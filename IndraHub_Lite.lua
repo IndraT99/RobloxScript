@@ -16,8 +16,7 @@ local autoTeleport = false
 local autoSkills = {}
 local selectedAutoSkills = { Z = true }
 local nativeAutoSkill = nil
-local ultraPotato = false
-local potatoCache = setmetatable({}, { __mode = "k" })
+local safePotato = false
 local potatoQueue = {}
 local queuedPotato = setmetatable({}, { __mode = "k" })
 
@@ -433,30 +432,32 @@ local function useSkill(skillKey)
 end
 
 local function cacheProperty(instance, property)
-    if isFragileExecutor then return end
-    potatoCache[instance] = potatoCache[instance] or {}
-    if potatoCache[instance][property] == nil then
-        local ok, value = pcall(function() return instance[property] end)
-        if ok then potatoCache[instance][property] = value end
-    end
 end
 
 local function setCachedProperty(instance, property, value)
-    cacheProperty(instance, property)
     pcall(function() instance[property] = value end)
 end
 
-local function applyUltraPotatoTo(instance)
-    if instance:IsA("BasePart") then
-        setCachedProperty(instance, "Material", Enum.Material.SmoothPlastic)
-        setCachedProperty(instance, "Reflectance", 0)
-        setCachedProperty(instance, "CastShadow", false)
-        local keep = false
-        local enemyService = workspace:FindFirstChild("EnemyService")
-        if player.Character and instance:IsDescendantOf(player.Character) then keep = true end
-        if enemyService and instance:IsDescendantOf(enemyService) then keep = true end
-        if not keep then setCachedProperty(instance, "Transparency", 1) end
-    elseif instance:IsA("Decal") or instance:IsA("Texture") then
+local function shouldUltraPotatoTouch(instance)
+    return instance:IsA("Decal")
+        or instance:IsA("Texture")
+        or instance:IsA("ParticleEmitter")
+        or instance:IsA("Trail")
+        or instance:IsA("Beam")
+        or instance:IsA("Fire")
+        or instance:IsA("Smoke")
+        or instance:IsA("Sparkles")
+        or instance:IsA("PointLight")
+        or instance:IsA("SpotLight")
+        or instance:IsA("SurfaceLight")
+        or instance:IsA("PostEffect")
+        or instance:IsA("Sound")
+        or instance:IsA("BillboardGui")
+        or instance:IsA("SurfaceGui")
+end
+
+local function applySafePotatoTo(instance)
+    if instance:IsA("Decal") or instance:IsA("Texture") then
         setCachedProperty(instance, "Transparency", 1)
     elseif instance:IsA("ParticleEmitter") or instance:IsA("Trail") or instance:IsA("Beam") or instance:IsA("Fire") or instance:IsA("Smoke") or instance:IsA("Sparkles") then
         setCachedProperty(instance, "Enabled", false)
@@ -469,37 +470,30 @@ local function applyUltraPotatoTo(instance)
     end
 end
 
-local function setUltraPotato(enabled)
-    ultraPotato = enabled
+local function setSafePotato(enabled)
+    safePotato = enabled
     if enabled then
         setCachedProperty(Lighting, "GlobalShadows", false)
         setCachedProperty(Lighting, "Brightness", 1)
         setCachedProperty(Lighting, "EnvironmentDiffuseScale", 0)
         setCachedProperty(Lighting, "EnvironmentSpecularScale", 0)
         setCachedProperty(Lighting, "FogEnd", 100000)
-        pcall(function() Lighting.Technology = Enum.Technology.Compatibility end)
         pcall(function()
             local rendering = settings().Rendering
             rendering.QualityLevel = Enum.QualityLevel.Level01
             rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level01
-            if type(setfpscap) == "function" then setfpscap(240) end
+            if type(setfpscap) == "function" then setfpscap(60) end
         end)
         potatoQueue = {}
         queuedPotato = setmetatable({}, { __mode = "k" })
         for _, item in ipairs(workspace:GetDescendants()) do
             if #potatoQueue >= maxPotatoQueue then break end
-            if not queuedPotato[item] then
+            if shouldUltraPotatoTouch(item) and not queuedPotato[item] then
                 queuedPotato[item] = true
                 table.insert(potatoQueue, item)
             end
         end
     else
-        for instance, props in pairs(potatoCache) do
-            if instance and instance.Parent then
-                for property, value in pairs(props) do pcall(function() instance[property] = value end) end
-            end
-        end
-        potatoCache = setmetatable({}, { __mode = "k" })
         potatoQueue = {}
         queuedPotato = setmetatable({}, { __mode = "k" })
     end
@@ -519,7 +513,7 @@ _G.IndraHubSession = sessionId
 local Window = WindUI:CreateWindow({
     Title = "IndraHub Lite",
     Icon = "swords",
-    Author = "Teleport + Auto Skill + Ultra Potato",
+    Author = "Teleport + Auto Skill + Safe Potato",
     Folder = "IndraHubLite",
     Size = UDim2.fromOffset(520, 390),
     Transparent = true,
@@ -679,12 +673,12 @@ Tabs.Skills:Slider({
 })
 
 Tabs.FPS:Toggle({
-    Title = "Ultra Potato",
-    Desc = "Extreme FPS: hides world clutter locally.",
+    Title = "Safe Potato",
+    Desc = "Stable FPS: disables effects, lights, sounds, decals, GUI clutter.",
     Value = false,
     Callback = function(value)
-        setUltraPotato(value)
-        notify("Ultra Potato", value and "ON" or "OFF", "cpu")
+        setSafePotato(value)
+        notify("Safe Potato", value and "ON" or "OFF", "cpu")
     end,
 })
 
@@ -708,7 +702,7 @@ Window:SelectTab(1)
 notify("IndraHub Lite", "Loaded. Toggle UI: RightControl", "flame")
 
 local descendantAddedConnection = workspace.DescendantAdded:Connect(function(instance)
-    if isSessionActive() and ultraPotato and #potatoQueue < maxPotatoQueue and not queuedPotato[instance] then
+    if isSessionActive() and safePotato and #potatoQueue < maxPotatoQueue and shouldUltraPotatoTouch(instance) and not queuedPotato[instance] then
         queuedPotato[instance] = true
         table.insert(potatoQueue, instance)
     end
@@ -719,11 +713,11 @@ task.spawn(function()
     while isSessionActive() do
         markHeartbeat()
         safeWait(isFragileExecutor and 0.35 or 0.12)
-        if ultraPotato and #potatoQueue > 0 then
+        if safePotato and #potatoQueue > 0 then
             local batch = isFragileExecutor and 30 or 140
             for _ = 1, math.min(batch, #potatoQueue) do
                 local instance = table.remove(potatoQueue)
-                if instance and instance.Parent then pcall(applyUltraPotatoTo, instance) end
+                if instance and instance.Parent then pcall(applySafePotatoTo, instance) end
             end
         end
     end
@@ -770,8 +764,9 @@ task.spawn(function()
     while isSessionActive() do
         markHeartbeat()
         safeWait(20)
-        for instance in pairs(potatoCache) do
-            if not instance or not instance.Parent then potatoCache[instance] = nil end
+        if #potatoQueue > maxPotatoQueue then
+            potatoQueue = {}
+            queuedPotato = setmetatable({}, { __mode = "k" })
         end
         for index = #enemyScanCache, 1, -1 do
             local enemy = enemyScanCache[index]
