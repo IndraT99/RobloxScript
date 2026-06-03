@@ -202,7 +202,7 @@ WindUI.Services.junkiedevelopment = {
 }
 
 local function isSessionActive()
-    return running and _G.IndraHubRunning and _G.IndraHubSession == sessionId
+    return running and _G.IndraHubLiteRunning and _G.IndraHubLiteSession == sessionId
 end
 
 local function notify(title, content, icon)
@@ -499,16 +499,16 @@ local function setSafePotato(enabled)
     end
 end
 
-if _G.IndraHubWindUI then
-    _G.IndraHubRunning = false
-    pcall(function() _G.IndraHubWindUI:Destroy() end)
+if _G.IndraHubLiteWindUI then
+    _G.IndraHubLiteRunning = false
+    pcall(function() _G.IndraHubLiteWindUI:Destroy() end)
 end
-if _G.IndraHubConnections then
-    for _, connection in ipairs(_G.IndraHubConnections) do pcall(function() connection:Disconnect() end) end
+if _G.IndraHubLiteConnections then
+    for _, connection in ipairs(_G.IndraHubLiteConnections) do pcall(function() connection:Disconnect() end) end
 end
-_G.IndraHubConnections = {}
-_G.IndraHubRunning = true
-_G.IndraHubSession = sessionId
+_G.IndraHubLiteConnections = {}
+_G.IndraHubLiteRunning = true
+_G.IndraHubLiteSession = sessionId
 
 local Window = WindUI:CreateWindow({
     Title = "IndraHub Lite",
@@ -533,7 +533,7 @@ local Window = WindUI:CreateWindow({
         }
     },
 })
-_G.IndraHubWindUI = Window
+_G.IndraHubLiteWindUI = Window
 
 while not getgenv().SCRIPT_KEY do
     task.wait(0.1)
@@ -690,7 +690,7 @@ Tabs.FPS:Button({
         autoSkills = {}
         nativeAutoSkill = nil
         running = false
-        _G.IndraHubRunning = false
+        _G.IndraHubLiteRunning = false
         pcall(function()
             if type(Player3CController.StopAutoSkill) == "function" then Player3CController.StopAutoSkill() end
         end)
@@ -707,7 +707,7 @@ local descendantAddedConnection = workspace.DescendantAdded:Connect(function(ins
         table.insert(potatoQueue, instance)
     end
 end)
-table.insert(_G.IndraHubConnections, descendantAddedConnection)
+table.insert(_G.IndraHubLiteConnections, descendantAddedConnection)
 
 task.spawn(function()
     while isSessionActive() do
