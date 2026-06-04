@@ -244,8 +244,11 @@ end
 
 local function isEnemyAlive(enemy)
     if not enemy or not enemy.Parent then return false end
+    if not enemy:IsA("Model") then return false end
     if not selectedEnemies[enemy.Name] then return false end
     if not getEnemyRoot(enemy) then return false end
+    local humanoid = enemy:FindFirstChildOfClass("Humanoid") or enemy:FindFirstChild("Humanoid", true)
+    if not humanoid or humanoid:GetState() == Enum.HumanoidStateType.Dead then return false end
     local health = getEnemyHealth(enemy)
     return health == nil or health > 0.05
 end
