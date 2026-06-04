@@ -227,7 +227,17 @@ local function getRoot()
 end
 
 local function getEnemyRoot(enemy)
-    return enemy and (enemy:FindFirstChild("HumanoidRootPart") or enemy:FindFirstChild("Torso") or enemy:FindFirstChild("UpperTorso") or enemy.PrimaryPart)
+    return enemy and (enemy:FindFirstChild("HumanoidRootPart", true) or enemy:FindFirstChild("Torso", true) or enemy:FindFirstChild("UpperTorso", true) or enemy.PrimaryPart)
+end
+
+local function getEnemyModel(instance)
+    if not instance then return nil end
+    local current = instance:IsA("Model") and instance or instance:FindFirstAncestorOfClass("Model")
+    while current and current ~= workspace do
+        if selectedEnemies[current.Name] and getEnemyRoot(current) then return current end
+        current = current.Parent and current.Parent:FindFirstAncestorOfClass("Model")
+    end
+    return nil
 end
 
 local function getEnemyHealth(enemy)
@@ -286,15 +296,24 @@ local function getSelectedEnemyInstances()
     end
 
     local result = {}
+    local seen = {}
     local folder = workspace:FindFirstChild("EnemyService")
-    if not folder then
-        enemyScanCache = result
-        lastEnemyScan = os.clock()
-        return result
+    if folder then
+        for _, enemy in ipairs(folder:GetDescendants()) do
+            local model = getEnemyModel(enemy)
+            if model and not seen[model] and isEnemyAlive(model) then
+                seen[model] = true
+                table.insert(result, model)
+            end
+        end
     end
 
-    for _, enemy in ipairs(folder:GetDescendants()) do
-        if selectedEnemies[enemy.Name] and isEnemyAlive(enemy) then table.insert(result, enemy) end
+    for _, enemy in ipairs(workspace:GetDescendants()) do
+        local model = getEnemyModel(enemy)
+        if model and not seen[model] and isEnemyAlive(model) then
+            seen[model] = true
+            table.insert(result, model)
+        end
     end
     table.sort(result, function(a, b) return a.Name == b.Name and tostring(a) < tostring(b) or a.Name < b.Name end)
     enemyScanCache = result
