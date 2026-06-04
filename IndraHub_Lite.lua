@@ -70,13 +70,6 @@ local enemyNames = {
 }
 local selectedEnemies = {}
 
-local bossRespawnIds = {
-    ["[Lv.15000] Niflor"] = "210008",
-    ["[Lv.15000] Surtrik"] = "210009",
-    ["[Lv.15000] Thorvak"] = "210010",
-    ["[Lv.15000] Hraegon"] = "210011",
-}
-
 local function dumpError(tag, err)
     warn("[IndraHubLite] " .. tostring(tag) .. ": " .. tostring(err))
 end
@@ -234,17 +227,7 @@ local function getRoot()
 end
 
 local function getEnemyRoot(enemy)
-    return enemy and (enemy:FindFirstChild("HumanoidRootPart", true) or enemy:FindFirstChild("Torso", true) or enemy:FindFirstChild("UpperTorso", true) or enemy.PrimaryPart)
-end
-
-local function getEnemyModel(instance)
-    if not instance then return nil end
-    local current = instance:IsA("Model") and instance or instance:FindFirstAncestorOfClass("Model")
-    while current and current ~= workspace do
-        if selectedEnemies[current.Name] and getEnemyRoot(current) then return current end
-        current = current.Parent and current.Parent:FindFirstAncestorOfClass("Model")
-    end
-    return nil
+    return enemy and (enemy:FindFirstChild("HumanoidRootPart") or enemy:FindFirstChild("Torso") or enemy:FindFirstChild("UpperTorso") or enemy.PrimaryPart)
 end
 
 local function getEnemyHealth(enemy)
@@ -297,97 +280,21 @@ local function moveToCFrame(root, targetCFrame)
     end
 end
 
-local function getRespawnRoot(enemyName)
-    local respawnId = bossRespawnIds[enemyName]
-    local bossRespawn = respawnId
-        and workspace:FindFirstChild("World")
-        and workspace.World:FindFirstChild("BossRespawn")
-    if bossRespawn and respawnId then
-        local exact = bossRespawn:FindFirstChild(respawnId)
-        if exact then return exact end
-    end
-
-    bossRespawn = workspace:FindFirstChild("World") and workspace.World:FindFirstChild("BossRespawn")
-
-    local bossToken = string.lower((string.match(enemyName, "%]%s*(.+)$") or enemyName):gsub("%s+", ""))
-    if bossRespawn then
-        for _, item in ipairs(bossRespawn:GetDescendants()) do
-            local text = item.Name
-            if item:IsA("TextLabel") or item:IsA("TextButton") or item:IsA("TextBox") then text = tostring(item.Text or item.Name) end
-            if string.find(string.lower(tostring(text):gsub("%s+", "")), bossToken, 1, true) then
-                local current = item
-                while current and current.Parent ~= bossRespawn do current = current.Parent end
-                return current or item
-            end
-        end
-    end
-
-    for _, root in ipairs({ workspace:FindFirstChild("World"), workspace }) do
-        if root then
-            for _, item in ipairs(root:GetDescendants()) do
-                if not player.Character or not item:IsDescendantOf(player.Character) then
-                    local text = item.Name
-                    if item:IsA("TextLabel") or item:IsA("TextButton") or item:IsA("TextBox") then text = tostring(item.Text or item.Name) end
-                    if string.find(string.lower(tostring(text):gsub("%s+", "")), bossToken, 1, true) then
-                        return item:IsA("BasePart") and item or item:FindFirstChildWhichIsA("BasePart", true) or item
-                    end
-                end
-            end
-        end
-    end
-
-    return nil
-end
-
-local function getInstanceCFrame(instance)
-    if not instance then return nil end
-    if instance:IsA("BasePart") then return instance.CFrame end
-    if instance:IsA("Model") then
-        local ok, cframe = pcall(function() return instance:GetPivot() end)
-        if ok then return cframe end
-        if instance.PrimaryPart then return instance.PrimaryPart.CFrame end
-    end
-    local part = instance:FindFirstChildWhichIsA("BasePart", true)
-    return part and part.CFrame or nil
-end
-
-local function teleportToSelectedRespawn(root)
-    for _, enemyName in ipairs(enemyNames) do
-        if selectedEnemies[enemyName] then
-            local cframe = getInstanceCFrame(getRespawnRoot(enemyName))
-            if cframe then
-                moveToCFrame(root, cframe * CFrame.new(0, hoverHeight, hoverDistance))
-                return true
-            end
-        end
-    end
-    return false
-end
-
 local function getSelectedEnemyInstances()
     if os.clock() - lastEnemyScan < enemyScanInterval then
         return enemyScanCache
     end
 
     local result = {}
-    local seen = {}
     local folder = workspace:FindFirstChild("EnemyService")
-    if folder then
-        for _, enemy in ipairs(folder:GetDescendants()) do
-            local model = getEnemyModel(enemy)
-            if model and not seen[model] and isEnemyAlive(model) then
-                seen[model] = true
-                table.insert(result, model)
-            end
-        end
+    if not folder then
+        enemyScanCache = result
+        lastEnemyScan = os.clock()
+        return result
     end
 
-    for _, enemy in ipairs(workspace:GetDescendants()) do
-        local model = getEnemyModel(enemy)
-        if model and not seen[model] and isEnemyAlive(model) then
-            seen[model] = true
-            table.insert(result, model)
-        end
+    for _, enemy in ipairs(folder:GetDescendants()) do
+        if selectedEnemies[enemy.Name] and isEnemyAlive(enemy) then table.insert(result, enemy) end
     end
     table.sort(result, function(a, b) return a.Name == b.Name and tostring(a) < tostring(b) or a.Name < b.Name end)
     enemyScanCache = result
@@ -402,7 +309,7 @@ local function teleportSelected()
     if not root then return false end
 
     local instances = getSelectedEnemyInstances()
-    if #instances == 0 then return teleportToSelectedRespawn(root) end
+    if #instances == 0 then return false end
     if targetInstanceIndex > #instances then targetInstanceIndex = 1 end
 
     for i = 1, #instances do
@@ -662,7 +569,7 @@ Tabs.Teleport:Button({
     Desc = "Select common bosses.",
     Callback = function()
         selectedEnemies = {}
-        for _, enemyName in ipairs({ "[Lv.150] NameLess Hero", "[Lv.750] Moraros", "[Lv.2500] Magador", "[Lv.6000] Velik", "[Lv.8500] Nivaron", "[Lv.3000] Black Swordsman", "[Lv.15000] Hraegon", "[Lv.15000] Niflor", "[Lv.15000] Struggler", "[Lv.15000] Surtrik", "[Lv.15000] Thorvak", "[Nightmare] Mad Dog", "[Lv.???] Gelaros" }) do
+        for _, enemyName in ipairs({ "[Lv.150] NameLess Hero", "[Lv.750] Moraros", "[Lv.2500] Magador", "[Lv.6000] Velik", "[Lv.3000] Black Swordsman", "[Lv.15000] Hraegon", "[Lv.15000] Niflor", "[Lv.15000] Struggler", "[Lv.15000] Surtrik", "[Lv.15000] Thorvak", "[Nightmare] Mad Dog", "[Lv.???] Gelaros" }) do
             selectedEnemies[enemyName] = true
         end
         currentTarget = nil
