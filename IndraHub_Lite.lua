@@ -65,6 +65,7 @@ local enemyNames = {
     "[Lv.15000] Surtrik",
     "[Lv.15000] Thorvak",
     "[Nightmare] Mad Dog",
+    "[Nightmare]Headless Knight",
     "[Lv.???]Dummy",
     "[Lv.???] Gelaros",
 }
