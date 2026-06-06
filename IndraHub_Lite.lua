@@ -177,6 +177,10 @@ else
     return
 end
 
+if type(WindUI.Services) ~= "table" then
+    WindUI.Services = {}
+end
+
 WindUI.Services.junkiedevelopment = {
     Name = "Junkie Development",
     Icon = "shield-check",
