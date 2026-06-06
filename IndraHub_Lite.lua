@@ -510,7 +510,6 @@ local function setSafePotato(enabled)
 end
 
 if _G.IndraHubLiteWindUI then
-    _G.IndraHubLiteRunning = false
     pcall(function() _G.IndraHubLiteWindUI:Destroy() end)
 end
 if _G.IndraHubLiteConnections then
