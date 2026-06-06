@@ -12,6 +12,10 @@ local player = Players.LocalPlayer
 local running = true
 local sessionId = {}
 
+_G.IndraHubLiteRunning = true
+_G.IndraHubLiteSession = sessionId
+_G.IndraHubLiteLastHeartbeat = os.clock()
+
 local autoTeleport = false
 local autoSkills = {}
 local selectedAutoSkills = { Z = true }
@@ -511,8 +515,6 @@ if _G.IndraHubLiteConnections then
     for _, connection in ipairs(_G.IndraHubLiteConnections) do pcall(function() connection:Disconnect() end) end
 end
 _G.IndraHubLiteConnections = {}
-_G.IndraHubLiteRunning = true
-_G.IndraHubLiteSession = sessionId
 
 task.spawn(function()
     while isSessionActive() do
