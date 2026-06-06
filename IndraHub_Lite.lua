@@ -159,7 +159,8 @@ end
 
 local okWindUI, WindUI = pcall(loadWindUI)
 if not okWindUI or type(WindUI) ~= "table" then
-    dumpError("WindUI", WindUI)
+    _G.IndraHubLiteError = "WINDUI FAIL"
+    warn("[IndraHubLite] WindUI failed: " .. tostring(WindUI))
     return
 end
 
@@ -171,7 +172,8 @@ if okJunkie and type(Junkie) == "table" then
     Junkie.identifier = "1116993"
     Junkie.provider = "BrokenBlade"
 else
-    dumpError("Junkie", Junkie)
+    _G.IndraHubLiteError = "JUNKIE FAIL"
+    warn("[IndraHubLite] Junkie failed: " .. tostring(Junkie))
     return
 end
 
