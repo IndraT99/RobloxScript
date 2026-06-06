@@ -514,6 +514,20 @@ _G.IndraHubLiteConnections = {}
 _G.IndraHubLiteRunning = true
 _G.IndraHubLiteSession = sessionId
 
+task.spawn(function()
+    while isSessionActive() do
+        markHeartbeat()
+        safeWait(isFragileExecutor and 0.35 or 0.12)
+        if safePotato and #potatoQueue > 0 then
+            local batch = isFragileExecutor and 30 or 140
+            for _ = 1, math.min(batch, #potatoQueue) do
+                local instance = table.remove(potatoQueue)
+                if instance and instance.Parent then pcall(applySafePotatoTo, instance) end
+            end
+        end
+    end
+end)
+
 local Window = WindUI:CreateWindow({
     Title = "IndraHub Lite",
     Icon = "swords",
@@ -712,20 +726,6 @@ local descendantAddedConnection = workspace.DescendantAdded:Connect(function(ins
     end
 end)
 table.insert(_G.IndraHubLiteConnections, descendantAddedConnection)
-
-task.spawn(function()
-    while isSessionActive() do
-        markHeartbeat()
-        safeWait(isFragileExecutor and 0.35 or 0.12)
-        if safePotato and #potatoQueue > 0 then
-            local batch = isFragileExecutor and 30 or 140
-            for _ = 1, math.min(batch, #potatoQueue) do
-                local instance = table.remove(potatoQueue)
-                if instance and instance.Parent then pcall(applySafePotatoTo, instance) end
-            end
-        end
-    end
-end)
 
 task.spawn(function()
     while isSessionActive() do
