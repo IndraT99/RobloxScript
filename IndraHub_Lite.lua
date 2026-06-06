@@ -102,6 +102,12 @@ if isFragileExecutor then
     enemyScanInterval = 2.25
     maxPotatoQueue = 1200
     moveMode = "Teleport"
+    
+    pcall(function()
+        getgenv().gethui = function()
+            return game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+        end
+    end)
 end
 
 local oldRequire = require
@@ -545,6 +551,7 @@ local Window = WindUI:CreateWindow({
     Theme = "Dark",
     Resizable = true,
     SideBarWidth = 150,
+    Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"),
     KeySystem = {
         Note = "Enter your key to continue.",
         SaveKey = true,
