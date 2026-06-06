@@ -573,7 +573,7 @@ Tabs.Teleport:Button({
     Desc = "Select common bosses.",
     Callback = function()
         selectedEnemies = {}
-        for _, enemyName in ipairs({ "[Lv.150] NameLess Hero", "[Lv.750] Moraros", "[Lv.2500] Magador", "[Lv.6000] Velik", "[Lv.3000] Black Swordsman", "[Lv.15000] Hraegon", "[Lv.15000] Niflor", "[Lv.15000] Struggler", "[Lv.15000] Surtrik", "[Lv.15000] Thorvak", "[Nightmare] Mad Dog", "[Lv.???] Gelaros" }) do
+        for _, enemyName in ipairs({ "[Lv.150] NameLess Hero", "[Lv.750] Moraros", "[Lv.2500] Magador", "[Lv.6000] Velik", "[Lv.3000] Black Swordsman", "[Lv.15000] Hraegon", "[Lv.15000] Niflor", "[Lv.15000] Struggler", "[Lv.15000] Surtrik", "[Lv.15000] Thorvak", "[Nightmare] Mad Dog", "[Nightmare]Headless Knight", "[Lv.???] Gelaros" }) do
             selectedEnemies[enemyName] = true
         end
         currentTarget = nil
