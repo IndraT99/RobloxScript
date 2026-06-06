@@ -14,7 +14,6 @@ local sessionId = {}
 
 _G.IndraHubLiteRunning = true
 _G.IndraHubLiteSession = sessionId
-_G.IndraHubLiteLastHeartbeat = os.clock()
 
 local autoTeleport = false
 local autoSkills = {}
@@ -102,12 +101,6 @@ if isFragileExecutor then
     enemyScanInterval = 2.25
     maxPotatoQueue = 1200
     moveMode = "Teleport"
-    
-    pcall(function()
-        getgenv().gethui = function()
-            return game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
-        end
-    end)
 end
 
 local oldRequire = require
@@ -158,8 +151,21 @@ end
 
 local Player3CController = safeRequire(getChildPath(ReplicatedStorage, { "Client", "System", "Player3C", "Internal", "Controller" }))
 
+local function fetchAndCache(url, cacheName)
+    if type(readfile) == "function" then
+        local ok, cached = pcall(readfile, cacheName)
+        if ok and type(cached) == "string" and #cached > 1000 then return cached end
+    end
+    local okFetch, source = pcall(function() return game:HttpGet(url) end)
+    if not okFetch or type(source) ~= "string" then error("Failed to fetch " .. tostring(url)) end
+    if type(writefile) == "function" then
+        pcall(writefile, cacheName, source)
+    end
+    return source
+end
+
 local function loadWindUI()
-    local source = game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua")
+    local source = fetchAndCache("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua", "IndraHub_WindUI_Cache.lua")
     return loadstring(source)()
 end
 
@@ -171,7 +177,8 @@ if not okWindUI or type(WindUI) ~= "table" then
 end
 
 local okJunkie, Junkie = pcall(function()
-    return loadstring(game:HttpGet("https://jnkie.com/sdk/library.lua"))()
+    local source = fetchAndCache("https://jnkie.com/sdk/library.lua", "IndraHub_Junkie_Cache.lua")
+    return loadstring(source)()
 end)
 if okJunkie and type(Junkie) == "table" then
     Junkie.service = "broken blade"
@@ -551,7 +558,6 @@ local Window = WindUI:CreateWindow({
     Theme = "Dark",
     Resizable = true,
     SideBarWidth = 150,
-    Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"),
     KeySystem = {
         Note = "Enter your key to continue.",
         SaveKey = true,
