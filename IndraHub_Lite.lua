@@ -155,8 +155,7 @@ end
 
 local okWindUI, WindUI = pcall(loadWindUI)
 if not okWindUI or type(WindUI) ~= "table" then
-    dumpError("WindUI", WindUI)
-    return
+    error("WindUI failed to load: " .. tostring(WindUI))
 end
 
 local okJunkie, Junkie = pcall(function()
@@ -167,8 +166,7 @@ if okJunkie and type(Junkie) == "table" then
     Junkie.identifier = "1116993"
     Junkie.provider = "BrokenBlade"
 else
-    dumpError("Junkie", Junkie)
-    return
+    error("Junkie SDK failed to load: " .. tostring(Junkie))
 end
 
 WindUI.Services.junkiedevelopment = {
