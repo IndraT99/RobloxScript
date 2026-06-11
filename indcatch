@@ -61,6 +61,9 @@ local autoCatchMinStrength = 0
 local autoCatchRarities = {}
 local autoCatchMapScanEnabled = false
 local autoCatchMapScanDelay = 2
+local autoCatchRetryCount = 2
+local autoCatchAttemptCooldown = 0.25
+local lastAutoCatchAttempt = 0
 local currentMinStrength = 3000
 local autoLoadUW = false
 local customPetNotifEnabled = false
@@ -482,17 +485,14 @@ end
 
 local function cleanupLassoVisuals()
     local char = player.Character
-    local containers = {char, workspace}
-    for _, container in ipairs(containers) do
-        if not container then continue end
-        for _, obj in ipairs(container:GetDescendants()) do
-            local name = string.lower(obj.Name)
-            local className = string.lower(obj.ClassName)
-            local looksLikeLasso = name:find("lasso") or name:find("rope") or name:find("tether") or className == "beam" or className == "trail"
-            if looksLikeLasso and not obj:FindFirstAncestorWhichIsA("Tool") then
-                if obj:IsA("BasePart") or obj:IsA("Beam") or obj:IsA("Trail") or obj:IsA("Attachment") or obj:IsA("Model") then
-                    pcall(function() obj:Destroy() end)
-                end
+    if not char then return end
+    for _, obj in ipairs(char:GetDescendants()) do
+        local name = string.lower(obj.Name)
+        local className = string.lower(obj.ClassName)
+        local looksLikeLasso = name:find("lasso") or name:find("rope") or name:find("tether") or className == "beam" or className == "trail"
+        if looksLikeLasso and not obj:FindFirstAncestorWhichIsA("Tool") then
+            if obj:IsA("BasePart") or obj:IsA("Beam") or obj:IsA("Trail") or obj:IsA("Attachment") or obj:IsA("Model") then
+                pcall(function() obj:Destroy() end)
             end
         end
     end
@@ -505,19 +505,6 @@ local function unequipLassoVisual()
         pcall(function() equipLassoVisual:InvokeServer() end)
     end
     cleanupLassoVisuals()
-end
-
-local function cleanupLassoVisualsOld()
-    local char = player.Character
-    if not char then return end
-    for _, obj in ipairs(char:GetDescendants()) do
-        local name = string.lower(obj.Name)
-        if name:find("lasso") or name:find("rope") then
-            if not obj:FindFirstAncestorWhichIsA("Tool") and (obj:IsA("BasePart") or obj:IsA("Beam") or obj:IsA("Trail") or obj:IsA("Attachment")) then
-                pcall(function() obj:Destroy() end)
-            end
-        end
-    end
 end
 
 local function getEquippedOrBackpackLasso()
@@ -568,21 +555,35 @@ local function attemptCatchPet(pet)
 
     local isBoss = pet:GetAttribute("Rarity") == "Boss"
     if isBoss then
-        for _ = 1, 60 do
+        for _ = 1, 30 do
             if not autoCatchEnabled or not pet.Parent then break end
             pcall(function() updateProgress:FireServer(1) end)
             pcall(function() updateProgress:FireServer(2) end)
-            task.wait()
+            task.wait(0.03)
         end
     else
-        for _, v in ipairs({25, 25, 61.66666666666668, 100, 100}) do
+        for _, v in ipairs({25, 61.66666666666668, 100, 100}) do
             pcall(function() updateProgress:FireServer(v) end)
-            task.wait()
+            task.wait(0.03)
         end
     end
 
     unequipLassoVisual()
     return true
+end
+
+local function attemptCatchPetWithRetry(pet)
+    for _ = 1, math.max(1, autoCatchRetryCount) do
+        if not autoCatchEnabled or not pet or not pet.Parent then return false end
+        local elapsed = os.clock() - lastAutoCatchAttempt
+        if elapsed < autoCatchAttemptCooldown then task.wait(autoCatchAttemptCooldown - elapsed) end
+        lastAutoCatchAttempt = os.clock()
+        if attemptCatchPet(pet) then
+            task.wait(0.25)
+            if not pet.Parent then return true end
+        end
+    end
+    return false
 end
 
 local function isPlayerBusy()
@@ -2528,8 +2529,8 @@ task.spawn(function()
                 pcall(function()
                     root.CFrame = pet:GetPivot() + Vector3.new(0, 5, 0)
                 end)
-                task.wait()
-                attemptCatchPet(pet)
+                task.wait(0.05)
+                attemptCatchPetWithRetry(pet)
             else
                 scanNextCatchMapArea(root)
             end
