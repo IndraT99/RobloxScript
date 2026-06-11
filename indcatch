@@ -1,0 +1,2570 @@
+local player = game.Players.LocalPlayer
+local CollectionService = game:GetService("CollectionService")
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterGui = game:GetService("StarterGui")
+local HttpService = game:GetService("HttpService")
+
+local env = getfenv and getfenv() or _G
+local genv = getgenv and getgenv() or env
+
+genv.IndraHubSession = (genv.IndraHubSession or 0) + 1
+local currentSession = genv.IndraHubSession
+
+if genv.IndraHubInputConnection then pcall(function() genv.IndraHubInputConnection:Disconnect() end) end
+if genv.IndraHubFlyConnection then pcall(function() genv.IndraHubFlyConnection:Disconnect() end) end
+
+---------------------------------------------------------------------
+-- ROBUST NOTIFICATION HANDLER (OS Sound Bypass)
+---------------------------------------------------------------------
+local function sendOSNotification(title, text)
+    if type(messagebox) == "function" then
+        task.spawn(function()
+            pcall(function() messagebox(text, title, 64) end)
+        end)
+    end
+    task.spawn(function()
+        pcall(function()
+            local gameSettings = UserSettings():GetService("UserGameSettings")
+            local originalVolume = gameSettings.MasterVolume
+            if originalVolume == 0 then gameSettings.MasterVolume = 0.5 end
+            local sound = Instance.new("Sound", workspace)
+            sound.SoundId = "rbxassetid://4590657391" -- Clean ping sound
+            sound.Volume = 3
+            sound:Play()
+            task.delay(2.5, function()
+                if originalVolume == 0 then gameSettings.MasterVolume = 0 end
+                sound:Destroy()
+            end)
+        end)
+    end)
+    pcall(function()
+        StarterGui:SetCore("SendNotification", {
+            Title = title,
+            Text = text,
+            Duration = 10,
+        })
+    end)
+end
+
+---------------------------------------------------------------------
+-- GLOBALS & STATE
+---------------------------------------------------------------------
+local targetBossesEnabled = true
+local ignoredRarities = {}
+local rarityIgnoreList = {"Divine", "Boss", "Secret", "Exclusive", "Mythical", "Legendary", "Epic", "Rare", "Common"}
+local rarityCatchList = {"Divine", "Boss", "Secret", "Exclusive", "Mythical", "Legendary", "Epic", "Rare", "Common"}
+local autoModeAll = false
+local autoModeCustom = false
+local autoCatchEnabled = false
+local autoCatchMinStrength = 0
+local autoCatchRarities = {}
+local autoCatchMapScanEnabled = false
+local autoCatchMapScanDelay = 2
+local currentMinStrength = 3000
+local autoLoadUW = false
+local customPetNotifEnabled = false
+local weatherNotifEnabled = false
+local autoCollectCashEnabled = false
+local collectCashDelay = 30
+local autoSellPetEnabled = false
+local autoSellPetRarities = {}
+local autoSellPetDelay = 5
+local flySpeed = 60
+local autoUWDelay = 60
+local currentWalkSpeed = 16
+local currentThemeMode = "Dark"
+
+local autoBuyFoodEnabled = false
+local autoBuyFoodItems = {}
+local autoBuyFoodAmount = 1
+local foodList = {
+    "Farmers Feed", "Enriched Feed", "Hay", "Bone", "Prime Feed", "Steak",
+    "Stew", "Coconut", "Honey", "Potato Bag", "Pie", "Fruit Bowl", "Crystal Berry"
+}
+
+local autoBuyMerchantEnabled = false
+local autoBuyMerchantItems = {}
+local purchasedMerchantSlots = {}
+local merchantItemList = {
+    "Bone", "Prime Feed", "Steak", "Rain Totem", "Lightning Totem", 
+    "Sand Totem", "Sand Tornado Totem", "Aurora Totem", "Cosmic Totem", "Mist Totem",
+    "Eruption Totem", "Riding Potion", "Fly Potion", "Golden Carrot",
+    "Speed Potion Tier 1", "Money Potion Tier 1", "Strength Potion Tier 1"
+}
+
+local autoBuyLassoEnabled = false
+local autoBuyLassoItems = {}
+local purchasedLassos = {}
+local lassoList = {
+    "Rancher's Rope", "Stormwrangler", "Voidweave Lasso", "Celestial Tether",
+    "Nebula Lasso", "Stormrend Lasso", "Inferno Lasso", "Peppermint Lasso",
+    "Festive Lasso"
+}
+
+local autoBuyPaintEnabled = false
+local autoBuyPaintItems = {}
+local purchasedPaints = {}
+local paintList = {
+    "Yellow Paint", "Red Paint", "Blue Paint", "Pink Paint", "Lime Paint",
+    "Lavender Paint", "Cyan Paint", "Purple Paint", "Grey Paint", "Sponge"
+}
+
+local autoFishEnabled = false
+local autoBuyBaitEnabled = false
+local selectedFishingBait = "Sardine Bait"
+local selectedFishingBaits = { ["Sardine Bait"] = true }
+local fishingBaitIndex = 0
+local autoFishDelay = 2
+local autoFishFinishDelay = 3
+local selectedFishingSpot = "Lost Docks"
+local fishingBusy = false
+local baitList = {
+    "Worm Bait", "Shrimp Bait", "Apple Bait", "Chicken Bait",
+    "Sardine Bait", "Bug Bait", "Squid Bait", "Bacon Bait"
+}
+
+local weatherDisplayNames = {
+    ["Rain"] = "Rain", ["Thunderstorm"] = "Thunderstorm", ["AuroraBorealis"] = "Aurora",
+    ["CosmicShower"] = "Cosmic Shower", ["Eruption"] = "Volcano", ["Underwater"] = "Underwater",
+    ["Sandstorm"] = "Sandstorm", ["Snowy"] = "Snowy", ["Valentines"] = "Valentines",
+    ["Blizzard"] = "Blizzard", ["Gravebound"] = "Gravebound"
+}
+local TargetWeathers = {}
+local weatherList = {}
+for weatherId, displayName in pairs(weatherDisplayNames) do
+    TargetWeathers[weatherId] = true
+    table.insert(weatherList, displayName)
+end
+
+local underwater = CFrame.new(10.2530, 4.6936, -4963.6157)
+local mainIsland = CFrame.new(-105.803, 830.677, -2745.03)
+local customLocation = CFrame.new(0.4640982151031494, 157.58486938476562, -2918.00244140625)
+local caveIsland = CFrame.new(383.350, -17.498, -2877.900)
+local beeIsland = CFrame.new(106.490, 7.999, -439.829)
+local safariIsland = CFrame.new(-2456.269, 10.384, -2763.248)
+local volcanoIsland = CFrame.new(-615.635, -139.716, -3469.758)
+local lostDocks = CFrame.new(1461.675, 8.455, -4483.125)
+local catchMapScanIndex = 0
+local lastCatchMapScan = 0
+local catchMapScanLocations = {
+    mainIsland,
+    customLocation,
+    caveIsland,
+    beeIsland,
+    safariIsland,
+    volcanoIsland,
+    lostDocks,
+    underwater,
+    CFrame.new(1273.15576171875, 13.070409774780273, -4312.73681640625),
+    CFrame.new(1306.417, -91.269, -4324.935),
+}
+local fishingSpots = {
+    ["Lost Docks"] = CFrame.new(1273.15576171875, 13.070409774780273, -4312.73681640625),
+    ["Lost Docks 2"] = CFrame.new(1306.417, -91.269, -4324.935),
+}
+local fishingSpotList = {"Lost Docks", "Lost Docks 2"}
+
+local flyEnabled = false
+local flyConnection = nil
+local autoTeleportNewArea = false
+local autoTeleportNewAreaDelay = 0.2
+
+local autoBreedEnabled = false
+local breedPenNumber = "auto"
+local breedDelay = 65
+local lastBreedRequestAt = 0
+local breedRequestCooldown = 5
+
+---------------------------------------------------------------------
+-- SAVE / LOAD CONFIG
+---------------------------------------------------------------------
+local CONFIG_FILE = "IndraHub_Config.json"
+local isLoaded = false -- Prevents saveConfig overwriting during UI init
+
+local function saveConfig()
+    if not isLoaded then return end
+    pcall(function()
+        local savedIgnoredRarities = {}
+        for rarity, val in pairs(ignoredRarities) do if val then table.insert(savedIgnoredRarities, rarity) end end
+        local savedCatchRarities = {}
+        for rarity, val in pairs(autoCatchRarities) do if val then table.insert(savedCatchRarities, rarity) end end
+        local savedSellRarities = {}
+        for rarity, val in pairs(autoSellPetRarities) do if val then table.insert(savedSellRarities, rarity) end end
+
+        local savedFood = {}
+        for k, v in pairs(autoBuyFoodItems) do if v then table.insert(savedFood, k) end end
+        
+        local savedMerchant = {}
+        for k, v in pairs(autoBuyMerchantItems) do if v then table.insert(savedMerchant, k) end end
+
+        local savedLassos = {}
+        for k, v in pairs(autoBuyLassoItems) do if v then table.insert(savedLassos, k) end end
+
+        local savedPaints = {}
+        for k, v in pairs(autoBuyPaintItems) do if v then table.insert(savedPaints, k) end end
+        
+        local savedBaits = {}
+        for bait, val in pairs(selectedFishingBaits) do if val then table.insert(savedBaits, bait) end end
+
+        local savedWeathers = {}
+        for w, val in pairs(TargetWeathers) do if val then table.insert(savedWeathers, w) end end
+        
+        local data = {
+            ignoredRaritiesList      = savedIgnoredRarities,
+            targetBossesEnabled      = targetBossesEnabled,
+            autoModeAll              = autoModeAll,
+            autoModeCustom           = autoModeCustom,
+            autoCatchEnabled         = autoCatchEnabled,
+            autoCatchMinStrength     = autoCatchMinStrength,
+            autoCatchMapScanEnabled  = autoCatchMapScanEnabled,
+            autoCatchMapScanDelay    = autoCatchMapScanDelay,
+            autoCatchRaritiesList    = savedCatchRarities,
+            currentMinStrength       = currentMinStrength,
+            collectCashDelay         = collectCashDelay,
+            flySpeed                 = flySpeed,
+            autoTeleportNewAreaDelay = autoTeleportNewAreaDelay,
+            weatherNotifEnabled      = weatherNotifEnabled,
+            customPetNotifEnabled    = customPetNotifEnabled,
+            autoCollectCashEnabled   = autoCollectCashEnabled,
+            autoSellPetEnabled       = autoSellPetEnabled,
+            autoSellPetRaritiesList  = savedSellRarities,
+            autoSellPetDelay         = autoSellPetDelay,
+            autoBuyFoodEnabled       = autoBuyFoodEnabled,
+            autoBuyMerchantEnabled   = autoBuyMerchantEnabled,
+            autoBuyLassoEnabled      = autoBuyLassoEnabled,
+            autoBuyPaintEnabled      = autoBuyPaintEnabled,
+            autoFishEnabled          = autoFishEnabled,
+            autoBuyBaitEnabled       = autoBuyBaitEnabled,
+            selectedFishingBait      = selectedFishingBait,
+            selectedFishingBaitsList = savedBaits,
+            selectedFishingSpot      = selectedFishingSpot,
+            autoFishDelay            = autoFishDelay,
+            autoFishFinishDelay      = autoFishFinishDelay,
+            autoBuyFoodAmount        = autoBuyFoodAmount,
+            autoBuyFoodList          = savedFood,
+            autoBuyMerchantList      = savedMerchant,
+            autoBuyLassoList         = savedLassos,
+            autoBuyPaintList         = savedPaints,
+            flyEnabled               = flyEnabled,
+            autoLoadUW               = autoLoadUW,
+            autoTeleportNewArea      = autoTeleportNewArea,
+            autoUWDelay              = autoUWDelay,
+            currentWalkSpeed         = currentWalkSpeed,
+            currentThemeMode         = currentThemeMode,
+            targetWeathersList       = savedWeathers,
+            autoBreedEnabled         = autoBreedEnabled,
+            breedPenNumber           = breedPenNumber,
+            breedDelay               = breedDelay,
+        }
+        writefile(CONFIG_FILE, HttpService:JSONEncode(data))
+    end)
+end
+
+local function loadConfig()
+    pcall(function()
+        if isfile and isfile(CONFIG_FILE) then
+            local ok, data = pcall(function()
+                return HttpService:JSONDecode(readfile(CONFIG_FILE))
+            end)
+            if not ok or type(data) ~= "table" then return end
+
+            if data.ignoredRaritiesList and type(data.ignoredRaritiesList) == "table" then
+                ignoredRarities = {}
+                for _, rarity in ipairs(data.ignoredRaritiesList) do ignoredRarities[rarity] = true end
+            elseif data.ignoreLegendaryEnabled ~= nil then
+                ignoredRarities.Legendary = data.ignoreLegendaryEnabled
+            end
+            if data.targetBossesEnabled      ~= nil then targetBossesEnabled      = data.targetBossesEnabled      end
+            if data.autoModeAll              ~= nil then autoModeAll              = data.autoModeAll              end
+            if data.autoModeCustom           ~= nil then autoModeCustom           = data.autoModeCustom           end
+            if data.autoCatchEnabled         ~= nil then autoCatchEnabled         = data.autoCatchEnabled         end
+            if data.autoCatchMinStrength     ~= nil then autoCatchMinStrength     = data.autoCatchMinStrength     end
+            if data.autoCatchMapScanEnabled  ~= nil then autoCatchMapScanEnabled  = data.autoCatchMapScanEnabled  end
+            if data.autoCatchMapScanDelay    ~= nil then autoCatchMapScanDelay    = data.autoCatchMapScanDelay    end
+            if data.autoCatchRaritiesList and type(data.autoCatchRaritiesList) == "table" then
+                autoCatchRarities = {}
+                for _, rarity in ipairs(data.autoCatchRaritiesList) do autoCatchRarities[rarity] = true end
+            end
+            if data.currentMinStrength       ~= nil then currentMinStrength       = data.currentMinStrength       end
+            if data.collectCashDelay        ~= nil then collectCashDelay        = data.collectCashDelay        end
+            if data.flySpeed               ~= nil then flySpeed               = data.flySpeed               end
+            if data.autoTeleportNewAreaDelay ~= nil then autoTeleportNewAreaDelay = data.autoTeleportNewAreaDelay end
+            if data.weatherNotifEnabled     ~= nil then weatherNotifEnabled     = data.weatherNotifEnabled     end
+            if data.customPetNotifEnabled   ~= nil then customPetNotifEnabled   = data.customPetNotifEnabled   end
+            if data.autoCollectCashEnabled  ~= nil then autoCollectCashEnabled  = data.autoCollectCashEnabled  end
+            if data.autoSellPetEnabled      ~= nil then autoSellPetEnabled      = data.autoSellPetEnabled      end
+            if data.autoSellPetDelay        ~= nil then autoSellPetDelay        = data.autoSellPetDelay        end
+            if data.autoSellPetRaritiesList and type(data.autoSellPetRaritiesList) == "table" then
+                autoSellPetRarities = {}
+                for _, rarity in ipairs(data.autoSellPetRaritiesList) do autoSellPetRarities[rarity] = true end
+            end
+            if data.autoBuyFoodEnabled      ~= nil then autoBuyFoodEnabled      = data.autoBuyFoodEnabled      end
+            if data.autoBuyMerchantEnabled  ~= nil then autoBuyMerchantEnabled  = data.autoBuyMerchantEnabled  end
+            if data.autoBuyLassoEnabled     ~= nil then autoBuyLassoEnabled     = data.autoBuyLassoEnabled     end
+            if data.autoBuyPaintEnabled     ~= nil then autoBuyPaintEnabled     = data.autoBuyPaintEnabled     end
+            if data.autoFishEnabled         ~= nil then autoFishEnabled         = data.autoFishEnabled         end
+            if data.autoBuyBaitEnabled      ~= nil then autoBuyBaitEnabled      = data.autoBuyBaitEnabled      end
+            if data.selectedFishingBait     ~= nil then selectedFishingBait     = tostring(data.selectedFishingBait) end
+            if data.selectedFishingBaitsList and type(data.selectedFishingBaitsList) == "table" then
+                selectedFishingBaits = {}
+                for _, bait in ipairs(data.selectedFishingBaitsList) do selectedFishingBaits[bait] = true end
+            elseif data.selectedFishingBait ~= nil then
+                selectedFishingBaits = { [selectedFishingBait] = true }
+            end
+            if data.selectedFishingSpot     ~= nil then selectedFishingSpot     = tostring(data.selectedFishingSpot) end
+            if data.autoFishDelay           ~= nil then autoFishDelay           = data.autoFishDelay           end
+            if data.autoFishFinishDelay     ~= nil then autoFishFinishDelay     = data.autoFishFinishDelay     end
+            if data.autoBuyFoodAmount       ~= nil then autoBuyFoodAmount       = data.autoBuyFoodAmount       end
+            
+            if data.autoBuyFoodList and type(data.autoBuyFoodList) == "table" then
+                autoBuyFoodItems = {}
+                for _, v in ipairs(data.autoBuyFoodList) do autoBuyFoodItems[v] = true end
+            end
+            if data.autoBuyMerchantList and type(data.autoBuyMerchantList) == "table" then
+                autoBuyMerchantItems = {}
+                for _, v in ipairs(data.autoBuyMerchantList) do autoBuyMerchantItems[v] = true end
+            end
+            if data.autoBuyLassoList and type(data.autoBuyLassoList) == "table" then
+                autoBuyLassoItems = {}
+                for _, v in ipairs(data.autoBuyLassoList) do autoBuyLassoItems[v] = true end
+            end
+            if data.autoBuyPaintList and type(data.autoBuyPaintList) == "table" then
+                autoBuyPaintItems = {}
+                for _, v in ipairs(data.autoBuyPaintList) do autoBuyPaintItems[v] = true end
+            end
+            
+            if data.targetWeathersList and type(data.targetWeathersList) == "table" then
+                TargetWeathers = {}
+                for _, w in ipairs(data.targetWeathersList) do TargetWeathers[w] = true end
+            end
+            
+            if data.flyEnabled              ~= nil then flyEnabled              = data.flyEnabled              end
+            if data.autoLoadUW              ~= nil then autoLoadUW              = data.autoLoadUW              end
+            if data.autoTeleportNewArea     ~= nil then autoTeleportNewArea     = data.autoTeleportNewArea     end
+            if data.autoUWDelay             ~= nil then autoUWDelay             = data.autoUWDelay             end
+            if data.currentWalkSpeed        ~= nil then currentWalkSpeed        = data.currentWalkSpeed        end
+            if data.autoBreedEnabled        ~= nil then autoBreedEnabled        = data.autoBreedEnabled        end
+            if data.breedPenNumber          ~= nil then breedPenNumber          = tostring(data.breedPenNumber) end
+            if data.breedDelay              ~= nil then breedDelay              = data.breedDelay              end
+            if data.currentThemeMode        ~= nil then 
+                currentThemeMode = data.currentThemeMode 
+                if WindUI and WindUI.SetTheme then pcall(function() WindUI:SetTheme(currentThemeMode) end) end
+            end
+            
+            -- Force trigger fly state if it was saved as ON
+            if flyEnabled and Window and Tabs and Tabs.Teleport then
+                -- The UI element will be created later, but we can trigger the game logic directly
+                task.spawn(function()
+                    task.wait(1) -- wait for char to load
+                    local char = player.Character
+                    if char then
+                        local hum = char:FindFirstChildOfClass("Humanoid")
+                        local root = char:FindFirstChild("HumanoidRootPart")
+                        if hum and root then
+                            hum.PlatformStand = true
+
+                            local bv = Instance.new("BodyVelocity")
+                            bv.Name = "IndraFlyVelocity"
+                            bv.MaxForce = Vector3.new(100000, 100000, 100000)
+                            bv.Velocity = Vector3.zero
+                            bv.Parent = root
+                            
+                            local bg = Instance.new("BodyGyro")
+                            bg.Name = "IndraFlyGyro"
+                            bg.MaxTorque = Vector3.new(100000, 100000, 100000)
+                            bg.CFrame = root.CFrame
+                            bg.Parent = root
+                            
+                            local camera = workspace.CurrentCamera
+                            genv.IndraHubFlyConnection = game:GetService("RunService").RenderStepped:Connect(function()
+                                if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+                                
+                                local x, y, z = 0, 0, 0
+                                local uis = UserInputService
+                                if uis:IsKeyDown(Enum.KeyCode.W) then z = -1 end
+                                if uis:IsKeyDown(Enum.KeyCode.S) then z = 1 end
+                                if uis:IsKeyDown(Enum.KeyCode.A) then x = -1 end
+                                if uis:IsKeyDown(Enum.KeyCode.D) then x = 1 end
+                                if uis:IsKeyDown(Enum.KeyCode.Space) then y = 1 end
+                                if uis:IsKeyDown(Enum.KeyCode.LeftControl) then y = -1 end
+                                
+                                local cf = camera.CFrame
+                                local moveDir = cf:VectorToWorldSpace(Vector3.new(x, y, z))
+                                if moveDir.Magnitude > 0 then moveDir = moveDir.Unit end
+                                
+                                bv.Velocity = moveDir * flySpeed
+                                bg.CFrame = cf
+                            end)
+                        end
+                    end
+                end)
+            end
+        end
+    end)
+end
+
+-- Auto-load config on execute
+loadConfig()
+
+---------------------------------------------------------------------
+-- HELPER FUNCTIONS
+---------------------------------------------------------------------
+local function findStrongestPetAny()
+    local strongest, max = nil, 0
+    for _, obj in pairs(CollectionService:GetTagged("Roaming")) do
+        local s = obj:GetAttribute("Strength")
+        local o = obj:GetAttribute("OwnerId")
+        local r = obj:GetAttribute("Rarity")
+        
+        if s and (not o or o == 0) and s > max then
+            if not targetBossesEnabled and r == "Boss" then continue end
+            if ignoredRarities[r] then continue end
+            max = s; strongest = obj
+        end
+    end
+    return strongest
+end
+
+local function findStrongestPetCustom(minStrength)
+    local strongest, max = nil, minStrength - 1
+    for _, obj in pairs(CollectionService:GetTagged("Roaming")) do
+        local s = obj:GetAttribute("Strength")
+        local o = obj:GetAttribute("OwnerId")
+        local r = obj:GetAttribute("Rarity")
+        
+        if s and s >= minStrength and (not o or o == 0) and s > max then
+            if not targetBossesEnabled and r == "Boss" then continue end
+            if ignoredRarities[r] then continue end
+            max = s; strongest = obj
+        end
+    end
+    return strongest
+end
+
+local function rarityAllowedForCatch(rarity)
+    for _, allowed in pairs(autoCatchRarities) do
+        if allowed then
+            return autoCatchRarities[rarity] == true
+        end
+    end
+    return true
+end
+
+local function findCatchPet()
+    local strongest, max = nil, autoCatchMinStrength - 1
+    local seen = {}
+
+    local function check(obj)
+        if not obj or seen[obj] then return end
+        seen[obj] = true
+        local s = tonumber(obj:GetAttribute("Strength")) or 0
+        local o = obj:GetAttribute("OwnerId")
+        local r = obj:GetAttribute("Rarity")
+        if obj:IsDescendantOf(workspace) and s >= autoCatchMinStrength and (not o or o == 0) and s > max and rarityAllowedForCatch(r) then
+            if not targetBossesEnabled and r == "Boss" then return end
+            max = s; strongest = obj
+        end
+    end
+
+    for _, folderName in ipairs({"RoamingPets", "SkyIslandPets", "AbyssIslandPets"}) do
+        local root = workspace:FindFirstChild(folderName)
+        local pets = root and root:FindFirstChild("Pets")
+        if pets then
+            for _, obj in ipairs(pets:GetChildren()) do
+                check(obj)
+            end
+        end
+    end
+
+    return strongest
+end
+
+local function cleanupLassoVisuals()
+    local char = player.Character
+    local containers = {char, workspace}
+    for _, container in ipairs(containers) do
+        if not container then continue end
+        for _, obj in ipairs(container:GetDescendants()) do
+            local name = string.lower(obj.Name)
+            local className = string.lower(obj.ClassName)
+            local looksLikeLasso = name:find("lasso") or name:find("rope") or name:find("tether") or className == "beam" or className == "trail"
+            if looksLikeLasso and not obj:FindFirstAncestorWhichIsA("Tool") then
+                if obj:IsA("BasePart") or obj:IsA("Beam") or obj:IsA("Trail") or obj:IsA("Attachment") or obj:IsA("Model") then
+                    pcall(function() obj:Destroy() end)
+                end
+            end
+        end
+    end
+end
+
+local function unequipLassoVisual()
+    local equipLassoVisual = ReplicatedStorage:FindFirstChild("Remotes") and ReplicatedStorage.Remotes:FindFirstChild("equipLassoVisual")
+    if equipLassoVisual then
+        pcall(function() equipLassoVisual:InvokeServer(nil) end)
+        pcall(function() equipLassoVisual:InvokeServer() end)
+    end
+    cleanupLassoVisuals()
+end
+
+local function cleanupLassoVisualsOld()
+    local char = player.Character
+    if not char then return end
+    for _, obj in ipairs(char:GetDescendants()) do
+        local name = string.lower(obj.Name)
+        if name:find("lasso") or name:find("rope") then
+            if not obj:FindFirstAncestorWhichIsA("Tool") and (obj:IsA("BasePart") or obj:IsA("Beam") or obj:IsA("Trail") or obj:IsA("Attachment")) then
+                pcall(function() obj:Destroy() end)
+            end
+        end
+    end
+end
+
+local function getEquippedOrBackpackLasso()
+    local char = player.Character
+    if char then
+        for _, tool in ipairs(char:GetChildren()) do
+            if tool:IsA("Tool") and tool.Name:lower():find("lasso") then return tool end
+        end
+    end
+    local backpack = player:FindFirstChild("Backpack")
+    if backpack then
+        for _, tool in ipairs(backpack:GetChildren()) do
+            if tool:IsA("Tool") and tool.Name:lower():find("lasso") then return tool end
+        end
+    end
+    return nil
+end
+
+local function attemptCatchPet(pet)
+    if not pet or not pet.Parent then return false end
+    local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not root then return false end
+    local Remotes = ReplicatedStorage:FindFirstChild("Remotes")
+    if not Remotes then return false end
+
+    local equipLassoVisual = Remotes:FindFirstChild("equipLassoVisual")
+    local throwLasso = Remotes:FindFirstChild("ThrowLasso")
+    local minigameRequest = Remotes:FindFirstChild("minigameRequest")
+    local updateProgress = Remotes:FindFirstChild("UpdateProgress")
+    if not throwLasso or not minigameRequest or not updateProgress then return false end
+
+    unequipLassoVisual()
+    local lasso = getEquippedOrBackpackLasso()
+    if equipLassoVisual and lasso then pcall(function() equipLassoVisual:InvokeServer(lasso) end) end
+
+    local ok, pivot = pcall(function() return pet:GetPivot() end)
+    if not ok or not pivot then return false end
+    local dir = Vector3.new(pivot.Position.X - root.Position.X, 0, pivot.Position.Z - root.Position.Z)
+    dir = dir.Magnitude > 0 and dir.Unit or root.CFrame.LookVector
+
+    pcall(function() throwLasso:FireServer(0.9, dir) end)
+    task.wait(0.15)
+    task.spawn(function()
+        pcall(function() minigameRequest:InvokeServer(pet, pivot) end)
+    end)
+    task.wait(0.15)
+    unequipLassoVisual()
+
+    local isBoss = pet:GetAttribute("Rarity") == "Boss"
+    if isBoss then
+        for _ = 1, 60 do
+            if not autoCatchEnabled or not pet.Parent then break end
+            pcall(function() updateProgress:FireServer(1) end)
+            pcall(function() updateProgress:FireServer(2) end)
+            task.wait()
+        end
+    else
+        for _, v in ipairs({25, 25, 61.66666666666668, 100, 100}) do
+            pcall(function() updateProgress:FireServer(v) end)
+            task.wait()
+        end
+    end
+
+    unequipLassoVisual()
+    return true
+end
+
+local function isPlayerBusy()
+    for _, obj in pairs(CollectionService:GetTagged("Roaming")) do
+        local o = obj:GetAttribute("OwnerId")
+        if o == player.UserId then return true end
+    end
+    local pg = player:FindFirstChild("PlayerGui")
+    if pg then
+        for _, gui in pairs(pg:GetChildren()) do
+            if gui:IsA("ScreenGui") and gui.Enabled then
+                local name = string.lower(gui.Name)
+                if string.find(name, "minigame") or string.find(name, "catch") or string.find(name, "lasso") then
+                    return true
+                end
+            end
+        end
+        local mgFrame = pg:FindFirstChild("Minigame", true) or pg:FindFirstChild("Catching", true) or pg:FindFirstChild("Minigames", true)
+        if mgFrame and mgFrame:IsA("GuiObject") and mgFrame.Visible then
+            local sGui = mgFrame:FindFirstAncestorOfClass("ScreenGui")
+            if sGui and sGui.Enabled then return true end
+        end
+    end
+    return false
+end
+
+local function teleportTo(cf)
+    local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if root then root.CFrame = cf + Vector3.new(0, 5, 0) end
+end
+
+local function scanNextCatchMapArea(root)
+    if not root or not autoCatchMapScanEnabled then return end
+    if os.clock() - lastCatchMapScan < autoCatchMapScanDelay then return end
+    lastCatchMapScan = os.clock()
+    catchMapScanIndex = (catchMapScanIndex % #catchMapScanLocations) + 1
+    root.CFrame = catchMapScanLocations[catchMapScanIndex] + Vector3.new(0, 6, 0)
+end
+
+local function getFishingSpot()
+    return fishingSpots[selectedFishingSpot] or fishingSpots["Lost Docks"]
+end
+
+local function getSelectedFishingBaitList()
+    local list = {}
+    for _, bait in ipairs(baitList) do
+        if selectedFishingBaits[bait] then table.insert(list, bait) end
+    end
+    if #list == 0 and selectedFishingBait ~= "" then table.insert(list, selectedFishingBait) end
+    return list
+end
+
+local function getNextFishingBait()
+    local list = getSelectedFishingBaitList()
+    if #list == 0 then return nil end
+    fishingBaitIndex = (fishingBaitIndex % #list) + 1
+    selectedFishingBait = list[fishingBaitIndex]
+    return selectedFishingBait
+end
+
+local function getPetInventory()
+    local remotes = ReplicatedStorage:WaitForChild("Remotes")
+    local getPetInventoryRemote = remotes:FindFirstChild("getPetInventory")
+    if not getPetInventoryRemote then return nil end
+    local ok, inv = pcall(function() return getPetInventoryRemote:InvokeServer() end)
+    if ok and type(inv) == "table" then return inv end
+    return nil
+end
+
+local function hasSelectedSellRarity()
+    for _, selected in pairs(autoSellPetRarities) do
+        if selected then return true end
+    end
+    return false
+end
+
+local function sellPetByGuid(guid, petData)
+    local remotes = ReplicatedStorage:WaitForChild("Remotes")
+    local collectPetCash = remotes:FindFirstChild("collectPetCash")
+    local sellPet = remotes:FindFirstChild("sellPet")
+    if not sellPet or not guid then return false end
+    if collectPetCash then
+        pcall(function() collectPetCash:FireServer(guid) end)
+        task.wait(0.1)
+    end
+    pcall(function() sellPet:InvokeServer(guid) end)
+    task.wait(0.6)
+    local inv = getPetInventory()
+    return type(inv) == "table" and inv[guid] == nil
+end
+
+local function logFailedSell(guid, pet)
+    if not writefile or type(pet) ~= "table" then return end
+    local line = table.concat({
+        tostring(os.date("%H:%M:%S")),
+        tostring(guid),
+        tostring(pet.name or pet.Name),
+        tostring(pet.rarity or pet.Rarity),
+        "rev=" .. tostring(pet.revToCollect),
+        "offline=" .. tostring(pet.offlineRevToBeCollected),
+        "price=" .. tostring(pet.sellPrice),
+    }, " | ")
+    pcall(function()
+        local old = isfile and isfile("IndraHub_FailedSellPets.txt") and readfile("IndraHub_FailedSellPets.txt") or ""
+        writefile("IndraHub_FailedSellPets.txt", old .. line .. "\n")
+    end)
+end
+
+local function findNextSellPet(inv)
+    for guid, pet in pairs(inv) do
+        if type(pet) == "table" then
+            local rarity = pet.rarity or pet.Rarity
+            guid = pet.guid or pet.Guid or guid
+            if rarity and autoSellPetRarities[rarity] then
+                return guid, pet
+            end
+        end
+    end
+    return nil, nil
+end
+
+---------------------------------------------------------------------
+-- WIND UI SETUP
+---------------------------------------------------------------------
+local function getUiParent()
+    if gethui then return gethui() end
+    return game:GetService("CoreGui")
+end
+
+local function destroyIndraHubUi()
+    pcall(function()
+        if _G.WindUIWindow then _G.WindUIWindow:Destroy() end
+    end)
+    _G.WindUIWindow = nil
+    genv.IndraHubWindow = nil
+
+    local function cleanupParent(parent)
+        if not parent then return end
+        for _, g in ipairs(parent:GetChildren()) do
+            if g:IsA("ScreenGui") and (g.Name == "WindUI" or g.Name == "IndraHub" or g.Name == "IndraHubToggle" or g.Name:find("IndraHub")) then
+                pcall(function() g:Destroy() end)
+            end
+        end
+    end
+
+    pcall(function() cleanupParent(game:GetService("CoreGui")) end)
+    pcall(function() cleanupParent(getUiParent()) end)
+end
+
+-- Destroy old UI if exists
+destroyIndraHubUi()
+
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+local Junkie = loadstring(game:HttpGet("https://jnkie.com/sdk/library.lua"))()
+Junkie.service = "Catch and Tame"
+Junkie.identifier = "1116993"
+Junkie.provider = "Catch and Tame"
+
+WindUI.Services.junkiedevelopment = {
+    Name = "Junkie Development",
+    Icon = "shield-check",
+    Args = { "ServiceId", "ApiKey", "Provider" },
+
+    New = function()
+        local function Verify(key)
+            local result = Junkie.check_key(key)
+            if result and result.valid then
+                if result.message == "KEYLESS" then
+                    getgenv().SCRIPT_KEY = "KEYLESS"
+                    return true, "Keyless mode"
+                elseif result.message == "KEY_VALID" then
+                    getgenv().SCRIPT_KEY = key
+                    return true, "Key valid"
+                end
+            end
+
+            return false, "Invalid key"
+        end
+
+        local function Copy()
+            local link = Junkie.get_key_link()
+            if setclipboard then setclipboard(link) end
+            return link
+        end
+
+        return { Verify = Verify, Copy = Copy }
+    end
+}
+
+local Window = WindUI:CreateWindow({
+    Title = "IndraHub",
+    Icon = "star",
+    Author = "Indra",
+    Folder = "IndraHubSettings",
+    Size = UDim2.fromOffset(580, 460),
+    Transparent = false,
+    Theme = "Dark",
+    Resizable = true,
+    SideBarWidth = 150,
+    KeySystem = {
+        Note = "Enter your key to continue.",
+        SaveKey = true,
+        API = {
+            {
+                Title = "Junkie",
+                Desc = "Click to copy link",
+                Icon = "key-round",
+                Type = "junkiedevelopment"
+            }
+        }
+    },
+})
+_G.WindUIWindow = Window
+genv.IndraHubWindow = Window
+
+while not getgenv().SCRIPT_KEY do
+    task.wait(0.1)
+end
+
+WindUI:SetNotificationLower(true)
+
+-- WindUI themes are handled natively in the CreateWindow params.
+-- We removed custom AddTheme to prevent initialization bugs.
+
+-- Toggle Key
+Window:SetToggleKey(Enum.KeyCode.V)
+Window:EditOpenButton({
+    Title = "Open IndraHub",
+    Icon = "star",
+    CornerRadius = UDim.new(0, 6),
+    StrokeThickness = 2,
+    Color = ColorSequence.new(Color3.fromRGB(138, 43, 226), Color3.fromRGB(173, 216, 230)),
+    Draggable = true
+})
+
+---------------------------------------------------------------------
+-- DRAGGABLE LOGO (IH) TO TOGGLE UI
+---------------------------------------------------------------------
+task.spawn(function()
+    local CoreGui = getUiParent()
+    local VirtualInputManager = game:GetService("VirtualInputManager")
+    
+    if CoreGui:FindFirstChild("IndraHubToggle") then
+        CoreGui.IndraHubToggle:Destroy()
+    end
+
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "IndraHubToggle"
+    if gethui then 
+        ScreenGui.Parent = gethui() 
+    else 
+        ScreenGui.Parent = CoreGui 
+    end
+
+    local ToggleButton = Instance.new("TextButton")
+    ToggleButton.Name = "ToggleButton"
+    ToggleButton.Parent = ScreenGui
+    ToggleButton.BackgroundColor3 = Color3.fromHex("#1a1a1a")
+    ToggleButton.BackgroundTransparency = 0
+    ToggleButton.Position = UDim2.new(0, 50, 0, 50)
+    ToggleButton.Size = UDim2.new(0, 45, 0, 45)
+    ToggleButton.Text = "IH"
+    ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleButton.TextSize = 20
+    ToggleButton.Font = Enum.Font.GothamBold
+    ToggleButton.Active = true
+    ToggleButton.Draggable = true 
+    ToggleButton.AutoButtonColor = true
+
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 12)
+    Corner.Parent = ToggleButton
+    
+    local Stroke = Instance.new("UIStroke")
+    Stroke.Parent = ToggleButton
+    Stroke.Color = Color3.fromHex("#8b5cf6") 
+    Stroke.Thickness = 2
+    Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+    ToggleButton.MouseButton1Click:Connect(function()
+        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.V, false, game)
+        task.wait(0.05)
+        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.V, false, game)
+    end)
+end)
+
+local Tabs = {
+    Main = Window:Tab({ Title = "Catch", Icon = "badge-check" }),
+    Farming = Window:Tab({ Title = "Pets", Icon = "paw-print" }),
+    Fishing = Window:Tab({ Title = "Fishing", Icon = "fish" }),
+    Shops = Window:Tab({ Title = "Shops", Icon = "shopping-cart" }),
+    Breeding = Window:Tab({ Title = "Breed", Icon = "heart" }),
+    Teleport = Window:Tab({ Title = "Travel", Icon = "map" }),
+    Config = Window:Tab({ Title = "Config", Icon = "save" }),
+    Settings = Window:Tab({ Title = "Settings", Icon = "settings" })
+}
+
+Window:SelectTab(1)
+
+---------------------------------------------------------------------
+-- MAIN TAB (Auto Catch, Lasso Boost)
+---------------------------------------------------------------------
+Tabs.Main:Section({ Title = "Target Filters", Icon = "sliders-horizontal" })
+
+Tabs.Main:Dropdown({
+    Title = "Catch Rarity Filter",
+    Desc = "Empty = all rarities. Select only rarities to catch.",
+    Values = rarityCatchList,
+    Value = (function()
+        local list = {}
+        for rarity, val in pairs(autoCatchRarities) do if val then table.insert(list, rarity) end end
+        return list
+    end)(),
+    Multi = true,
+    AllowNone = true,
+    Callback = function(selections)
+        local lookup = {}
+        if selections then
+            for _, rarity in ipairs(selections) do lookup[rarity] = true end
+        end
+        autoCatchRarities = lookup
+        saveConfig()
+        WindUI:Notify({Title="Auto Catch", Content="Rarity filter updated", Icon="badge-check", Duration=2})
+    end
+})
+
+Tabs.Main:Input({
+    Title = "Catch Min Strength",
+    Desc = "0 = any strength. Higher value skips weaker pets.",
+    Value = tostring(autoCatchMinStrength),
+    Placeholder = "0",
+    Numeric = true,
+    Callback = function(val)
+        local num = tonumber(val)
+        if num then
+            autoCatchMinStrength = num
+            saveConfig()
+        end
+    end
+})
+
+Tabs.Main:Toggle({
+    Title = "Enable Auto Catch",
+    Desc = "Catch pets matching rarity and strength filters",
+    Value = autoCatchEnabled,
+    Callback = function(val)
+        autoCatchEnabled = val
+        saveConfig()
+        if val then WindUI:Notify({Title="Auto Catch", Content="ON", Icon="badge-check", Duration=2})
+        else WindUI:Notify({Title="Auto Catch", Content="OFF", Icon="badge-check", Duration=2}) end
+    end
+})
+
+Tabs.Main:Toggle({
+    Title = "Map Scan Patrol",
+    Desc = "Patrol map areas when no target is loaded locally",
+    Value = autoCatchMapScanEnabled,
+    Callback = function(val)
+        autoCatchMapScanEnabled = val
+        saveConfig()
+        WindUI:Notify({Title="Map Scan Patrol", Content=val and "ON" or "OFF", Icon="map", Duration=2})
+    end
+})
+
+Tabs.Main:Slider({
+    Title = "Map Scan Delay (seconds)",
+    Desc = "Area switch delay while no target is loaded",
+    Value = {
+        Min = 1,
+        Max = 10,
+        Default = autoCatchMapScanDelay,
+        Decimals = 1
+    },
+    Callback = function(val)
+        autoCatchMapScanDelay = val
+        saveConfig()
+    end
+})
+
+Tabs.Main:Section({ Title = "Lasso Tools", Icon = "zap" })
+
+local BOOST_STRENGTH = 99999
+local function boostLassoStrength()
+    local boosted = false
+    if getgc then
+        pcall(function()
+            for _, obj in pairs(getgc(true)) do
+                if type(obj) == "table" then
+                    if rawget(obj, "lassos") and rawget(obj, "equippedLasso") then
+                        rawset(obj.lassos, "Stellar Lasso", true)
+                        rawset(obj, "equippedLasso", "Stellar Lasso")
+                        boosted = true
+                    end
+                    if rawget(obj, "strength") and rawget(obj, "model") then
+                        if type(rawget(obj, "strength")) == "number" then
+                            rawset(obj, "strength", BOOST_STRENGTH)
+                            boosted = true
+                        end
+                    end
+                    if rawget(obj, "Basic Lasso") and type(rawget(obj, "Basic Lasso")) == "table" then
+                        for name, data in pairs(obj) do
+                            if type(data) == "table" and data.strength then
+                                data.strength = BOOST_STRENGTH
+                                boosted = true
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    end
+    pcall(function()
+        for _, desc in pairs(ReplicatedStorage:GetDescendants()) do
+            if desc:IsA("ModuleScript") and string.find(string.lower(desc.Name), "lasso") then
+                pcall(function()
+                    local config = require(desc)
+                    if type(config) == "table" then
+                        for name, data in pairs(config) do
+                            if type(data) == "table" and data.strength then
+                                data.strength = BOOST_STRENGTH
+                                boosted = true
+                            end
+                        end
+                    end
+                end)
+            end
+        end
+    end)
+    return boosted
+end
+
+Tabs.Main:Button({
+    Title = "Boost Lasso Strength (Stellar)",
+    Desc = "Boosts local lasso config and equips Stellar Lasso",
+    Callback = function()
+        boostLassoStrength()
+        pcall(function()
+            local lassoRE = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_knit@1.7.0"):WaitForChild("knit"):WaitForChild("Services"):WaitForChild("LassoService"):WaitForChild("RE")
+            lassoRE:WaitForChild("EquipLasso"):FireServer("Stellar Lasso")
+        end)
+        WindUI:Notify({Title="Lasso Boosted", Content="All lasso strengths = 3100!", Icon="zap", Duration=3})
+        sendOSNotification("Lasso Boost", "All lasso strength = 3100!")
+    end
+})
+
+-- Auto Lasso background thread
+task.spawn(function()
+    task.wait(1)
+    boostLassoStrength()
+    pcall(function()
+        local lassoRE = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_knit@1.7.0"):WaitForChild("knit"):WaitForChild("Services"):WaitForChild("LassoService"):WaitForChild("RE")
+        lassoRE:WaitForChild("EquipLasso"):FireServer("Stellar Lasso")
+    end)
+    while true do
+        task.wait(3)
+        boostLassoStrength()
+    end
+end)
+
+---------------------------------------------------------------------
+-- FARMING TAB (Collect Cash)
+---------------------------------------------------------------------
+Tabs.Farming:Section({ Title = "Cash Collection", Icon = "dollar-sign" })
+
+Tabs.Farming:Toggle({
+    Title = "Auto Collect Pet Cash",
+    Desc = "Collect all pet cash on a timer",
+    Value = autoCollectCashEnabled,
+    Callback = function(val)
+        autoCollectCashEnabled = val
+        saveConfig()
+        if val then
+            WindUI:Notify({Title="Collect Cash", Content="ON - every " .. collectCashDelay .. "s", Icon="dollar-sign", Duration=2})
+        else
+            WindUI:Notify({Title="Collect Cash", Content="OFF", Icon="dollar-sign", Duration=2})
+        end
+    end
+})
+
+Tabs.Farming:Slider({
+    Title = "Collect Delay (seconds)",
+    Desc = "Seconds between collect-all attempts",
+    Value = {
+        Min = 5,
+        Max = 300,
+        Default = collectCashDelay
+    },
+    Callback = function(val)
+        collectCashDelay = val
+        saveConfig()
+    end
+})
+
+Tabs.Farming:Button({
+    Title = "Collect Now",
+    Desc = "Collect all pet cash now",
+    Callback = function()
+        pcall(function()
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("collectAllPetCash"):FireServer()
+        end)
+        WindUI:Notify({Title="Collect Cash", Content="Collected!", Icon="dollar-sign", Duration=2})
+    end
+})
+
+Tabs.Farming:Section({ Title = "Pet Selling", Icon = "badge-dollar-sign" })
+
+Tabs.Farming:Dropdown({
+    Title = "Sell Rarity Filter",
+    Desc = "Only selected rarities are sold. Empty = sell nothing.",
+    Values = rarityCatchList,
+    Value = (function()
+        local list = {}
+        for rarity, val in pairs(autoSellPetRarities) do if val then table.insert(list, rarity) end end
+        return list
+    end)(),
+    Multi = true,
+    AllowNone = true,
+    Callback = function(selections)
+        local lookup = {}
+        if selections then
+            for _, rarity in ipairs(selections) do lookup[rarity] = true end
+        end
+        autoSellPetRarities = lookup
+        saveConfig()
+        WindUI:Notify({Title="Auto Sell Pet", Content="Rarity filter updated", Icon="badge-dollar-sign", Duration=2})
+    end
+})
+
+Tabs.Farming:Slider({
+    Title = "Sell Delay (seconds)",
+    Desc = "Seconds between inventory sell scans",
+    Value = {
+        Min = 2,
+        Max = 60,
+        Default = autoSellPetDelay,
+        Decimals = 0
+    },
+    Callback = function(val)
+        autoSellPetDelay = val
+        saveConfig()
+    end
+})
+
+Tabs.Farming:Toggle({
+    Title = "Enable Auto Sell Pet",
+    Desc = "Sell inventory pets matching selected rarities",
+    Value = autoSellPetEnabled,
+    Callback = function(val)
+        autoSellPetEnabled = val
+        saveConfig()
+        WindUI:Notify({Title="Auto Sell Pet", Content=val and "ON" or "OFF", Icon="badge-dollar-sign", Duration=2})
+    end
+})
+
+-- Auto Collect Cash background thread
+task.spawn(function()
+    local lastCollect = 0
+    while genv.IndraHubSession == currentSession do
+        task.wait(1)
+        if autoCollectCashEnabled then
+            if os.clock() - lastCollect >= collectCashDelay then
+                lastCollect = os.clock()
+                pcall(function()
+                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("collectAllPetCash"):FireServer()
+                end)
+            end
+        end
+    end
+end)
+
+-- Auto sell pet logic
+task.spawn(function()
+    while genv.IndraHubSession == currentSession do
+        task.wait(math.max(2, autoSellPetDelay))
+        if autoSellPetEnabled and hasSelectedSellRarity() then
+            pcall(function()
+                pcall(function()
+                    ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("collectAllPetCash"):FireServer()
+                end)
+                for _ = 1, 20 do
+                    if not autoSellPetEnabled then break end
+                    local inv = getPetInventory()
+                    if not inv then break end
+                    local guid, pet = findNextSellPet(inv)
+                    if not guid then break end
+                    if not sellPetByGuid(guid, pet) then
+                        logFailedSell(guid, pet)
+                        break
+                    end
+                    task.wait(0.6)
+                end
+            end)
+        end
+    end
+end)
+
+---------------------------------------------------------------------
+-- FISHING TAB (Auto Fish, Bait)
+---------------------------------------------------------------------
+Tabs.Fishing:Section({ Title = "Fishing Automation", Icon = "fish" })
+
+Tabs.Fishing:Dropdown({
+    Title = "Select Fishing Spot",
+    Desc = "Used by teleport, cast once, and auto fish",
+    Values = fishingSpotList,
+    Value = selectedFishingSpot,
+    Callback = function(selection)
+        if selection and fishingSpots[selection] then
+            selectedFishingSpot = selection
+            saveConfig()
+        end
+    end
+})
+
+Tabs.Fishing:Dropdown({
+    Title = "Select Bait(s)",
+    Desc = "Auto buy all selected; auto fish rotates bait",
+    Values = baitList,
+    Value = getSelectedFishingBaitList(),
+    Multi = true,
+    AllowNone = true,
+    Callback = function(selections)
+        local lookup = {}
+        if selections then
+            for _, bait in ipairs(selections) do lookup[bait] = true end
+        end
+        selectedFishingBaits = lookup
+        local list = getSelectedFishingBaitList()
+        selectedFishingBait = list[1] or ""
+        fishingBaitIndex = 0
+        saveConfig()
+    end
+})
+
+Tabs.Fishing:Toggle({
+    Title = "Auto Buy Bait",
+    Desc = "Buy selected bait every cycle",
+    Value = autoBuyBaitEnabled,
+    Callback = function(val)
+        autoBuyBaitEnabled = val
+        saveConfig()
+        WindUI:Notify({Title="Auto Buy Bait", Content=val and "ON" or "OFF", Icon="fish", Duration=2})
+    end
+})
+
+Tabs.Fishing:Toggle({
+    Title = "Auto Fish Bypass",
+    Desc = "Use bait, cast, wait for fish info, then finish",
+    Value = autoFishEnabled,
+    Callback = function(val)
+        autoFishEnabled = val
+        saveConfig()
+        fishingBusy = false
+        WindUI:Notify({Title="Auto Fish", Content=val and "ON" or "OFF", Icon="fish", Duration=2})
+    end
+})
+
+Tabs.Fishing:Slider({
+    Title = "Cast Delay (seconds)",
+    Desc = "Seconds between cast attempts",
+    Value = {
+        Min = 1,
+        Max = 10,
+        Default = autoFishDelay,
+        Decimals = 1
+    },
+    Callback = function(val)
+        autoFishDelay = val
+        saveConfig()
+    end
+})
+
+Tabs.Fishing:Slider({
+    Title = "Fallback Finish Delay (seconds)",
+    Desc = "Fallback finish timer when fish info is missing",
+    Value = {
+        Min = 1,
+        Max = 10,
+        Default = autoFishFinishDelay,
+        Decimals = 1
+    },
+    Callback = function(val)
+        autoFishFinishDelay = val
+        saveConfig()
+    end
+})
+
+Tabs.Fishing:Button({
+    Title = "Teleport to Fishing Spot",
+    Desc = "Move to selected fishing spot",
+    Callback = function()
+        teleportTo(getFishingSpot())
+    end
+})
+
+Tabs.Fishing:Button({
+    Title = "Cast Once",
+    Desc = "Manual StartFishing at selected spot",
+    Callback = function()
+        pcall(function()
+            ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("StartFishing"):FireServer(getFishingSpot())
+        end)
+    end
+})
+
+---------------------------------------------------------------------
+-- SHOPS TAB (Auto Buy Food, Merchant)
+---------------------------------------------------------------------
+Tabs.Shops:Section({ Title = "Auto Buy Food", Icon = "shopping-cart" })
+
+Tabs.Shops:Dropdown({
+    Title = "Select Food(s)",
+    Desc = "Choose which food items to auto buy",
+    Values = foodList,
+    Value = (function()
+        local list = {}
+        for k, v in pairs(autoBuyFoodItems) do if v then table.insert(list, k) end end
+        if #list == 0 then return {"Steak"} end
+        return list
+    end)(),
+    Multi = true,
+    Callback = function(selections)
+        local lookup = {}
+        if selections then
+            for _, v in ipairs(selections) do lookup[v] = true end
+        end
+        autoBuyFoodItems = lookup
+        saveConfig()
+    end
+})
+
+Tabs.Shops:Slider({
+    Title = "Buy Amount",
+    Desc = "How many to buy per interval",
+    Value = {
+        Min = 1,
+        Max = 100,
+        Default = 1
+    },
+    Callback = function(val)
+        autoBuyFoodAmount = val
+        saveConfig()
+    end
+})
+
+Tabs.Shops:Toggle({
+    Title = "Enable Auto Buy Food",
+    Desc = "Automatically buys selected food every second",
+    Value = autoBuyFoodEnabled,
+    Callback = function(val)
+        autoBuyFoodEnabled = val
+        saveConfig()
+    end
+})
+
+Tabs.Shops:Section({ Title = "Auto Buy Merchant", Icon = "shopping-bag" })
+
+Tabs.Shops:Dropdown({
+    Title = "Select Merchant Items",
+    Desc = "Choose items to buy when merchant spawns",
+    Values = merchantItemList,
+    Value = (function()
+        local list = {}
+        for k, v in pairs(autoBuyMerchantItems) do if v then table.insert(list, k) end end
+        return list
+    end)(),
+    Multi = true,
+    Callback = function(selections)
+        local lookup = {}
+        if selections then
+            for _, v in ipairs(selections) do lookup[v] = true end
+        end
+        autoBuyMerchantItems = lookup
+        saveConfig()
+    end
+})
+
+Tabs.Shops:Toggle({
+    Title = "Enable Auto Buy Merchant",
+    Desc = "Automatically buys selected items from merchant slots",
+    Value = autoBuyMerchantEnabled,
+    Callback = function(val)
+        autoBuyMerchantEnabled = val
+        saveConfig()
+        if val then
+            purchasedMerchantSlots = {}
+        end
+    end
+})
+
+Tabs.Shops:Section({ Title = "Auto Buy Lasso", Icon = "target" })
+
+Tabs.Shops:Dropdown({
+    Title = "Select Lassos",
+    Desc = "Choose lassos to buy once",
+    Values = lassoList,
+    Value = (function()
+        local list = {}
+        for k, v in pairs(autoBuyLassoItems) do if v then table.insert(list, k) end end
+        return list
+    end)(),
+    Multi = true,
+    Callback = function(selections)
+        local lookup = {}
+        if selections then
+            for _, v in ipairs(selections) do lookup[v] = true end
+        end
+        autoBuyLassoItems = lookup
+        saveConfig()
+    end
+})
+
+Tabs.Shops:Toggle({
+    Title = "Enable Auto Buy Lasso",
+    Desc = "Automatically buys selected lassos once",
+    Value = autoBuyLassoEnabled,
+    Callback = function(val)
+        autoBuyLassoEnabled = val
+        saveConfig()
+        if val then purchasedLassos = {} end
+    end
+})
+
+Tabs.Shops:Section({ Title = "Auto Buy Paint", Icon = "palette" })
+
+Tabs.Shops:Dropdown({
+    Title = "Select Paints",
+    Desc = "Open Paint Merchant first, then enable auto buy",
+    Values = paintList,
+    Value = (function()
+        local list = {}
+        for k, v in pairs(autoBuyPaintItems) do if v then table.insert(list, k) end end
+        return list
+    end)(),
+    Multi = true,
+    Callback = function(selections)
+        local lookup = {}
+        if selections then
+            for _, v in ipairs(selections) do lookup[v] = true end
+        end
+        autoBuyPaintItems = lookup
+        saveConfig()
+    end
+})
+
+Tabs.Shops:Toggle({
+    Title = "Enable Auto Buy Paint",
+    Desc = "Clicks selected paint Buy x1 buttons when PaintShop is open",
+    Value = autoBuyPaintEnabled,
+    Callback = function(val)
+        autoBuyPaintEnabled = val
+        saveConfig()
+        if val then purchasedPaints = {} end
+    end
+})
+
+---------------------------------------------------------------------
+-- BREEDING TAB
+---------------------------------------------------------------------
+local breedStationPos1 = vector.create(-169.56399536132812, 12, -2956.529052734375)
+local breedStationPos2 = vector.create(-162.60342407226562, 12, -2930.13330078125)
+
+local breedPetList = {}       -- { {name="Cat (abc123)", instance=<Instance>}, ... }
+local breedPetNames = {}      -- { "Cat (abc123)", ... }
+local selectedBreedPet1 = nil -- instance
+local selectedBreedPet2 = nil -- instance
+local breedPetDropdown1 = nil
+local breedPetDropdown2 = nil
+
+local function findOwnPenNumber()
+    local pensFolder = workspace:FindFirstChild("PlayerPens")
+    if not pensFolder then return nil end
+
+    for _, pen in ipairs(pensFolder:GetChildren()) do
+        local owner = pen:GetAttribute("Owner") or pen:GetAttribute("OwnerName")
+        local ownerId = pen:GetAttribute("OwnerId") or pen:GetAttribute("UserId")
+        if owner == player.Name or ownerId == player.UserId then
+            return tostring(pen.Name)
+        end
+    end
+
+    return nil
+end
+
+local function getBreedPen()
+    local pensFolder = workspace:FindFirstChild("PlayerPens")
+    if not pensFolder then return nil end
+
+    if breedPenNumber == "auto" or breedPenNumber == "" then
+        local ownPen = findOwnPenNumber()
+        if ownPen then breedPenNumber = ownPen end
+    end
+
+    return pensFolder:FindFirstChild(tostring(breedPenNumber))
+end
+
+local function toBreedVector(pos)
+    return vector.create(pos.X, pos.Y, pos.Z)
+end
+
+local function scanPenPets()
+    breedPetList = {}
+    breedPetNames = {}
+    local pen = getBreedPen()
+    if not pen then return end
+    local petsFolder = pen:FindFirstChild("Pets")
+    if not petsFolder then return end
+    
+    for _, pet in ipairs(petsFolder:GetChildren()) do
+        local petName = pet:GetAttribute("Name") or pet.Name
+        local shortId = string.sub(pet.Name, 1, 8)
+        local cooldownEnd = tonumber(pet:GetAttribute("CooldownEnd")) or 0
+        local cooldownText = cooldownEnd > os.time() and " [Cooldown]" or ""
+        local displayName = petName .. " (" .. shortId .. ")" .. cooldownText
+        table.insert(breedPetList, {name = displayName, instance = pet})
+        table.insert(breedPetNames, displayName)
+    end
+
+    local firstReady = nil
+    local secondReady = nil
+    for _, petInfo in ipairs(breedPetList) do
+        local pet = petInfo.instance
+        local cooldownEnd = tonumber(pet:GetAttribute("CooldownEnd")) or 0
+        if cooldownEnd <= os.time() then
+            if not firstReady then
+                firstReady = pet
+            elseif (pet:GetAttribute("Name") or pet.Name) ~= (firstReady:GetAttribute("Name") or firstReady.Name) then
+                secondReady = pet
+                break
+            elseif not secondReady then
+                secondReady = pet
+            end
+        end
+    end
+
+    selectedBreedPet1 = selectedBreedPet1 or firstReady or (breedPetList[1] and breedPetList[1].instance)
+    selectedBreedPet2 = selectedBreedPet2 or secondReady or (breedPetList[2] and breedPetList[2].instance)
+end
+
+local function refreshBreedPetDropdowns()
+    for _, dropdown in ipairs({breedPetDropdown1, breedPetDropdown2}) do
+        if dropdown then
+            pcall(function()
+                if dropdown.Refresh then dropdown:Refresh(breedPetNames) end
+            end)
+            pcall(function()
+                if dropdown.SetValues then dropdown:SetValues(breedPetNames) end
+            end)
+            pcall(function()
+                if dropdown.Update then dropdown:Update({Values = breedPetNames}) end
+            end)
+        end
+    end
+end
+
+local function findBreedStations()
+    local pen = getBreedPen()
+    if not pen then return nil, nil end
+    
+    local breedingFolder = pen:FindFirstChild("Breeding")
+    if breedingFolder then
+        local parts = {}
+        for _, child in ipairs(breedingFolder:GetDescendants()) do
+            if child:IsA("BasePart") then table.insert(parts, child) end
+        end
+        if #parts >= 2 then
+            return toBreedVector(parts[1].Position), toBreedVector(parts[2].Position)
+        elseif #parts == 1 then
+            local p = parts[1].Position
+            return toBreedVector(p), toBreedVector(p + Vector3.new(5, 0, 0))
+        end
+    end
+
+    if selectedBreedPet1 and selectedBreedPet2 then
+        local ok1, pivot1 = pcall(function() return selectedBreedPet1:GetPivot() end)
+        local ok2, pivot2 = pcall(function() return selectedBreedPet2:GetPivot() end)
+        if ok1 and ok2 then
+            return toBreedVector(pivot1.Position), toBreedVector(pivot2.Position)
+        end
+    end
+
+    local storeFolder = pen:FindFirstChild("Store")
+    local nest = storeFolder and storeFolder:FindFirstChild("Nest", true)
+    if nest then
+        local ok, pivot = pcall(function() return nest:GetPivot() end)
+        if ok and pivot then
+            local p = pivot.Position
+            return toBreedVector(p + Vector3.new(-3, 0, 0)), toBreedVector(p + Vector3.new(3, 0, 0))
+        end
+    end
+
+    local eggsFolder = pen:FindFirstChild("Eggs")
+    if eggsFolder then
+        local eggPart = eggsFolder:FindFirstChildWhichIsA("BasePart", true)
+        if eggPart then
+            local p = eggPart.Position
+            return toBreedVector(p + Vector3.new(-3, 0, 0)), toBreedVector(p + Vector3.new(3, 0, 0))
+        end
+    end
+
+    -- Search for breeding station parts in the pen
+    local stations = {}
+    for _, child in ipairs(pen:GetDescendants()) do
+        if child:IsA("BasePart") then
+            local name = string.lower(child.Name)
+            -- More specific names commonly used for breeding pads
+            if string.find(name, "pad") or string.find(name, "seat") or string.find(name, "stand") or string.find(name, "nursery") or string.find(name, "pedestal") then
+                table.insert(stations, child)
+            end
+        end
+    end
+    
+    -- Sort by name or distance if needed, but for now just pick the first two found
+    if #stations >= 2 then
+        local p1 = stations[1].Position
+        local p2 = stations[2].Position
+            return toBreedVector(p1), toBreedVector(p2)
+    elseif #stations == 1 then
+        local p1 = stations[1].Position
+        -- If only one found, assume second is nearby
+        return toBreedVector(p1), toBreedVector(p1 + Vector3.new(5, 0, 0))
+    end
+
+    local petsFolder = pen:FindFirstChild("Pets")
+    if petsFolder then
+        local firstPet = petsFolder:FindFirstChildWhichIsA("Model")
+        if firstPet then
+            local ok, pivot = pcall(function() return firstPet:GetPivot() end)
+            if ok and pivot then
+                local p = pivot.Position
+                return toBreedVector(p + Vector3.new(-3, 0, 0)), toBreedVector(p + Vector3.new(3, 0, 0))
+            end
+        end
+    end
+
+    return nil, nil
+end
+
+local function doBreedRequest()
+    local now = os.clock()
+    if now - lastBreedRequestAt < breedRequestCooldown then
+        return false, "Local debounce: wait " .. math.ceil(breedRequestCooldown - (now - lastBreedRequestAt)) .. "s"
+    end
+
+    if not selectedBreedPet1 or not selectedBreedPet2 then
+        return false, "Select 2 pets first from dropdowns"
+    end
+    if selectedBreedPet1 == selectedBreedPet2 then
+        return false, "Cannot breed a pet with itself"
+    end
+    if not selectedBreedPet1:IsDescendantOf(workspace) then
+        return false, "Pet 1 no longer exists in pen"
+    end
+    if not selectedBreedPet2:IsDescendantOf(workspace) then
+        return false, "Pet 2 no longer exists in pen"
+    end
+    
+    -- Try dynamic positions first, fallback to hardcoded
+    local pos1, pos2 = findBreedStations()
+    if not pos1 then
+        pos1 = breedStationPos1
+        pos2 = breedStationPos2
+    end
+    
+    local breedRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("breedRequest")
+    lastBreedRequestAt = os.clock()
+    local result, reason = breedRemote:InvokeServer(
+        selectedBreedPet1, selectedBreedPet2,
+        pos1,
+        pos2
+    )
+
+    if result == false then
+        return false, "Server rejected breed request" .. (reason and (": " .. tostring(reason)) or ". Try different pets.")
+    end
+
+    return true, result or reason
+end
+
+local function ensureOwnBreedPen()
+    local pen = getBreedPen()
+    local owner = pen and (pen:GetAttribute("Owner") or pen:GetAttribute("OwnerName"))
+    local ownerId = pen and (pen:GetAttribute("OwnerId") or pen:GetAttribute("UserId"))
+    if not pen or (owner ~= player.Name and ownerId ~= player.UserId) then
+        local ownPen = findOwnPenNumber()
+        if ownPen then breedPenNumber = ownPen end
+    end
+end
+
+-- Initial scan
+ensureOwnBreedPen()
+scanPenPets()
+
+Tabs.Breeding:Section({ Title = "Breed Pets", Icon = "heart" })
+
+Tabs.Breeding:Button({
+    Title = "Auto Detect My Pen",
+    Desc = "Finds PlayerPen where Owner matches your username",
+    Callback = function()
+        local ownPen = findOwnPenNumber()
+        if ownPen then
+            breedPenNumber = ownPen
+            saveConfig()
+            scanPenPets()
+            refreshBreedPetDropdowns()
+            WindUI:Notify({Title="Breeding", Content="Detected pen " .. ownPen .. " - found " .. #breedPetList .. " pets", Icon="heart", Duration=3})
+        else
+            WindUI:Notify({Title="Breeding", Content="Could not detect your pen", Icon="alert-circle", Duration=3})
+        end
+    end
+})
+
+Tabs.Breeding:Button({
+    Title = "Scan My Pen",
+    Desc = "Refresh pets from your detected PlayerPen",
+    Callback = function()
+        ensureOwnBreedPen()
+        scanPenPets()
+        refreshBreedPetDropdowns()
+        if #breedPetList == 0 then
+            WindUI:Notify({Title="Scan", Content="No pets found in pen " .. breedPenNumber, Icon="alert-circle", Duration=3})
+        else
+            local petSummary = ""
+            for i, p in ipairs(breedPetList) do
+                if i <= 20 then
+                    petSummary = petSummary .. "#" .. i .. " " .. p.name .. "\n"
+                end
+            end
+            if #breedPetList > 20 then
+                petSummary = petSummary .. "... +" .. (#breedPetList - 20) .. " more"
+            end
+            WindUI:Notify({Title="Scan Complete", Content="Found " .. #breedPetList .. " pets:\n" .. petSummary, Icon="heart", Duration=8})
+        end
+    end
+})
+
+breedPetDropdown1 = Tabs.Breeding:Dropdown({
+    Title = "Select Pet 1",
+    Desc = "Pick first pet from scanned pen list",
+    Values = breedPetNames,
+    Value = breedPetNames[1],
+    Callback = function(selection)
+        for _, petInfo in ipairs(breedPetList) do
+            if petInfo.name == selection then
+                selectedBreedPet1 = petInfo.instance
+                WindUI:Notify({Title="Pet 1 Set", Content=petInfo.name, Icon="heart", Duration=2})
+                return
+            end
+        end
+        selectedBreedPet1 = nil
+    end
+})
+
+breedPetDropdown2 = Tabs.Breeding:Dropdown({
+    Title = "Select Pet 2",
+    Desc = "Pick second pet from scanned pen list",
+    Values = breedPetNames,
+    Value = breedPetNames[2],
+    Callback = function(selection)
+        for _, petInfo in ipairs(breedPetList) do
+            if petInfo.name == selection then
+                selectedBreedPet2 = petInfo.instance
+                WindUI:Notify({Title="Pet 2 Set", Content=petInfo.name, Icon="heart", Duration=2})
+                return
+            end
+        end
+        selectedBreedPet2 = nil
+    end
+})
+
+Tabs.Breeding:Button({
+    Title = "Breed Now",
+    Desc = "Send a breed request with the 2 selected pets",
+    Callback = function()
+        local ok, msg = pcall(function()
+            local success, result = doBreedRequest()
+            if success then
+                WindUI:Notify({Title="Breed Sent!", Content="Request fired! Result: " .. tostring(result), Icon="heart", Duration=4})
+            else
+                WindUI:Notify({Title="Breed Failed", Content=tostring(result), Icon="alert-circle", Duration=4})
+            end
+        end)
+        if not ok then
+            WindUI:Notify({Title="Breed Error", Content=tostring(msg), Icon="alert-circle", Duration=4})
+        end
+    end
+})
+
+Tabs.Breeding:Section({ Title = "Auto Breed", Icon = "repeat" })
+
+Tabs.Breeding:Toggle({
+    Title = "Auto Breed",
+    Desc = "Continuously breeds the 2 selected pets at the configured delay",
+    Value = autoBreedEnabled,
+    Callback = function(val)
+        autoBreedEnabled = val
+        saveConfig()
+        if val then
+            WindUI:Notify({Title="Auto Breed", Content="ON - every " .. breedDelay .. "s", Icon="heart", Duration=2})
+        else
+            WindUI:Notify({Title="Auto Breed", Content="OFF", Icon="heart", Duration=2})
+        end
+    end
+})
+
+Tabs.Breeding:Slider({
+    Title = "Breed Delay (seconds)",
+    Desc = "How often auto breed fires a request",
+    Value = {
+        Min = 30,
+        Max = 300,
+        Default = breedDelay
+    },
+    Callback = function(val)
+        breedDelay = val
+        saveConfig()
+    end
+})
+
+
+---------------------------------------------------------------------
+-- TELEPORT TAB (Locations, Auto Farm, Player Speed)
+---------------------------------------------------------------------
+Tabs.Teleport:Section({ Title = "Locations", Icon = "map-pin" })
+
+Tabs.Teleport:Button({
+    Title = "Teleport to Main Island",
+    Callback = function()
+        teleportTo(mainIsland)
+    end
+})
+
+Tabs.Teleport:Button({
+    Title = "Teleport to Underworld",
+    Callback = function()
+        teleportTo(underwater)
+    end
+})
+
+Tabs.Teleport:Button({
+    Title = "Teleport to Cave Island",
+    Callback = function()
+        teleportTo(caveIsland)
+    end
+})
+
+Tabs.Teleport:Button({
+    Title = "Teleport to Bee Island",
+    Callback = function()
+        teleportTo(beeIsland)
+    end
+})
+
+Tabs.Teleport:Button({
+    Title = "Teleport to Safari Island",
+    Callback = function()
+        teleportTo(safariIsland)
+    end
+})
+
+Tabs.Teleport:Button({
+    Title = "Teleport to Volcano Island",
+    Callback = function()
+        teleportTo(volcanoIsland)
+    end
+})
+
+Tabs.Teleport:Button({
+    Title = "Teleport to Lost Docks",
+    Callback = function()
+        teleportTo(lostDocks)
+    end
+})
+
+Tabs.Teleport:Button({
+    Title = "Teleport to New Area (From Image)",
+    Callback = function()
+        teleportTo(customLocation)
+    end
+})
+
+Tabs.Teleport:Toggle({
+    Title = "Auto Teleport to New Area",
+    Desc = "Continuously keeps your character at the new area coordinate",
+    Value = autoTeleportNewArea,
+    Callback = function(val)
+        autoTeleportNewArea = val
+        saveConfig()
+    end
+})
+
+Tabs.Teleport:Slider({
+    Title = "Auto Teleport Delay (seconds)",
+    Desc = "How often the script teleports you back to the coordinate",
+    Value = {
+        Min = 0.1,
+        Max = 60,
+        Default = autoTeleportNewAreaDelay,
+        Decimals = 1
+    },
+    Callback = function(val)
+        autoTeleportNewAreaDelay = val
+        saveConfig()
+    end
+})
+
+Tabs.Teleport:Section({ Title = "Target Rules", Icon = "target" })
+
+Tabs.Teleport:Toggle({
+    Title = "Target Bosses",
+    Desc = "If OFF, the script will ignore \"Boss\" rarity pets",
+    Value = targetBossesEnabled,
+    Callback = function(val)
+        targetBossesEnabled = val
+        saveConfig()
+    end
+})
+
+Tabs.Teleport:Dropdown({
+    Title = "Ignore Rarity",
+    Desc = "Select rarities to skip while targeting pets",
+    Values = rarityIgnoreList,
+    Value = (function()
+        local list = {}
+        for rarity, val in pairs(ignoredRarities) do if val then table.insert(list, rarity) end end
+        return list
+    end)(),
+    Multi = true,
+    Callback = function(selections)
+        local lookup = {}
+        if selections then
+            for _, rarity in ipairs(selections) do lookup[rarity] = true end
+        end
+        ignoredRarities = lookup
+        saveConfig()
+        WindUI:Notify({Title="Ignore Rarity", Content="Updated ignored rarities", Icon="target", Duration=2})
+    end
+})
+
+Tabs.Teleport:Section({ Title = "Auto Teleport", Icon = "navigation" })
+
+Tabs.Teleport:Button({
+    Title = "Teleport to Strongest Pet (Any)",
+    Callback = function()
+        local pet = findStrongestPetAny()
+        local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+        if pet and root then root.CFrame = pet:GetPivot() + Vector3.new(0,5,0) end
+    end
+})
+
+Tabs.Teleport:Toggle({
+    Title = "Auto Teleport (All)",
+    Desc = "Continuously teleports to the strongest available pet everywhere",
+    Value = autoModeAll,
+    Callback = function(val)
+        autoModeAll = val
+        saveConfig()
+    end
+})
+
+Tabs.Teleport:Input({
+    Title = "Custom Min Strength",
+    Desc = "Minimum strength required to target a pet (For Custom mode)",
+    Value = tostring(currentMinStrength),
+    Placeholder = "e.g. 3000",
+    Numeric = true,
+    Callback = function(val)
+        local num = tonumber(val)
+        if num then currentMinStrength = num; saveConfig() end
+    end
+})
+
+Tabs.Teleport:Toggle({
+    Title = "Auto Teleport (Custom)",
+    Desc = "Only teleports if the strongest pet meets the minimum strength",
+    Value = autoModeCustom,
+    Callback = function(val)
+        autoModeCustom = val
+        saveConfig()
+    end
+})
+
+Tabs.Teleport:Section({ Title = "Auto Underworld (UW)", Icon = "box" })
+Tabs.Teleport:Toggle({
+    Title = "Auto Load Underworld",
+    Desc = "Briefly teleports to UW repeatedly to load spawns",
+    Value = autoLoadUW,
+    Callback = function(val)
+        autoLoadUW = val
+        saveConfig()
+    end
+})
+
+Tabs.Teleport:Slider({
+    Title = "Auto Load UW Delay (seconds)",
+    Desc = "How often the script visits the Underworld",
+    Value = {
+        Min = 10,
+        Max = 300,
+        Default = autoUWDelay
+    },
+    Callback = function(val)
+        autoUWDelay = val
+        saveConfig()
+    end
+})
+
+Tabs.Teleport:Section({ Title = "Player Modifications", Icon = "user" })
+
+Tabs.Teleport:Toggle({
+    Title = "Enable Fly",
+    Desc = "Allows you to fly around the map using W A S D + Space/Ctrl",
+    Value = flyEnabled,
+    Callback = function(val)
+        flyEnabled = val
+        saveConfig()
+        local char = player.Character
+        local root = char and char:FindFirstChild("HumanoidRootPart")
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        
+        if val then
+            if not root or not hum then return end
+            -- Create fly forces
+            local bv = Instance.new("BodyVelocity")
+            bv.Name = "IndraFlyVelocity"
+            bv.MaxForce = Vector3.new(100000, 100000, 100000)
+            bv.Velocity = Vector3.zero
+            bv.Parent = root
+            
+            local bg = Instance.new("BodyGyro")
+            bg.Name = "IndraFlyGyro"
+            bg.MaxTorque = Vector3.new(100000, 100000, 100000)
+            bg.CFrame = root.CFrame
+            bg.Parent = root
+            
+            hum.PlatformStand = true
+            
+            local camera = workspace.CurrentCamera
+            genv.IndraHubFlyConnection = game:GetService("RunService").RenderStepped:Connect(function()
+                if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+                
+                local x, y, z = 0, 0, 0
+                local uis = UserInputService
+                if uis:IsKeyDown(Enum.KeyCode.W) then z = -1 end
+                if uis:IsKeyDown(Enum.KeyCode.S) then z = 1 end
+                if uis:IsKeyDown(Enum.KeyCode.A) then x = -1 end
+                if uis:IsKeyDown(Enum.KeyCode.D) then x = 1 end
+                if uis:IsKeyDown(Enum.KeyCode.Space) then y = 1 end
+                if uis:IsKeyDown(Enum.KeyCode.LeftControl) then y = -1 end
+                
+                local cf = camera.CFrame
+                local moveDir = cf:VectorToWorldSpace(Vector3.new(x, y, z))
+                if moveDir.Magnitude > 0 then
+                    moveDir = moveDir.Unit
+                end
+                
+                bv.Velocity = moveDir * flySpeed
+                bg.CFrame = cf
+            end)
+        else
+            if genv.IndraHubFlyConnection then
+                genv.IndraHubFlyConnection:Disconnect()
+                genv.IndraHubFlyConnection = nil
+            end
+            if root and root:FindFirstChild("IndraFlyVelocity") then
+                root.IndraFlyVelocity:Destroy()
+            end
+            if root and root:FindFirstChild("IndraFlyGyro") then
+                root.IndraFlyGyro:Destroy()
+            end
+            if hum then
+                hum.PlatformStand = false
+            end
+        end
+    end
+})
+
+Tabs.Teleport:Slider({
+    Title = "Fly Speed",
+    Desc = "Speed of flying",
+    Value = {
+        Min = 10,
+        Max = 200,
+        Default = flySpeed
+    },
+    Callback = function(val)
+        flySpeed = val
+        saveConfig()
+    end
+})
+
+Tabs.Teleport:Slider({
+    Title = "Walk Speed",
+    Desc = "Change your walk speed (16 is default)",
+    Value = {
+        Min = 16,
+        Max = 200,
+        Default = currentWalkSpeed
+    },
+    Callback = function(val)
+        currentWalkSpeed = val
+        saveConfig()
+        local char = player.Character
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        if hum then hum.WalkSpeed = val end
+    end
+})
+
+---------------------------------------------------------------------
+-- CONFIG TAB
+---------------------------------------------------------------------
+Tabs.Config:Section({ Title = "Save / Load Config", Icon = "save" })
+
+Tabs.Config:Button({
+    Title = "Save Config",
+    Desc = "Manually save all current settings to file",
+    Callback = function()
+        saveConfig()
+        WindUI:Notify({Title="Config Saved", Content="Settings saved to " .. CONFIG_FILE, Icon="save", Duration=3})
+    end
+})
+
+Tabs.Config:Button({
+    Title = "Load Config",
+    Desc = "Reload settings from saved file (re-execute to apply to UI)",
+    Callback = function()
+        loadConfig()
+        WindUI:Notify({Title="Config Loaded", Content="Settings loaded! Re-run script to fully apply.", Icon="refresh-cw", Duration=4})
+    end
+})
+
+Tabs.Config:Button({
+    Title = "Reset Config",
+    Desc = "Delete saved config and restore all defaults",
+    Callback = function()
+        pcall(function()
+            if isfile and isfile(CONFIG_FILE) then
+                delfile(CONFIG_FILE)
+            end
+        end)
+        ignoredRarities         = {}
+        targetBossesEnabled     = true
+        autoModeAll             = false
+        autoModeCustom          = false
+        autoCatchEnabled        = false
+        autoCatchMinStrength    = 0
+        autoCatchRarities       = {}
+        autoCatchMapScanEnabled = false
+        autoCatchMapScanDelay   = 2
+        currentMinStrength      = 3000
+        collectCashDelay        = 30
+        flySpeed                = 60
+        weatherNotifEnabled     = false
+        customPetNotifEnabled   = false
+        autoCollectCashEnabled  = false
+        autoSellPetEnabled      = false
+        autoSellPetRarities     = {}
+        autoSellPetDelay        = 5
+        autoBuyFoodEnabled      = false
+        autoBuyMerchantEnabled  = false
+        autoBuyLassoEnabled     = false
+        autoBuyPaintEnabled     = false
+        autoFishEnabled         = false
+        autoBuyBaitEnabled      = false
+        selectedFishingBait     = "Sardine Bait"
+        selectedFishingSpot     = "Lost Docks"
+        autoFishDelay           = 2
+        autoFishFinishDelay     = 3
+        fishingBusy             = false
+        autoBuyFoodAmount       = 1
+        autoLoadUW              = false
+        autoTeleportNewArea     = false
+        autoTeleportNewAreaDelay = 0.2
+        WindUI:Notify({Title="Config Reset", Content="All settings reset to default. Re-run script to apply.", Icon="rotate-ccw", Duration=4})
+        autoUWDelay = 60
+        autoBreedEnabled = false
+        breedPenNumber = "auto"
+        breedDelay = 65
+    end
+})
+
+---------------------------------------------------------------------
+-- SETTINGS TAB (Notifiers, UI)
+---------------------------------------------------------------------
+Tabs.Settings:Section({ Title = "Notifications", Icon = "bell" })
+
+Tabs.Settings:Toggle({
+    Title = "Custom Pet Notifier",
+    Desc = "Alerts you when a pet above Custom Min Strength spawns",
+    Value = customPetNotifEnabled,
+    Callback = function(val)
+        customPetNotifEnabled = val
+        if val then sendOSNotification("Pet Notifier", "Alerting for pets >= " .. tostring(currentMinStrength)) end
+    end
+})
+
+Tabs.Settings:Toggle({
+    Title = "Rare Weather Notifier",
+    Desc = "Alerts you when specific active weathers occur",
+    Value = weatherNotifEnabled,
+    Callback = function(val)
+        weatherNotifEnabled = val
+    end
+})
+
+Tabs.Settings:Dropdown({
+    Title = "Target Weathers",
+    Desc = "Which weathers trigger the notification",
+    Values = weatherList,
+    Value = (function()
+        local list = {}
+        for wId, val in pairs(TargetWeathers) do
+            if val and weatherDisplayNames[wId] then
+                table.insert(list, weatherDisplayNames[wId])
+            end
+        end
+        return list
+    end)(),
+    Multi = true,
+    AllowNone = true,
+    Callback = function(selections)
+        for wId, dName in pairs(weatherDisplayNames) do
+            TargetWeathers[wId] = table.find(selections, dName) ~= nil
+        end
+        saveConfig()
+    end
+})
+
+Tabs.Settings:Section({ Title = "UI Theme", Icon = "palette" })
+
+local Themes = {"Dark", "Light", "Gray", "Blue", "Green", "Purple"}
+local currentThemeIndex = table.find(Themes, currentThemeMode) or 1
+
+Tabs.Settings:Button({
+    Title = "Cycle Interface Theme",
+    Desc = "Change script menu colors",
+    Callback = function()
+        currentThemeIndex = currentThemeIndex + 1
+        if currentThemeIndex > #Themes then currentThemeIndex = 1 end
+        local tName = Themes[currentThemeIndex]
+        currentThemeMode = tName
+        WindUI:SetTheme(tName)
+        saveConfig()
+        WindUI:Notify({Title="Theme Changed", Content="Switched to " .. tName, Icon="palette", Duration=2})
+    end
+})
+
+
+---------------------------------------------------------------------
+-- BACKGROUND MAIN LOOPS
+---------------------------------------------------------------------
+-- Auto breed logic
+task.spawn(function()
+    while genv.IndraHubSession == currentSession do
+        task.wait(1)
+        if autoBreedEnabled then
+            pcall(function()
+                local success, result = doBreedRequest()
+                if success then
+                    WindUI:Notify({Title="Auto Breed", Content="Breed sent! Result: " .. tostring(result), Icon="heart", Duration=3})
+                end
+            end)
+            -- Wait the configured delay before next breed attempt
+            local waited = 0
+            while waited < breedDelay and genv.IndraHubSession == currentSession do
+                task.wait(1)
+                waited = waited + 1
+                if not autoBreedEnabled then break end
+            end
+        end
+    end
+end)
+
+-- Auto buy food logic
+task.spawn(function()
+    while genv.IndraHubSession == currentSession do
+        task.wait(1)
+        if autoBuyFoodEnabled and next(autoBuyFoodItems) then
+            pcall(function()
+                local buyRemote = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_knit@1.7.0"):WaitForChild("knit"):WaitForChild("Services"):WaitForChild("FoodService"):WaitForChild("RE"):WaitForChild("BuyFood")
+                
+                for itemName, _ in pairs(autoBuyFoodItems) do
+                    buyRemote:FireServer(itemName, autoBuyFoodAmount)
+                    task.wait(0.2) -- small delay between different food purchases
+                end
+            end)
+        end
+    end
+end)
+
+-- Auto teleport custom area logic
+task.spawn(function()
+    while genv.IndraHubSession == currentSession do
+        task.wait(autoTeleportNewAreaDelay)
+        if autoTeleportNewArea then
+            pcall(function()
+                local char = player.Character
+                local root = char and char:FindFirstChild("HumanoidRootPart")
+                if root then
+                    root.CFrame = customLocation
+                end
+            end)
+        end
+    end
+end)
+
+-- Auto buy merchant logic
+task.spawn(function()
+    while genv.IndraHubSession == currentSession do
+        task.wait(2.5)
+        if autoBuyMerchantEnabled then
+            pcall(function()
+                local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+                if remotes then
+                    local buyMerchant = remotes:FindFirstChild("BuyMerchant")
+                    if buyMerchant then
+                        for item, _ in pairs(autoBuyMerchantItems) do
+                            for slot = 1, 6 do
+                                local slotKey = item .. "_" .. tostring(slot)
+                                -- Only attempt to buy if we haven't maxed out attempts for this slot
+                                if not purchasedMerchantSlots[slotKey] or purchasedMerchantSlots[slotKey] < 3 then
+                                    buyMerchant:FireServer(slot, item)
+                                    purchasedMerchantSlots[slotKey] = (purchasedMerchantSlots[slotKey] or 0) + 1
+                                    task.wait(0.1)
+                                end
+                            end
+                        end
+                    end
+                end
+                
+                -- Clear tracker periodically (e.g. every 30 mins) assuming merchant despawns
+                -- Handled separately or by toggling off and on
+            end)
+        end
+    end
+end)
+
+-- Auto buy lasso logic
+task.spawn(function()
+    while genv.IndraHubSession == currentSession do
+        task.wait(3)
+        if autoBuyLassoEnabled and next(autoBuyLassoItems) then
+            pcall(function()
+                local buyLasso = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_knit@1.7.0"):WaitForChild("knit"):WaitForChild("Services"):WaitForChild("LassoService"):WaitForChild("RE"):WaitForChild("BuyLasso")
+                for lassoName, _ in pairs(autoBuyLassoItems) do
+                    if not purchasedLassos[lassoName] then
+                        buyLasso:FireServer(lassoName)
+                        purchasedLassos[lassoName] = true
+                        task.wait(0.3)
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+local function clickGuiButton(button)
+    if not button or not button:IsA("GuiButton") or not button.Visible then return false end
+    if firesignal then
+        pcall(function() firesignal(button.MouseButton1Click) end)
+        return true
+    end
+
+    local pos = button.AbsolutePosition + (button.AbsoluteSize / 2)
+    local vim = game:GetService("VirtualInputManager")
+    vim:SendMouseButtonEvent(pos.X, pos.Y, 0, true, game, 1)
+    task.wait(0.05)
+    vim:SendMouseButtonEvent(pos.X, pos.Y, 0, false, game, 1)
+    return true
+end
+
+-- Auto buy paint logic
+task.spawn(function()
+    while genv.IndraHubSession == currentSession do
+        task.wait(3)
+        if autoBuyPaintEnabled and next(autoBuyPaintItems) then
+            pcall(function()
+                local pg = player:FindFirstChild("PlayerGui")
+                local paintShop = pg and pg:FindFirstChild("PaintShop")
+                local scroll = paintShop and paintShop:FindFirstChild("ScrollingFrame", true)
+                if not scroll then return end
+
+                for paintName, _ in pairs(autoBuyPaintItems) do
+                    if not purchasedPaints[paintName] then
+                        local itemFrame = scroll:FindFirstChild(paintName)
+                        local buyButton = itemFrame and itemFrame:FindFirstChild("BuyButton", true)
+                        local button = buyButton and buyButton:FindFirstChild("Button", true)
+                        if button and clickGuiButton(button) then
+                            purchasedPaints[paintName] = true
+                            task.wait(0.4)
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+-- Fishing finish bypass listener
+task.spawn(function()
+    local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+    local fishingInfo = Remotes:FindFirstChild("FishingInfoSend")
+    local endFishing = Remotes:FindFirstChild("EndFIshing")
+    if fishingInfo and endFishing then
+        fishingInfo.OnClientEvent:Connect(function(info, value, fishName)
+            if genv.IndraHubSession ~= currentSession or not autoFishEnabled then return end
+            task.spawn(function()
+                local delayTime = tonumber(value) or autoFishFinishDelay
+                task.wait(math.max(1, delayTime))
+                pcall(function() endFishing:FireServer() end)
+                task.wait(0.8)
+                fishingBusy = false
+                if fishName then
+                    pcall(function()
+                        WindUI:Notify({Title="Auto Fish", Content="Caught/ended: " .. tostring(fishName), Icon="fish", Duration=2})
+                    end)
+                end
+            end)
+        end)
+    end
+end)
+
+-- Auto buy bait logic
+task.spawn(function()
+    while genv.IndraHubSession == currentSession do
+        task.wait(3)
+        if autoBuyBaitEnabled then
+            pcall(function()
+                local buyBait = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("buyBait")
+                for _, bait in ipairs(getSelectedFishingBaitList()) do
+                    buyBait:FireServer(bait)
+                    task.wait(0.1)
+                end
+            end)
+        end
+    end
+end)
+
+-- Auto fish logic
+task.spawn(function()
+    while genv.IndraHubSession == currentSession do
+        task.wait(math.max(1, autoFishDelay))
+        if autoFishEnabled and not fishingBusy then
+            fishingBusy = true
+            local ok = pcall(function()
+                local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+                local useBait = Remotes:FindFirstChild("UseBait")
+                local retrieveData = Remotes:FindFirstChild("retrieveData")
+                local startFishing = Remotes:FindFirstChild("StartFishing")
+
+                local bait = getNextFishingBait()
+                if useBait and bait then
+                    useBait:FireServer(bait)
+                end
+                if retrieveData then
+                    pcall(function() retrieveData:InvokeServer() end)
+                end
+                task.wait(0.2)
+                if startFishing then
+                    startFishing:FireServer(getFishingSpot())
+                else
+                    fishingBusy = false
+                end
+            end)
+            if not ok then fishingBusy = false end
+
+            task.delay(math.max(8, autoFishFinishDelay + 5), function()
+                if genv.IndraHubSession == currentSession and autoFishEnabled and fishingBusy then
+                    pcall(function()
+                        ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("EndFIshing"):FireServer()
+                    end)
+                    fishingBusy = false
+                end
+            end)
+        end
+    end
+end)
+
+-- Main logic loop for teleports and notis
+task.spawn(function()
+    local lastUnderwaterTP = 0
+    local savedPosition = nil
+    local returning = false
+    local lastWeather = nil
+    local notifiedPets = {}
+
+    while genv.IndraHubSession == currentSession do
+        task.wait(0.5)
+
+        -- WEATHER NOTIFICATION LOGIC
+        if weatherNotifEnabled then
+            pcall(function()
+                local Knit = require(ReplicatedStorage.Packages.knit)
+                local WeatherCtrl = Knit.GetController("WeatherController")
+                local current = nil
+                
+                if WeatherCtrl then current = WeatherCtrl.CurrentWeather end
+                if not current then current = workspace:GetAttribute("Weather") end
+
+                if current and current ~= lastWeather then
+                    lastWeather = current
+                    if TargetWeathers[current] then
+                        local prettyName = weatherDisplayNames[current] or current
+                        sendOSNotification("Pet Catchers - Rare Weather!", prettyName .. " has started in the game!")
+                    end
+                end
+            end)
+        end
+
+        -- CUSTOM PET NOTIFIER LOGIC
+        if customPetNotifEnabled then
+            pcall(function()
+                for _, obj in pairs(CollectionService:GetTagged("Roaming")) do
+                    local s = obj:GetAttribute("Strength")
+                    local o = obj:GetAttribute("OwnerId")
+                    local r = obj:GetAttribute("Rarity")
+                    
+                    if s and s >= currentMinStrength and (not o or o == 0) then
+                        if not targetBossesEnabled and r == "Boss" then continue end
+                        
+                        if not notifiedPets[obj] then
+                            notifiedPets[obj] = true
+                            local petName = obj:GetAttribute("Name") or "A rare pet"
+                            sendOSNotification("Strong Pet Found!", petName .. " spawned with " .. tostring(s) .. " strength!")
+                        end
+                    end
+                end
+                
+                for obj, _ in pairs(notifiedPets) do
+                    if not obj:IsDescendantOf(workspace) then
+                        notifiedPets[obj] = nil
+                    end
+                end
+            end)
+        end
+
+        local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+        if not root then continue end
+
+        if autoCatchEnabled and not returning then
+            local pet = findCatchPet()
+            if pet then
+                pcall(function()
+                    root.CFrame = pet:GetPivot() + Vector3.new(0, 5, 0)
+                end)
+                task.wait()
+                attemptCatchPet(pet)
+            else
+                scanNextCatchMapArea(root)
+            end
+        end
+
+        if autoCatchEnabled then
+            continue
+        end
+
+        if isPlayerBusy() then continue end
+
+        if autoLoadUW and not returning then
+            if os.clock() - lastUnderwaterTP >= autoUWDelay then
+                lastUnderwaterTP = os.clock()
+                savedPosition = root.CFrame
+                root.CFrame = underwater
+                returning = true
+
+                task.delay(3, function()
+                    local r = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                    if r and savedPosition then r.CFrame = savedPosition end
+                    returning = false
+                end)
+            end
+        end
+
+        if autoModeCustom and not returning then
+            local pet = findStrongestPetCustom(currentMinStrength)
+            if pet then root.CFrame = pet:GetPivot() + Vector3.new(0,5,0) end
+        elseif autoModeAll and not returning then
+            local pet = findStrongestPetAny()
+            if pet then root.CFrame = pet:GetPivot() + Vector3.new(0,5,0) end
+        end
+    end
+end)
+
+-- UI is fully loaded, enable auto-saving
+isLoaded = true
