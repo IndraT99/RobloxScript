@@ -40,14 +40,15 @@ local lastEnemyScan = 0
 local enemyScanInterval = 1.25
 local maxPotatoQueue = 2500
 
-local skillKeys = { "Z", "X", "C", "V" }
-local skillPriority = { "V", "C", "Z", "X" }
-local skillSlots = { Z = 1, X = 2, C = 3, V = 4 }
+local skillKeys = { "Z", "X", "C", "V", "R" }
+local skillPriority = { "R", "V", "C", "Z", "X" }
+local skillSlots = { Z = 1, X = 2, C = 3, V = 4, R = 5 }
 local skillKeyCodes = {
     Z = Enum.KeyCode.Z,
     X = Enum.KeyCode.X,
     C = Enum.KeyCode.C,
     V = Enum.KeyCode.V,
+    R = Enum.KeyCode.R,
 }
 
 local enemyNames = {
