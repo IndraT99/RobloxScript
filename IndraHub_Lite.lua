@@ -71,6 +71,7 @@ local enemyNames = {
     "[Lv.15000] Space Invader",
     "[Nightmare] Mad Dog",
     "[Nightmare]Headless Knight",
+    "[Lv.15000] Charon",
     "[Lv.???]Dummy",
     "[Lv.???] Gelaros",
 }
