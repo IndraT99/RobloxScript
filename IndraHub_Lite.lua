@@ -72,6 +72,9 @@ local enemyNames = {
     "[Nightmare] Mad Dog",
     "[Nightmare]Headless Knight",
     "[Lv.15000] Charon",
+    "Valstrax[Common]",
+    "Valstrax[Hard]",
+    "Valstrax[Nightmare]",
     "[Lv.???]Dummy",
     "[Lv.???] Gelaros",
 }
