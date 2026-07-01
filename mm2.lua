@@ -17,11 +17,17 @@ collectSound.Volume = 1
 collectSound.Parent = player:WaitForChild("PlayerGui")
 
 local visitedPositions = {}
+local highlights = {}
 local isActive = false
 local flySpeed = 15
 local collected = 0
 local startTime = 0
 local antiAFK = false
+local espEnabled = false
+local espMurderer = true
+local espSheriff = true
+local espInnocent = false
+local espSelf = false
 local sessionId = tostring(os.clock()) .. "_" .. tostring(math.random(1000, 9999))
 
 env.IndraHubMM2Running = true
@@ -80,9 +86,90 @@ Window:EditOpenButton({ Title = "IndraHub", Icon = "gem", Draggable = true })
 
 local Tabs = {
     Farm = Window:Tab({ Title = "Farm", Icon = "coins" }),
+    ESP = Window:Tab({ Title = "ESP", Icon = "eye" }),
     Stats = Window:Tab({ Title = "Stats", Icon = "chart-line" }),
     Settings = Window:Tab({ Title = "Settings", Icon = "settings" }),
 }
+
+local function removeHighlight(targetPlayer)
+    if highlights[targetPlayer] then
+        highlights[targetPlayer]:Destroy()
+        highlights[targetPlayer] = nil
+    end
+end
+
+local function clearESP()
+    for targetPlayer in pairs(highlights) do
+        removeHighlight(targetPlayer)
+    end
+end
+
+local function createHighlight(targetPlayer, color)
+    local char = targetPlayer.Character
+    if not char then return end
+
+    local highlight = highlights[targetPlayer]
+    if not highlight or highlight.Parent ~= char then
+        removeHighlight(targetPlayer)
+        highlight = Instance.new("Highlight")
+        highlight.Name = "IndraHubMM2ESP"
+        highlight.FillTransparency = 0.35
+        highlight.OutlineTransparency = 0
+        highlight.Parent = char
+        highlights[targetPlayer] = highlight
+    end
+
+    highlight.FillColor = color
+    highlight.OutlineColor = color
+end
+
+local function playerHasTool(targetPlayer, names)
+    local function scan(container)
+        if not container then return false end
+        for _, tool in ipairs(container:GetChildren()) do
+            if tool:IsA("Tool") then
+                local name = tool.Name:lower()
+                for _, token in ipairs(names) do
+                    if name:find(token, 1, true) then return true end
+                end
+            end
+        end
+        return false
+    end
+
+    return scan(targetPlayer:FindFirstChild("Backpack")) or scan(targetPlayer.Character)
+end
+
+local function getRole(targetPlayer)
+    if not targetPlayer.Character then return nil end
+    if playerHasTool(targetPlayer, { "knife", "murderer" }) then return "Murderer" end
+    if playerHasTool(targetPlayer, { "gun", "revolver", "sheriff" }) then return "Sheriff" end
+    return "Innocent"
+end
+
+local function updateESP()
+    if not espEnabled then
+        clearESP()
+        return
+    end
+
+    for _, targetPlayer in ipairs(Players:GetPlayers()) do
+        if targetPlayer == player and not espSelf then
+            removeHighlight(targetPlayer)
+        else
+            local role = getRole(targetPlayer)
+            if role == "Murderer" and espMurderer then
+                createHighlight(targetPlayer, Color3.fromRGB(255, 55, 55))
+            elseif role == "Sheriff" and espSheriff then
+                createHighlight(targetPlayer, Color3.fromRGB(55, 135, 255))
+            elseif role == "Innocent" and espInnocent then
+                createHighlight(targetPlayer, Color3.fromRGB(55, 255, 120))
+            else
+                removeHighlight(targetPlayer)
+            end
+        end
+    end
+end
 
 local function resetStats()
     collected = 0
@@ -111,6 +198,22 @@ end
 
 player.CharacterAdded:Connect(setCharacter)
 
+Players.PlayerRemoving:Connect(removeHighlight)
+
+for _, targetPlayer in ipairs(Players:GetPlayers()) do
+    targetPlayer.CharacterAdded:Connect(function()
+        task.wait(0.5)
+        updateESP()
+    end)
+end
+
+Players.PlayerAdded:Connect(function(targetPlayer)
+    targetPlayer.CharacterAdded:Connect(function()
+        task.wait(0.5)
+        updateESP()
+    end)
+end)
+
 player.Idled:Connect(function()
     if not antiAFK then return end
     pcall(function()
@@ -128,6 +231,8 @@ RunService.Stepped:Connect(function()
         end
     end
 end)
+
+RunService.RenderStepped:Connect(updateESP)
 
 local function flyTo(pos, speed)
     if not rootPart then return end
@@ -198,6 +303,53 @@ Tabs.Farm:Slider({
     end,
 })
 
+Tabs.ESP:Toggle({
+    Title = "ESP Enabled",
+    Desc = "Highlights players by detected MM2 role.",
+    Value = false,
+    Callback = function(value)
+        espEnabled = value
+        if not value then clearESP() end
+        notify("ESP", value and "ON" or "OFF", "eye")
+    end,
+})
+
+Tabs.ESP:Toggle({
+    Title = "Murderer ESP",
+    Desc = "Red highlight for knife holder.",
+    Value = espMurderer,
+    Callback = function(value)
+        espMurderer = value
+    end,
+})
+
+Tabs.ESP:Toggle({
+    Title = "Sheriff ESP",
+    Desc = "Blue highlight for gun holder.",
+    Value = espSheriff,
+    Callback = function(value)
+        espSheriff = value
+    end,
+})
+
+Tabs.ESP:Toggle({
+    Title = "Innocent ESP",
+    Desc = "Green highlight for players without knife/gun.",
+    Value = espInnocent,
+    Callback = function(value)
+        espInnocent = value
+    end,
+})
+
+Tabs.ESP:Toggle({
+    Title = "Self ESP",
+    Desc = "Allow highlighting your own character.",
+    Value = espSelf,
+    Callback = function(value)
+        espSelf = value
+    end,
+})
+
 Tabs.Settings:Toggle({
     Title = "Anti-AFK",
     Desc = "Uses VirtualUser on idle.",
@@ -230,6 +382,7 @@ Tabs.Settings:Button({
     Desc = "Stop this IndraHub MM2 session.",
     Callback = function()
         isActive = false
+        clearESP()
         env.IndraHubMM2Running = false
         if env.IndraHubMM2Window then pcall(function() env.IndraHubMM2Window:Destroy() end) end
         notify("IndraHub MM2", "Unloaded", "trash")
