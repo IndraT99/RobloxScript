@@ -24,6 +24,18 @@ local Connections = {}
 local ESPObjects = {}
 local XRayParts = {}
 local IsRunning = true
+local env = getgenv and getgenv() or _G
+
+env.IndraHubHideAndSeekRunning = true
+env.IndraHubHideAndSeekLastHeartbeat = os.clock()
+env.IndraHubHideAndSeekError = nil
+
+task.spawn(function()
+    while env.IndraHubHideAndSeekRunning and IsRunning do
+        env.IndraHubHideAndSeekLastHeartbeat = os.clock()
+        task.wait(2)
+    end
+end)
 
 local function SafeCall(func, ...)
     local success, result = pcall(func, ...)
@@ -202,7 +214,6 @@ local function UpdateSpeed(value)
 end
 
 local function SetupGUI()
-    local env = getgenv and getgenv() or _G
     if env.IndraHubHideNSeekWindow then
         pcall(function() env.IndraHubHideNSeekWindow:Destroy() end)
     end
