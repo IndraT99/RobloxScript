@@ -6,6 +6,18 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local LocalPlayer = Players.LocalPlayer
 local HUB_NAME = "IndraHub"
+local env = getgenv and getgenv() or _G
+
+env.IndraHubSpeedKeyRunning = true
+env.IndraHubSpeedKeyLastHeartbeat = os.clock()
+env.IndraHubSpeedKeyError = nil
+
+task.spawn(function()
+    while env.IndraHubSpeedKeyRunning do
+        env.IndraHubSpeedKeyLastHeartbeat = os.clock()
+        task.wait(2)
+    end
+end)
 
 -- godmode (bypasses client traps/npc)
 local oldNewIndex
