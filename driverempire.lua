@@ -1,5 +1,16 @@
 local env = getgenv and getgenv() or _G
 
+env.IndraHubDriverEmpireRunning = true
+env.IndraHubDriverEmpireLastHeartbeat = os.clock()
+env.IndraHubDriverEmpireError = nil
+
+task.spawn(function()
+    while env.IndraHubDriverEmpireRunning do
+        env.IndraHubDriverEmpireLastHeartbeat = os.clock()
+        task.wait(2)
+    end
+end)
+
 local function loadRemoteSource(url, cacheName)
     local canRead = type(readfile) == "function"
     if canRead then
