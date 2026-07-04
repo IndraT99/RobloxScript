@@ -4,6 +4,18 @@ local version = "1.252"
 local HUB_NAME = "IndraHub Rivals"
 local CONFIG_FOLDER = "IndraHub_Rivals"
 local CONFIG_FILE = CONFIG_FOLDER .. "/config.json"
+local env = getgenv and getgenv() or _G
+
+env.IndraHubRivalsRunning = true
+env.IndraHubRivalsLastHeartbeat = os.clock()
+env.IndraHubRivalsError = nil
+
+task.spawn(function()
+    while env.IndraHubRivalsRunning do
+        env.IndraHubRivalsLastHeartbeat = os.clock()
+        task.wait(2)
+    end
+end)
 
 local function loadWindUI()
     local source = game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua")
