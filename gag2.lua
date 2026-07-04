@@ -3,6 +3,18 @@ local R_S = game:GetService("ReplicatedStorage")
 local R_UN = game:GetService("RunService")
 local L_P = P_S.LocalPlayer
 
+local env = getgenv and getgenv() or _G
+env.IndraHubGardenRunning = true
+env.IndraHubGardenLastHeartbeat = os.clock()
+env.IndraHubGardenError = nil
+
+task.spawn(function()
+    while env.IndraHubGardenRunning do
+        env.IndraHubGardenLastHeartbeat = os.clock()
+        task.wait(2)
+    end
+end)
+
 local W_UI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 local GUI_Win = W_UI:CreateWindow({
