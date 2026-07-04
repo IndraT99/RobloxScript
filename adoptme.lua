@@ -1,3 +1,16 @@
+local env = getgenv and getgenv() or _G
+
+env.IndraHubAdoptMeRunning = true
+env.IndraHubAdoptMeLastHeartbeat = os.clock()
+env.IndraHubAdoptMeError = nil
+
+task.spawn(function()
+    while env.IndraHubAdoptMeRunning do
+        env.IndraHubAdoptMeLastHeartbeat = os.clock()
+        task.wait(2)
+    end
+end)
+
 task.spawn(function()
     local fsys = require(game.ReplicatedStorage:WaitForChild("Fsys"))
     local load = fsys.load
