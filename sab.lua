@@ -12,6 +12,18 @@ local Lighting = game:GetService("Lighting")
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
+local env = getgenv and getgenv() or _G
+
+env.IndraHubSABRunning = true
+env.IndraHubSABLastHeartbeat = os.clock()
+env.IndraHubSABError = nil
+
+task.spawn(function()
+    while env.IndraHubSABRunning do
+        env.IndraHubSABLastHeartbeat = os.clock()
+        task.wait(2)
+    end
+end)
 
 local State = {
     speedEnabled = false,
