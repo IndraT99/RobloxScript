@@ -5,6 +5,19 @@
 
 repeat task.wait() until game:IsLoaded()
 
+local env = getgenv and getgenv() or _G
+
+env.IndraHubPVBRunning = true
+env.IndraHubPVBLastHeartbeat = os.clock()
+env.IndraHubPVBError = nil
+
+task.spawn(function()
+    while env.IndraHubPVBRunning do
+        env.IndraHubPVBLastHeartbeat = os.clock()
+        task.wait(2)
+    end
+end)
+
 if setfpscap then
     setfpscap(1000000)
 else
