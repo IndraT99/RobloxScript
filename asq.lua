@@ -4,18 +4,29 @@ end
 local env = getgenv and getgenv() or _G
 local sessionId = tostring(os.clock()) .. "_" .. tostring(math.random(1000, 9999))
 
-env.IndraHubAnimeSquadronRunning = true
-env.IndraHubAnimeSquadronSession = sessionId
-env.IndraHubAnimeSquadronLastHeartbeat = os.clock()
-env.IndraHubAnimeSquadronError = nil
+local function setGlobal(key, value)
+    rawset(_G, key, value)
+    if env ~= _G then env[key] = value end
+end
+
+local function getGlobal(key)
+    local value = rawget(_G, key)
+    if value ~= nil then return value end
+    return env[key]
+end
+
+setGlobal("IndraHubAnimeSquadronRunning", true)
+setGlobal("IndraHubAnimeSquadronSession", sessionId)
+setGlobal("IndraHubAnimeSquadronLastHeartbeat", os.clock())
+setGlobal("IndraHubAnimeSquadronError", nil)
 
 local function running()
-    return env.IndraHubAnimeSquadronRunning and env.IndraHubAnimeSquadronSession == sessionId
+    return getGlobal("IndraHubAnimeSquadronRunning") and getGlobal("IndraHubAnimeSquadronSession") == sessionId
 end
 
 task.spawn(function()
     while running() do
-        env.IndraHubAnimeSquadronLastHeartbeat = os.clock()
+        setGlobal("IndraHubAnimeSquadronLastHeartbeat", os.clock())
         task.wait(2)
     end
 end)
@@ -1080,4 +1091,3 @@ local function createMobileToggle()
     end)
 end
 createMobileToggle()
-
