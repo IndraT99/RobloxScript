@@ -10,18 +10,29 @@ local Breakables = Things and Things:WaitForChild("Breakables", 10)
 local env = getgenv and getgenv() or _G
 local sessionId = tostring(os.clock()) .. "_" .. tostring(math.random(1000, 9999))
 
-env.IndraHubPetSimRunning = true
-env.IndraHubPetSimSession = sessionId
-env.IndraHubPetSimLastHeartbeat = os.clock()
-env.IndraHubPetSimError = nil
+local function setGlobal(key, value)
+    rawset(_G, key, value)
+    if env ~= _G then env[key] = value end
+end
+
+local function getGlobal(key)
+    local value = rawget(_G, key)
+    if value ~= nil then return value end
+    return env[key]
+end
+
+setGlobal("IndraHubPetSimRunning", true)
+setGlobal("IndraHubPetSimSession", sessionId)
+setGlobal("IndraHubPetSimLastHeartbeat", os.clock())
+setGlobal("IndraHubPetSimError", nil)
 
 local function running()
-    return env.IndraHubPetSimRunning and env.IndraHubPetSimSession == sessionId
+    return getGlobal("IndraHubPetSimRunning") and getGlobal("IndraHubPetSimSession") == sessionId
 end
 
 task.spawn(function()
     while running() do
-        env.IndraHubPetSimLastHeartbeat = os.clock()
+        setGlobal("IndraHubPetSimLastHeartbeat", os.clock())
         task.wait(2)
     end
 end)
