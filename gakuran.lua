@@ -5,6 +5,15 @@ local Workspace = game:GetService("Workspace")
 local player = Players.LocalPlayer
 local shared = getgenv and getgenv() or _G
 
+local function setShared(key, value)
+    rawset(_G, key, value)
+    if shared ~= _G then shared[key] = value end
+end
+
+setShared("IndraHubReconRunning", true)
+setShared("IndraHubReconError", nil)
+setShared("IndraHubReconLastHeartbeat", os.clock())
+
 local settings = {
     monitorVitals = true,
     monitorNetwork = false,
@@ -326,6 +335,9 @@ sweepWorld()
 
 local cadence = {energy = 0, sweep = 0, range = 0, runtime = 0, frames = 0}
 RunService.Heartbeat:Connect(function(dt)
+    setShared("IndraHubReconRunning", true)
+    setShared("IndraHubReconLastHeartbeat", os.clock())
+
     cadence.frames = cadence.frames + 1
 
     cadence.runtime = cadence.runtime + dt
