@@ -1,12 +1,23 @@
 local env = getgenv and getgenv() or _G
 
-env.IndraHubDriverEmpireRunning = true
-env.IndraHubDriverEmpireLastHeartbeat = os.clock()
-env.IndraHubDriverEmpireError = nil
+local function setGlobal(key, value)
+    rawset(_G, key, value)
+    if env ~= _G then env[key] = value end
+end
+
+local function getGlobal(key)
+    local value = rawget(_G, key)
+    if value ~= nil then return value end
+    return env[key]
+end
+
+setGlobal("IndraHubDriverEmpireRunning", true)
+setGlobal("IndraHubDriverEmpireLastHeartbeat", os.clock())
+setGlobal("IndraHubDriverEmpireError", nil)
 
 task.spawn(function()
-    while env.IndraHubDriverEmpireRunning do
-        env.IndraHubDriverEmpireLastHeartbeat = os.clock()
+    while getGlobal("IndraHubDriverEmpireRunning") do
+        setGlobal("IndraHubDriverEmpireLastHeartbeat", os.clock())
         task.wait(2)
     end
 end)
