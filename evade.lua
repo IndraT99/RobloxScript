@@ -1,14 +1,25 @@
 -- [IndraHub] Evade Script - WindUI Edition
 local env = getgenv and getgenv() or _G
-env.IndraExecId = game:GetService("HttpService"):GenerateGUID(false)
-local CurrentExecId = env.IndraExecId
-env.IndraHubEvadeRunning = true
-env.IndraHubEvadeLastHeartbeat = os.clock()
-env.IndraHubEvadeError = nil
+local function setGlobal(key, value)
+    rawset(_G, key, value)
+    if env ~= _G then env[key] = value end
+end
+
+local function getGlobal(key)
+    local value = rawget(_G, key)
+    if value ~= nil then return value end
+    return env[key]
+end
+
+setGlobal("IndraExecId", game:GetService("HttpService"):GenerateGUID(false))
+local CurrentExecId = getGlobal("IndraExecId")
+setGlobal("IndraHubEvadeRunning", true)
+setGlobal("IndraHubEvadeLastHeartbeat", os.clock())
+setGlobal("IndraHubEvadeError", nil)
 
 task.spawn(function()
-    while env.IndraHubEvadeRunning and env.IndraExecId == CurrentExecId do
-        env.IndraHubEvadeLastHeartbeat = os.clock()
+    while getGlobal("IndraHubEvadeRunning") and getGlobal("IndraExecId") == CurrentExecId do
+        setGlobal("IndraHubEvadeLastHeartbeat", os.clock())
         task.wait(2)
     end
 end)
