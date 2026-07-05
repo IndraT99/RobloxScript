@@ -1,12 +1,23 @@
 local env = getgenv and getgenv() or _G
 
-env.IndraHubAdoptMeRunning = true
-env.IndraHubAdoptMeLastHeartbeat = os.clock()
-env.IndraHubAdoptMeError = nil
+local function setGlobal(key, value)
+    rawset(_G, key, value)
+    if env ~= _G then env[key] = value end
+end
+
+local function getGlobal(key)
+    local value = rawget(_G, key)
+    if value ~= nil then return value end
+    return env[key]
+end
+
+setGlobal("IndraHubAdoptMeRunning", true)
+setGlobal("IndraHubAdoptMeLastHeartbeat", os.clock())
+setGlobal("IndraHubAdoptMeError", nil)
 
 task.spawn(function()
-    while env.IndraHubAdoptMeRunning do
-        env.IndraHubAdoptMeLastHeartbeat = os.clock()
+    while getGlobal("IndraHubAdoptMeRunning") do
+        setGlobal("IndraHubAdoptMeLastHeartbeat", os.clock())
         task.wait(2)
     end
 end)
