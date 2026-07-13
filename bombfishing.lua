@@ -23,7 +23,15 @@ local function setGlobal(path, value)
 end
 
 -- Initialize Supervisor State for this specific script
+if getGlobal("IndraHubBombFishing.Running") then return end
 setGlobal("IndraHubBombFishing.Running", true)
+
+task.spawn(function()
+    while task.wait(2) do
+        if not getGlobal("IndraHubBombFishing.Running") then break end
+        setGlobal("IndraHubBombFishing.LastHeartbeat", os.time())
+    end
+end)
 setGlobal("IndraHubBombFishing.AutoBomb", false)
 setGlobal("IndraHubBombFishing.AutoSell", false)
 setGlobal("IndraHubBombFishing.AutoRebirth", false)
