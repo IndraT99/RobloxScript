@@ -1,26 +1,19 @@
-local CONFIG = {
+local IndraSettings = {
 	TweenSpeed = 95,
-	PosterCooldown = 2.3,
-	ClickRadius = 10,
-	ClickBurst = 36,
+	TargetCooldown = 2.3,
+	InteractRadius = 10,
+	InteractBurst = 36,
 	ClickInterval = 0.018,
-	MissionTimeout = 1.15,
-	CancelTimeout = 0.8,
+	JobTimeout = 1.15,
+	AbortTimeout = 0.8,
 	MaxRerolls = 60,
+	AntiAFK = true,
+	PosterESP = false,
 	BoardName = "Corkboard",
 	PostersName = "Posters",
 	TargetWords = {"poster"},
 }
 
-local POSTER_POSITIONS = {
-	Vector3.new(-1694.8, 95.1, -174.4),
-	Vector3.new(-1681.3, 95.1, -247.4),
-	Vector3.new(-1612.8, 94.1, -255.3),
-	Vector3.new(-1617.8, 94.1, -219.3),
-	Vector3.new(-1615.8, 94.1, -209.1),
-	Vector3.new(-1612.6, 93.5, -187.8),
-	Vector3.new(-1612.8, 94.1, -173.3),
-}
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -29,37 +22,75 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 local GlobalEnvironment = typeof(getgenv) == "function" and getgenv() or _G
 
-if typeof(GlobalEnvironment.UniversePosterFarmCleanup) == "function" then
-	pcall(GlobalEnvironment.UniversePosterFarmCleanup)
+-- [INDRAHUB CORE MODULES]
+local VirtualUser = game:GetService("VirtualUser")
+LocalPlayer.Idled:Connect(function()
+	if IndraSettings.AntiAFK then
+		VirtualUser:CaptureController()
+		VirtualUser:ClickButton2(Vector2.new())
+	end
+end)
+
+local function updateESP()
+	pcall(function()
+		local espFolder = game.CoreGui:FindFirstChild("IndraESP_Kenomega")
+		if not espFolder then
+			espFolder = Instance.new("Folder")
+			espFolder.Name = "IndraESP_Kenomega"
+			espFolder.Parent = game.CoreGui
+		end
+		espFolder:ClearAllChildren()
+		if not IndraSettings.PosterESP then return end
+		
+		for i, loc in ipairs(TARGET_LOCATIONS) do
+			local p = Instance.new("Part")
+			p.Size = Vector3.new(1, 1, 1)
+			p.Position = loc
+			p.Anchored = true
+			p.CanCollide = false
+			p.Transparency = 1
+			p.Parent = espFolder
+			local hl = Instance.new("Highlight")
+			hl.Adornee = p
+			hl.FillColor = Color3.new(1, 0.2, 0.2)
+			hl.OutlineColor = Color3.new(1, 0, 0)
+			hl.Parent = espFolder
+		end
+	end)
 end
 
-local runtime = {
+
+if typeof(GlobalEnvironment.IndraFarmCleanup) == "function" then
+	pcall(GlobalEnvironment.IndraFarmCleanup)
+end
+
+local IndraState = {
 	Alive = true,
 	Enabled = false,
-	CurrentTween = nil,
-	Generation = 0,
-	CollisionStates = {},
+	ActiveMovement = nil,
+	ExecutionCycle = 0,
+	CollisionCache = {},
 	Connections = {},
 	Respawning = false,
-	ForceMissionRetake = false,
-	MissionRetakeRequested = false,
+	ForceJobRefresh = false,
+	JobRefreshPending = false,
 }
 
-local mission = {
+local JobData = {
 	Active = false,
 	Description = "",
 	Remaining = nil,
 	Revision = 0,
 }
 
-local function clearMissionState()
-	mission.Revision = mission.Revision + 1
-	mission.Active = false
-	mission.Description = ""
-	mission.Remaining = nil
+local function resetJobData()
+	JobData.Revision = JobData.Revision + 1
+	JobData.Active = false
+	JobData.Description = ""
+	JobData.Remaining = nil
 end
 
-local function character()
+local function getIndraChar()
 	local model = LocalPlayer.Character
 	if not model then return nil end
 	local humanoid = model:FindFirstChildOfClass("Humanoid")
@@ -69,28 +100,28 @@ local function character()
 end
 
 local function restoreCollisions()
-	for part, canCollide in pairs(runtime.CollisionStates) do
+	for part, canCollide in pairs(IndraState.CollisionCache) do
 		if part and part.Parent then part.CanCollide = canCollide end
 	end
-	table.clear(runtime.CollisionStates)
+	table.clear(IndraState.CollisionCache)
 end
 
-local function enforceNoclip()
-	if not runtime.Enabled or not runtime.CurrentTween then
-		if next(runtime.CollisionStates) then restoreCollisions() end
+local function IndraGhostMode()
+	if not IndraState.Enabled or not IndraState.ActiveMovement then
+		if next(IndraState.CollisionCache) then restoreCollisions() end
 		return
 	end
 	local model = LocalPlayer.Character
 	if not model then return end
 	for _, part in ipairs(model:GetDescendants()) do
 		if part:IsA("BasePart") then
-			if runtime.CollisionStates[part] == nil then runtime.CollisionStates[part] = part.CanCollide end
+			if IndraState.CollisionCache[part] == nil then IndraState.CollisionCache[part] = part.CanCollide end
 			part.CanCollide = false
 		end
 	end
 end
 
-table.insert(runtime.Connections, RunService.Stepped:Connect(enforceNoclip))
+table.insert(IndraState.Connections, RunService.Stepped:Connect(IndraGhostMode))
 
 local function lowercase(value)
 	return string.lower(tostring(value or ""))
@@ -113,21 +144,21 @@ end
 local function updateMission(...)
 	local count = select("#", ...)
 	local args = {...}
-	if runtime.Respawning then
-		clearMissionState()
+	if IndraState.Respawning then
+		resetJobData()
 		return
 	end
-	if runtime.ForceMissionRetake and not runtime.MissionRetakeRequested then
-		clearMissionState()
+	if IndraState.ForceJobRefresh and not IndraState.JobRefreshPending then
+		resetJobData()
 		return
 	end
 	if count == 0 or args[1] == nil then
-		clearMissionState()
+		resetJobData()
 		return
 	end
-	if runtime.ForceMissionRetake then
-		runtime.ForceMissionRetake = false
-		runtime.MissionRetakeRequested = false
+	if IndraState.ForceJobRefresh then
+		IndraState.ForceJobRefresh = false
+		IndraState.JobRefreshPending = false
 	end
 	local description
 	if typeof(args[1]) == "Instance" then
@@ -135,10 +166,10 @@ local function updateMission(...)
 	else
 		description = tostring(args[1])
 	end
-	mission.Revision = mission.Revision + 1
-	mission.Active = description ~= ""
-	mission.Description = description
-	mission.Remaining = remainingFrom(description)
+	JobData.Revision = JobData.Revision + 1
+	JobData.Active = description ~= ""
+	JobData.Description = description
+	JobData.Remaining = remainingFrom(description)
 end
 
 local function missionRemote()
@@ -150,12 +181,12 @@ end
 
 local activeMissionRemote = missionRemote()
 if activeMissionRemote then
-	table.insert(runtime.Connections, activeMissionRemote.OnClientEvent:Connect(updateMission))
+	table.insert(IndraState.Connections, activeMissionRemote.OnClientEvent:Connect(updateMission))
 end
 
-local function isPosterMission()
-	if runtime.Respawning or runtime.ForceMissionRetake then return false end
-	return mission.Active and containsAny(mission.Description, CONFIG.TargetWords)
+local function IsBountyActive()
+	if IndraState.Respawning or IndraState.ForceJobRefresh then return false end
+	return JobData.Active and containsAny(JobData.Description, IndraSettings.TargetWords)
 end
 
 local function fireMissionClose(button)
@@ -195,7 +226,7 @@ local function fireDetector(detector)
 end
 
 local function findBoard()
-	local container = workspace:FindFirstChild(CONFIG.BoardName)
+	local container = workspace:FindFirstChild(IndraSettings.BoardName)
 	if not container then return nil, nil end
 	local board = container:FindFirstChild("Board")
 	local part = board and board:FindFirstChild("Color this to paint the board")
@@ -211,30 +242,30 @@ local function findBoard()
 end
 
 local function stopMovement()
-	local tween = runtime.CurrentTween
-	runtime.CurrentTween = nil
+	local tween = IndraState.ActiveMovement
+	IndraState.ActiveMovement = nil
 	if tween then pcall(function() tween:Cancel() end) end
 end
 
-local function moveTo(position, generation)
-	local _, _, root = character()
+local function NavigateToTarget(position, generation)
+	local _, _, root = getIndraChar()
 	if not root then return false end
 	local distance = (position - root.Position).Magnitude
 	if distance <= 1 then return true end
-	local duration = math.max(0.03, distance / CONFIG.TweenSpeed)
+	local duration = math.max(0.03, distance / IndraSettings.TweenSpeed)
 	local target = CFrame.new(position) * root.CFrame.Rotation
 	local tween = TweenService:Create(root, TweenInfo.new(duration, Enum.EasingStyle.Linear), {CFrame = target})
-	runtime.CurrentTween = tween
+	IndraState.ActiveMovement = tween
 	tween:Play()
 	while tween.PlaybackState == Enum.PlaybackState.Playing do
-		if not runtime.Enabled or generation ~= runtime.Generation then
+		if not IndraState.Enabled or generation ~= IndraState.ExecutionCycle then
 			tween:Cancel()
-			if runtime.CurrentTween == tween then runtime.CurrentTween = nil end
+			if IndraState.ActiveMovement == tween then IndraState.ActiveMovement = nil end
 			return false
 		end
 		RunService.Heartbeat:Wait()
 	end
-	if runtime.CurrentTween == tween then runtime.CurrentTween = nil end
+	if IndraState.ActiveMovement == tween then IndraState.ActiveMovement = nil end
 	restoreCollisions()
 	return tween.PlaybackState == Enum.PlaybackState.Completed
 end
@@ -242,54 +273,54 @@ end
 local function waitForChange(revision, timeout, generation, predicate)
 	local deadline = os.clock() + timeout
 	repeat
-		if not runtime.Enabled or generation ~= runtime.Generation then return false end
+		if not IndraState.Enabled or generation ~= IndraState.ExecutionCycle then return false end
 		if predicate and predicate() then return true end
-		if mission.Revision ~= revision and not predicate then return true end
+		if JobData.Revision ~= revision and not predicate then return true end
 		RunService.Heartbeat:Wait()
 	until os.clock() >= deadline
-	return predicate and predicate() or mission.Revision ~= revision
+	return predicate and predicate() or JobData.Revision ~= revision
 end
 
-local function acquirePosterMission(generation)
-	if isPosterMission() then return true end
+local function SnatchBounty(generation)
+	if IsBountyActive() then return true end
 	local detector, board = findBoard()
 	if not detector then
 		return false
 	end
 	local boardPosition = board and board.Position + board.CFrame.LookVector * 4
-	if boardPosition and not moveTo(boardPosition, generation) then return false end
-	for attempt = 1, CONFIG.MaxRerolls do
-		if not runtime.Enabled or generation ~= runtime.Generation then return false end
-		if isPosterMission() then
+	if boardPosition and not NavigateToTarget(boardPosition, generation) then return false end
+	for attempt = 1, IndraSettings.MaxRerolls do
+		if not IndraState.Enabled or generation ~= IndraState.ExecutionCycle then return false end
+		if IsBountyActive() then
 			return true
 		end
-		local previousDescription = mission.Description
-		if mission.Active and not containsAny(previousDescription, CONFIG.TargetWords) then
+		local previousDescription = JobData.Description
+		if JobData.Active and not containsAny(previousDescription, IndraSettings.TargetWords) then
 			for _ = 1, 3 do
-				local revision = mission.Revision
+				local revision = JobData.Revision
 				if not cancelMission() then break end
-				waitForChange(revision, CONFIG.CancelTimeout, generation, function()
-						return not mission.Active
+				waitForChange(revision, IndraSettings.AbortTimeout, generation, function()
+						return not JobData.Active
 				end)
-				if not mission.Active then break end
+				if not JobData.Active then break end
 			end
-			if mission.Active then
+			if JobData.Active then
 				return false
 			end
 		end
-		if not runtime.Enabled or generation ~= runtime.Generation then return false end
-		local revision = mission.Revision
-		if runtime.ForceMissionRetake then runtime.MissionRetakeRequested = true end
+		if not IndraState.Enabled or generation ~= IndraState.ExecutionCycle then return false end
+		local revision = JobData.Revision
+		if IndraState.ForceJobRefresh then IndraState.JobRefreshPending = true end
 		fireDetector(detector)
-		waitForChange(revision, CONFIG.MissionTimeout, generation, function()
-			return mission.Active
+		waitForChange(revision, IndraSettings.JobTimeout, generation, function()
+			return JobData.Active
 		end)
 	end
 	return false
 end
 
-local function orderedPositions(origin)
-	local remaining = table.clone(POSTER_POSITIONS)
+local function SortDistances(origin)
+	local remaining = table.clone(TARGET_LOCATIONS)
 	local result = {}
 	local current = origin
 	while #remaining > 0 do
@@ -309,17 +340,17 @@ local function orderedPositions(origin)
 	return result
 end
 
-local function posterDetectors()
-	local container = workspace:FindFirstChild(CONFIG.PostersName)
+local function ScanTargets()
+	local container = workspace:FindFirstChild(IndraSettings.PostersName)
 	local map = {}
 	if not container then return map end
 	local detectors = {}
 	for _, object in ipairs(container:GetDescendants()) do
 		if object:IsA("ClickDetector") then table.insert(detectors, object) end
 	end
-	for index, position in ipairs(POSTER_POSITIONS) do
+	for index, position in ipairs(TARGET_LOCATIONS) do
 		local best
-		local bestDistance = CONFIG.ClickRadius
+		local bestDistance = IndraSettings.InteractRadius
 		for _, detector in ipairs(detectors) do
 			local part = detector.Parent
 			if part and part:IsA("BasePart") then
@@ -337,8 +368,8 @@ end
 
 local function detectorFor(position, map)
 	local best
-	local bestDistance = CONFIG.ClickRadius
-	for index, knownPosition in ipairs(POSTER_POSITIONS) do
+	local bestDistance = IndraSettings.InteractRadius
+	for index, knownPosition in ipairs(TARGET_LOCATIONS) do
 		local distance = (knownPosition - position).Magnitude
 		if distance <= bestDistance and map[index] then
 			best = map[index]
@@ -348,95 +379,95 @@ local function detectorFor(position, map)
 	return best
 end
 
-local function clickPoster(position, map, generation)
+local function TriggerInteraction(position, map, generation)
 	local detector = detectorFor(position, map)
 	if not detector then
 		return false
 	end
-	local startingRevision = mission.Revision
-	local startingProgress = mission.Remaining
-	for _ = 1, CONFIG.ClickBurst do
-		if not runtime.Enabled or generation ~= runtime.Generation then return false end
-		if not isPosterMission() then return true end
+	local startingRevision = JobData.Revision
+	local startingProgress = JobData.Remaining
+	for _ = 1, IndraSettings.InteractBurst do
+		if not IndraState.Enabled or generation ~= IndraState.ExecutionCycle then return false end
+		if not IsBountyActive() then return true end
 		fireDetector(detector)
-		if mission.Revision ~= startingRevision then
-			if not mission.Active then return true end
-			if startingProgress and mission.Remaining and mission.Remaining < startingProgress then return true end
+		if JobData.Revision ~= startingRevision then
+			if not JobData.Active then return true end
+			if startingProgress and JobData.Remaining and JobData.Remaining < startingProgress then return true end
 		end
-		task.wait(CONFIG.ClickInterval)
+		task.wait(IndraSettings.ClickInterval)
 	end
 	return true
 end
 
 local function cooldown(generation)
-	local deadline = os.clock() + CONFIG.PosterCooldown
+	local deadline = os.clock() + IndraSettings.TargetCooldown
 	while os.clock() < deadline do
-		if not runtime.Enabled or generation ~= runtime.Generation or not isPosterMission() then return false end
+		if not IndraState.Enabled or generation ~= IndraState.ExecutionCycle or not IsBountyActive() then return false end
 		RunService.Heartbeat:Wait()
 	end
 	return true
 end
 
-local function farmMission(generation)
-	local _, _, root = character()
+local function ExecuteBounty(generation)
+	local _, _, root = getIndraChar()
 	if not root then return false end
-	local map = posterDetectors()
-	local order = orderedPositions(root.Position)
+	local map = ScanTargets()
+	local order = SortDistances(root.Position)
 	for index, position in ipairs(order) do
-		if not runtime.Enabled or generation ~= runtime.Generation then return false end
-		if not isPosterMission() then return true end
-		if not moveTo(position, generation) then return false end
-		if not clickPoster(position, map, generation) then return false end
-		if not isPosterMission() then return true end
-		if not cooldown(generation) then return not isPosterMission() end
+		if not IndraState.Enabled or generation ~= IndraState.ExecutionCycle then return false end
+		if not IsBountyActive() then return true end
+		if not NavigateToTarget(position, generation) then return false end
+		if not TriggerInteraction(position, map, generation) then return false end
+		if not IsBountyActive() then return true end
+		if not cooldown(generation) then return not IsBountyActive() end
 	end
 	return true
 end
 
-local function beginRespawnRecovery()
-	if runtime.Respawning then return end
-	runtime.Respawning = true
-	runtime.Enabled = false
-	runtime.Generation = runtime.Generation + 1
-	runtime.ForceMissionRetake = false
-	runtime.MissionRetakeRequested = false
+local function IndraRespawnProtocol()
+	if IndraState.Respawning then return end
+	IndraState.Respawning = true
+	IndraState.Enabled = false
+	IndraState.ExecutionCycle = IndraState.ExecutionCycle + 1
+	IndraState.ForceJobRefresh = false
+	IndraState.JobRefreshPending = false
 	stopMovement()
 	restoreCollisions()
-	clearMissionState()
+	resetJobData()
 end
 
-local function recoverAfterRespawn(model)
-	beginRespawnRecovery()
+local function IndraRecoveryPhase(model)
+	IndraRespawnProtocol()
 	task.spawn(function()
 		local root = model:WaitForChild("HumanoidRootPart", 10)
-		if not root or LocalPlayer.Character ~= model or not runtime.Alive then return end
+		if not root or LocalPlayer.Character ~= model or not IndraState.Alive then return end
 		task.wait(3)
-		if LocalPlayer.Character ~= model or not runtime.Alive then return end
-		clearMissionState()
-		runtime.ForceMissionRetake = true
-		runtime.MissionRetakeRequested = false
-		runtime.Respawning = false
-		runtime.Enabled = true
-		runtime.Generation = runtime.Generation + 1
+		if LocalPlayer.Character ~= model or not IndraState.Alive then return end
+		resetJobData()
+		IndraState.ForceJobRefresh = true
+		IndraState.JobRefreshPending = false
+		IndraState.Respawning = false
+		IndraState.Enabled = true
+		IndraState.ExecutionCycle = IndraState.ExecutionCycle + 1
 	end)
 end
 
-table.insert(runtime.Connections, LocalPlayer.CharacterRemoving:Connect(function()
-	beginRespawnRecovery()
+table.insert(IndraState.Connections, LocalPlayer.CharacterRemoving:Connect(function()
+	IndraRespawnProtocol()
 end))
-table.insert(runtime.Connections, LocalPlayer.CharacterAdded:Connect(recoverAfterRespawn))
+table.insert(IndraState.Connections, LocalPlayer.CharacterAdded:Connect(IndraRecoveryPhase))
 
-local function automation()
-	while runtime.Alive do
-		if runtime.Enabled and not runtime.Respawning then
-			local generation = runtime.Generation
-			local _, _, root = character()
+local function IndraEngineCore()
+	while IndraState.Alive do
+		if IndraState.Enabled and not IndraState.Respawning then
+			local generation = IndraState.ExecutionCycle
+			local _, _, root = getIndraChar()
 			if not root then
-				repeat RunService.Heartbeat:Wait() until not runtime.Enabled or character()
-			elseif not isPosterMission() then
-				acquirePosterMission(generation)
-			elseif generation == runtime.Generation then
-				farmMission(generation)
+				repeat RunService.Heartbeat:Wait() until not IndraState.Enabled or getIndraChar()
+			elseif not IsBountyActive() then
+				SnatchBounty(generation)
+			elseif generation == IndraState.ExecutionCycle then
+				ExecuteBounty(generation)
 			end
 		else
 			RunService.Heartbeat:Wait()
@@ -445,18 +476,28 @@ local function automation()
 	end
 end
 
-GlobalEnvironment.UniversePosterFarmCleanup = function()
-	if not runtime.Alive then return end
-	runtime.Alive = false
-	runtime.Enabled = false
-	runtime.Generation = runtime.Generation + 1
+GlobalEnvironment.IndraFarmCleanup = function()
+	if not IndraState.Alive then return end
+	IndraState.Alive = false
+	IndraState.Enabled = false
+	IndraState.ExecutionCycle = IndraState.ExecutionCycle + 1
 	stopMovement()
 	restoreCollisions()
-	for _, connection in ipairs(runtime.Connections) do
+	for _, connection in ipairs(IndraState.Connections) do
 		pcall(function() connection:Disconnect() end)
 	end
-	runtime.Connections = {}
+	IndraState.Connections = {}
 end
+
+local TARGET_LOCATIONS = {
+	Vector3.new(-1694.8, 95.1, -174.4),
+	Vector3.new(-1681.3, 95.1, -247.4),
+	Vector3.new(-1612.8, 94.1, -255.3),
+	Vector3.new(-1617.8, 94.1, -219.3),
+	Vector3.new(-1615.8, 94.1, -209.1),
+	Vector3.new(-1612.6, 93.5, -187.8),
+	Vector3.new(-1612.8, 94.1, -173.3),
+}
 
 -- ==========================================
 -- INDRAHUB & WINDUI INTEGRATION
@@ -496,8 +537,8 @@ FarmTab:Toggle({
     Title = "Enable Auto Poster",
     Desc = "Automatically accepts and completes poster missions",
     Callback = function(state)
-        runtime.Enabled = state
-        runtime.Generation = runtime.Generation + 1
+        IndraState.Enabled = state
+        IndraState.ExecutionCycle = IndraState.ExecutionCycle + 1
     end,
 })
 
@@ -505,9 +546,42 @@ FarmTab:Button({
     Title = "Force Cleanup & Stop",
     Desc = "Stops the farm and restores collisions instantly",
     Callback = function()
-        if typeof(GlobalEnvironment.UniversePosterFarmCleanup) == "function" then
-            pcall(GlobalEnvironment.UniversePosterFarmCleanup)
+        if typeof(GlobalEnvironment.IndraFarmCleanup) == "function" then
+            pcall(GlobalEnvironment.IndraFarmCleanup)
         end
+    end,
+})
+
+
+FarmTab:Section({ Title = "Advanced Features", TextSize = 16 })
+FarmTab:Toggle({
+    Title = "Anti-AFK",
+    Desc = "Prevents you from disconnecting due to inactivity",
+    Value = IndraSettings.AntiAFK,
+    Callback = function(state)
+        IndraSettings.AntiAFK = state
+    end,
+})
+
+FarmTab:Toggle({
+    Title = "Poster Location ESP",
+    Desc = "Highlights poster locations through walls",
+    Value = IndraSettings.PosterESP,
+    Callback = function(state)
+        IndraSettings.PosterESP = state
+        updateESP()
+    end,
+})
+
+FarmTab:Slider({
+    Title = "Tween Speed",
+    Desc = "Adjusts character movement speed",
+    Step = 1,
+    Value = IndraSettings.TweenSpeed,
+    Max = 200,
+    Min = 50,
+    Callback = function(val)
+        IndraSettings.TweenSpeed = val
     end,
 })
 
@@ -529,5 +603,5 @@ SettingsTab:Button({
 })
 
 Window:SelectTab(1)
-task.spawn(automation)
+task.spawn(IndraEngineCore)
 print("[IndraHub] Auto Poster loaded.")
