@@ -1,15 +1,8 @@
---[[
-    =========================================================
-    INDRAHUB PREMIUM - STORAGE HUNTERS
-    UI Created by Antigravity IDE
-    =========================================================
-]]
-
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 local Window = WindUI:CreateWindow({
     Title = "IndraHub | Storage Hunters",
-    Icon = "rbxassetid://10683767", -- Using an asset id found in the dump
+    Icon = "rbxassetid://10683767",
     Author = "IndraHub Premium",
     Folder = "IndraHub_StorageHunters",
     Size = UDim2.fromOffset(600, 500),
@@ -18,6 +11,16 @@ local Window = WindUI:CreateWindow({
     SideBarWidth = 200,
     HasOutline = true,
 })
+
+-- Supervisor Heartbeat
+task.spawn(function()
+    while task.wait(1) do
+        if getgenv then
+            getgenv().IndraHubStorageHuntersRunning = true
+            getgenv().IndraHubStorageHuntersLastHeartbeat = os.time()
+        end
+    end
+end)
 
 -- ==========================================
 -- 1. SHOP MANAGER TAB
