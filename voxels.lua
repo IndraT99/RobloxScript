@@ -46,10 +46,10 @@ if not okWindUI then
 end
 
 local Window = WindUI:CreateWindow({
-    Title = "IndraHub | Voxel Hub",
+    Title = "IndraHub | Voxels",
     Icon = "shield-alert",
     Author = "EVE909",
-    Folder = "IndraHub_Voxel",
+    Folder = "IndraHub_Voxels",
     Size = UDim2.fromOffset(580, 460),
     Transparent = true,
     Theme = "Dark",
@@ -96,7 +96,7 @@ local function createOrUpdateESP(char)
     if not char or not char:FindFirstChild("HumanoidRootPart") then return end
     if espHighlights[char] then espHighlights[char].Adornee = char return end
     local highlight = Instance.new("Highlight")
-    highlight.Name = "VoxelHubESP"
+    highlight.Name = "IndraHubESP"
     highlight.Adornee = char
     highlight.FillColor = Color3.fromRGB(255, 0, 0)
     highlight.OutlineColor = Color3.fromRGB(255, 80, 80)
@@ -434,7 +434,7 @@ WlTab:Button({
 
 local InfoTab = Window:Tab({ Title = "Info & IndraHub", Icon = "info" })
 InfoTab:Paragraph({
-    Title = "Voxel Hub By EVE909",
+    Title = "IndraHub",
     Desc = "Converted & Powered by IndraHub\nShoutout GamerHox\nDiscord: https://discord.gg/2PPBJsmqr"
 })
 
