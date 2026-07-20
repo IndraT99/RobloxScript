@@ -288,25 +288,106 @@ state.getCurrentStage = function()
     return "Stage 1"
 end
 
-state.uiLibraryState = nil
-if ((63747*(63747+1))%2==0) then
-if not state.uiLibraryState then
-    local value042, value043 = pcall(function()
-        state.uiLibraryState = loadstring(game:HttpGet(
-            "https://cdn.vinzhub.com/scripts/Liblery%20Ui/VALINC%20QUARTZ/1e72163d8c3b5ce2340659f7f67776e3/ff342f0b0e66c7835ba0697c21422a0229a990d57e7c2f6f.lua"
-        ))()
-    end)
-    if not value042 then return end
-end
 
-state.window = state.uiLibraryState.CreateWindow({
-    Title = "VALINC SYNDICATE",
-    Subtitle = "Mine Per Click Free v1.0.0",
-    Logo = "rbxassetid://107101390544126",
-    ToggleKey = Enum.KeyCode.G
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+
+local Window = WindUI:CreateWindow({
+    Title = "IndraHub | Mine Per Click",
+    Icon = "rbxassetid://107101390544126",
+    Author = "IndraHub",
+    Folder = "IndraHub",
+    Size = UDim2.fromOffset(580, 460),
+    Transparent = true,
+    Theme = "Dark",
+    SideBarWidth = 200,
+    HasOutline = true
 })
 
-_G.unknownField.unknownField = state.window.unknownField or state.window.unknownField or state.window
+local function WrapTabOrSection(windObj)
+    local wrapper = {}
+    function wrapper:CreateSection(name)
+        windObj:Section({ Title = name })
+        return wrapper
+    end
+    function wrapper:CreateToggle(name, default, callback)
+        windObj:Toggle({
+            Title = name,
+            Default = default,
+            Callback = callback
+        })
+        return self
+    end
+    function wrapper:CreateDropdown(name, values, default, callback)
+        windObj:Dropdown({
+            Title = name,
+            Values = values,
+            Value = default,
+            Callback = callback
+        })
+        return self
+    end
+    function wrapper:CreateMultiDropdown(name, values, defaults, callback)
+        windObj:Dropdown({
+            Title = name,
+            Values = values,
+            Value = type(defaults) == "table" and defaults[1] or defaults,
+            Callback = callback
+        })
+        return self
+    end
+    function wrapper:CreateSlider(name, min, max, default, isFloat, callback)
+        windObj:Slider({
+            Title = name,
+            Step = isFloat and 0.01 or 1,
+            Min = min,
+            Max = max,
+            Default = default,
+            Callback = callback
+        })
+        return self
+    end
+    function wrapper:CreateButton(name, callback)
+        windObj:Button({
+            Title = name,
+            Callback = callback
+        })
+        return self
+    end
+    function wrapper:CreateLabel(name)
+        windObj:Paragraph({
+            Title = name,
+            Desc = ""
+        })
+        return self
+    end
+    function wrapper:CreateStatusList(name, items)
+        local str = ""
+        for _, item in ipairs(items) do
+            str = str .. item.name .. ": " .. item.value .. "\n"
+        end
+        windObj:Paragraph({
+            Title = name,
+            Desc = str
+        })
+        return self
+    end
+    return wrapper
+end
+
+state.uiLibraryState = {
+    CreateWindow = function(self, options)
+        local wrapper = {}
+        function wrapper:CreateTab(name, icon)
+            local windTab = Window:Tab({ Title = name, Icon = icon or "home" })
+            return WrapTabOrSection(windTab)
+        end
+        return wrapper
+    end
+}
+
+state.window = state.uiLibraryState:CreateWindow()
+_G.unknownField.unknownField = Window
+
 else
   local value044=math.floor(914/914) value044=nil
 end
