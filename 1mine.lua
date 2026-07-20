@@ -288,7 +288,7 @@ state.getCurrentStage = function()
     return "Stage 1"
 end
 
-state.uiLibraryState = _G.unknownField
+state.uiLibraryState = nil
 if ((63747*(63747+1))%2==0) then
 if not state.uiLibraryState then
     local value042, value043 = pcall(function()
