@@ -47,9 +47,21 @@ function MockValincUi.CreateWindow(config)
         local Tab = Window:Tab({ Title = name, Icon = icon or "file" })
         local mockTab = {}
         
+        function mockTab:CreateCategory(catName)
+            Tab:Button({Title = "====== " .. catName .. " ======", Callback = function() end})
+            return {}
+        end
+        
         function mockTab:CreateSection(secName)
             Tab:Button({Title = "--- " .. secName .. " ---", Callback = function() end})
             local mockSection = {}
+            
+            function mockSection:CreateLabel(title)
+                local lbl = Tab:Button({Title = title, Callback = function() end})
+                local mockLabel = {}
+                function mockLabel:SetText(txt) end
+                return mockLabel
+            end
             
             function mockSection:CreateToggle(title, default, callback)
                 Tab:Toggle({Title = title, Default = default, Callback = callback})
@@ -78,13 +90,32 @@ function MockValincUi.CreateWindow(config)
                     currentVal = v
                     if callback then callback(v) end
                 end
-                
                 local drp = Tab:Dropdown({Title = title, Values = values, Value = default, Callback = wrappedCallback})
-                
                 local mockDropdown = {}
                 function mockDropdown:GetValue() return currentVal end
                 function mockDropdown:SetValues(newVals) drp:Refresh(newVals) end
                 return mockDropdown
+            end
+            
+            function mockSection:CreateMultiDropdown(title, values, default, callback)
+                local currentVal = default
+                local wrappedCallback = function(v)
+                    currentVal = v
+                    if callback then callback(v) end
+                end
+                local drp = Tab:Dropdown({Title = title, Values = values, Value = default, Callback = wrappedCallback})
+                local mockDropdown = {}
+                function mockDropdown:GetValue() return currentVal end
+                function mockDropdown:SetValues(newVals) drp:Refresh(newVals) end
+                return mockDropdown
+            end
+            
+            function mockSection:CreateDualButton(title, btn1Text, btn2Text, default, callback)
+                Tab:Button({Title = title .. " [" .. btn1Text .. "]", Callback = function() callback(false) end})
+                Tab:Toggle({Title = title .. " [" .. btn2Text .. "]", Default = default, Callback = function(val) callback(val) end})
+                local mockDual = {}
+                function mockDual:SetTitle(txt) end
+                return mockDual
             end
             
             return mockSection
