@@ -881,7 +881,7 @@ local InfoTab = Window:Tab({ Title = "Info", Icon = "info" })
 -- =============================================================
 -- 1. Main Tab
 -- =============================================================
-MainTab:Button({ Title = "--- Auto Farm ---", Callback = function() end })
+MainTab:Button({ Title = " Auto Farm ", Callback = function() end })
 MainTab:Toggle({
     Title = "Auto Take Item (Loot Ground)",
     Default = false,
@@ -897,7 +897,7 @@ MainTab:Toggle({
     end
 })
 
-MainTab:Button({ Title = "--- Combat ---", Callback = function() end })
+MainTab:Button({ Title = " Combat ", Callback = function() end })
 MainTab:Toggle({
     Title = "Kill Aura (Auto Attack)",
     Default = false,
@@ -909,7 +909,7 @@ MainTab:Toggle({
 -- =============================================================
 -- 2. Visuals Tab
 -- =============================================================
-VisualsTab:Button({ Title = "--- ESP ---", Callback = function() end })
+VisualsTab:Button({ Title = " ESP ", Callback = function() end })
 VisualsTab:Toggle({
     Title = "Loot ESP",
     Default = false,
@@ -953,7 +953,7 @@ VisualsTab:Slider({
     end
 })
 
-VisualsTab:Button({ Title = "--- Environment ---", Callback = function() end })
+VisualsTab:Button({ Title = " Environment ", Callback = function() end })
 VisualsTab:Toggle({
     Title = "Fullbright",
     Default = false,
@@ -968,7 +968,7 @@ VisualsTab:Toggle({
 -- =============================================================
 -- 3. Misc Tab
 -- =============================================================
-MiscTab:Button({ Title = "--- Player Movement ---", Callback = function() end })
+MiscTab:Button({ Title = " Player Movement ", Callback = function() end })
 MiscTab:Toggle({
     Title = "Speed Hack",
     Default = false,
@@ -1035,14 +1035,14 @@ MiscTab:Toggle({
 -- =============================================================
 -- 4. Info Tab
 -- =============================================================
-InfoTab:Button({ Title = "--- About ---", Callback = function() end })
+InfoTab:Button({ Title = " About ", Callback = function() end })
 InfoTab:Button({ Title = "IndraHub - Deadly Delivery", Callback = function() end })
 
-InfoTab:Button({ Title = "--- Project Info ---", Callback = function() end })
+InfoTab:Button({ Title = " Project Info ", Callback = function() end })
 InfoTab:Button({ Title = "Advanced script automation platform", Callback = function() end })
 InfoTab:Button({ Title = "Built for performance, stealth & reliability", Callback = function() end })
 
-InfoTab:Button({ Title = "--- Links ---", Callback = function() end })
+InfoTab:Button({ Title = " Links ", Callback = function() end })
 InfoTab:Button({ Title = "Portal: indrahub.com (coming soon)", Callback = function() end })
 InfoTab:Button({ Title = "Discord: join for updates & support", Callback = function() end })
 
