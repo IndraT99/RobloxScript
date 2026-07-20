@@ -1,6 +1,7 @@
 -- Deobfuscated from 1mineperclick.lua.
 -- Decoder, anti-analysis checks, encrypted string pool, and slot indirection removed.
--- [0] markers remain where original property names were already erased by the input.
+-- Analysis copy: unknownField marks property metadata erased from supplied input.
+-- This file is for reading only; do not execute it as an exact recovered payload.
 
 local state = {}
 
@@ -20,13 +21,13 @@ end
 
 if ((28989*(28989+1))%2==0) then
 else
-  local _IliloiooIlIoIO="26" _IliloiooIlIoIO=_IliloiooIlIoIO:sub(1,0)
+  local value001="26" value001=value001:sub(1,0)
 end
 do
 if (21 - 21) ~= 0 then
-  local _IliloOil = {}
-  _IliloOil[711] = 986
-  _IliloOil = nil
+  local value002 = {}
+  value002[711] = 986
+  value002 = nil
 end
 end
 
@@ -40,11 +41,11 @@ state.localPlayer = state.playersService.LocalPlayer
 state.dataClient = require(state.replicatedStorage:WaitForChild("Client"):WaitForChild("DataClient"))
 state.dataReplica = nil
 task.spawn(function()
-    local _OI01lOi1O0ii1iI, _O1lolIOo1I00IO1 = pcall(function()
-        return state.dataClient[0][0]
+    local value003, value004 = pcall(function()
+        return state.dataClient.unknownField.unknownField
     end)
-    if _OI01lOi1O0ii1iI and _O1lolIOo1I00IO1 then
-        state.dataReplica = _O1lolIOo1I00IO1
+    if value003 and value004 then
+        state.dataReplica = value004
     else
         state.dataReplica = state.dataClient:GetReplica()
     end
@@ -53,37 +54,37 @@ end)
 if ((58639>0)) then
 state.scriptId = tostring(math.random()) .. "_" .. tostring(os.clock())
 
-if _G[0] then
-    _G[0][0] = true
+if _G.unknownField then
+    _G.unknownField.unknownField = true
     pcall(function()
-        if _G[0][0] then
-            _G[0][0]:Destroy()
+        if _G.unknownField.unknownField then
+            _G.unknownField.unknownField:Destroy()
         end
     end)
     pcall(function()
-        if _G[0][0] then
-            for _1OOiilol, _lOooiO1Ili01iIO in ipairs(_G[0][0]) do
-                if _lOooiO1Ili01iIO and _lOooiO1Ili01iIO[0] then
-                    pcall(function() _lOooiO1Ili01iIO:Disconnect() end)
+        if _G.unknownField.unknownField then
+            for value005, value006 in ipairs(_G.unknownField.unknownField) do
+                if value006 and value006.unknownField then
+                    pcall(function() value006:Disconnect() end)
                 end
             end
         end
     end)
     pcall(function()
-        local _0xI1i1O0OoiI = state.localPlayer.Character
-        local _Illl0011Ill = _0xI1i1O0OoiI and _0xI1i1O0OoiI:FindFirstChildOfClass("Humanoid")
-        if _Illl0011Ill then
-            _Illl0011Ill[0] = 16
-            _Illl0011Ill[0] = 50
+        local value007 = state.localPlayer.Character
+        local value008 = value007 and value007:FindFirstChildOfClass("Humanoid")
+        if value008 then
+            value008.unknownField = 16
+            value008.unknownField = 50
         end
     end)
 end
 
 state.connections = {}
 else
-  local _O1loI11ii1I=math.floor(240/240) _O1loI11ii1I=nil
+  local value009=math.floor(240/240) value009=nil
 end
-_G[0] = {
+_G.unknownField = {
     stopThreads = false,
     ScriptId = state.scriptId,
     UI = nil,
@@ -93,19 +94,19 @@ _G[0] = {
 state.stageNames = { "Auto (Highest Unlocked)" }
 state.stagesList = nil
 pcall(function()
-    local _OI0l1i0IiiIloO = state.replicatedStorage:WaitForChild("Databases", (((3)*3)-(((3))*2)))
-    if _OI0l1i0IiiIloO then
-        state.stagesList = require(_OI0l1i0IiiIloO:WaitForChild("StagesList", (((3)*3)-(((3))*2))))
+    local value010 = state.replicatedStorage:WaitForChild("Databases", (((3)*3)-(((3))*2)))
+    if value010 then
+        state.stagesList = require(value010:WaitForChild("StagesList", (((3)*3)-(((3))*2))))
     end
 end)
 
 if type(state.stagesList) == "table" then
-    for _Ill1O1l1 = 1, #state.stagesList do
-        table.insert(state.stageNames, "Stage " .. tostring(_Ill1O1l1))
+    for value011 = 1, #state.stagesList do
+        table.insert(state.stageNames, "Stage " .. tostring(value011))
     end
 else
-    for _lO0lolOlIo = 1, (((100)*1)-0) do
-        table.insert(state.stageNames, "Stage " .. tostring(_lO0lolOlIo))
+    for value012 = 1, (((100)*1)-0) do
+        table.insert(state.stageNames, "Stage " .. tostring(value012))
     end
 end
 
@@ -142,24 +143,24 @@ state.config = {
 }
 
 state.isActive = function()
-    local _lO0OO0iii = _G[0]
-    return _lO0OO0iii and not _lO0OO0iii[0] and _lO0OO0iii[0] == state.scriptId
+    local value013 = _G.unknownField
+    return value013 and not value013.unknownField and value013.unknownField == state.scriptId
 end
 
 state.getHumanoid = function()
-    local _OIIo0lO01I1oo1o = state.localPlayer.Character
-    return _OIIo0lO01I1oo1o and _OIIo0lO01I1oo1o:FindFirstChildOfClass("Humanoid")
+    local value014 = state.localPlayer.Character
+    return value014 and value014:FindFirstChildOfClass("Humanoid")
 end
 
 state.getRootPart = function()
-    local _OIIoOlOi0io0o = state.localPlayer.Character
-    return _OIIoOlOi0io0o and (_OIIoOlOi0io0o:FindFirstChild("HumanoidRootPart") or _OIIoOlOi0io0o.PrimaryPart)
+    local value015 = state.localPlayer.Character
+    return value015 and (value015:FindFirstChild("HumanoidRootPart") or value015.PrimaryPart)
 end
 do
 if (187 * 0) > 0 then
-  local _OI1i010oIliI0l = ""
-  local _IlOOoiOlIoII0 = _OI1i010oIliI0l .. "934"
-  _IlOOoiOlIoII0 = nil
+  local value016 = ""
+  local value017 = value016 .. "934"
+  value017 = nil
 end
 end
 
@@ -178,144 +179,144 @@ state.rarityRanks = {
 
 if ((73+158)>=0) then
 state.numberSuffixes = { "", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc", "Ud", "Dd", "Td", "Qad", "Qid", "Sxd", "Spd", "Ocd", "Nod", "Vg" }
-state.formatNumber = function(_O10ooo011101l)
-    if not _O10ooo011101l or _O10ooo011101l < (((1000)*5)-(((1000))*4)) then
-        return tostring(math.floor(_O10ooo011101l or 0))
+state.formatNumber = function(value018)
+    if not value018 or value018 < (((1000)*5)-(((1000))*4)) then
+        return tostring(math.floor(value018 or 0))
     end
-    local _O1l1l0oOOI0i = math.floor(math.log(_O10ooo011101l, 1000))
-    local _0xiIII11OIO1iIl = math.min(_O1l1l0oOOI0i, #state.numberSuffixes - 1)
-    local _lOliolOIiIli = _O10ooo011101l / ((((1000)*5)-(((1000))*4)) ^ _0xiIII11OIO1iIl)
-    local _lII11II0oOIoOI = state.numberSuffixes[1]
+    local value019 = math.floor(math.log(value018, 1000))
+    local value020 = math.min(value019, #state.numberSuffixes - 1)
+    local value021 = value018 / ((((1000)*5)-(((1000))*4)) ^ value020)
+    local value022 = state.numberSuffixes[1]
     
-    if _lOliolOIiIli >= (((100)*1)-0) then
-        return string.format("%.0f%s", _lOliolOIiIli, _lII11II0oOIoOI)
-    elseif _lOliolOIiIli >= 10 then
-        return string.format("%.1f%s", _lOliolOIiIli, _lII11II0oOIoOI)
+    if value021 >= (((100)*1)-0) then
+        return string.format("%.0f%s", value021, value022)
+    elseif value021 >= 10 then
+        return string.format("%.1f%s", value021, value022)
     else
-        return string.format("%.2f%s", _lOliolOIiIli, _lII11II0oOIoOI)
+        return string.format("%.2f%s", value021, value022)
     end
 end
 
 state.getBackpackAmount = function()
-    local _0xl1ii0oOollI1i = nil
+    local value023 = nil
     pcall(function()
-        _0xl1ii0oOollI1i = state.localPlayer.Character:FindFirstChild("Main")
-            and state.localPlayer.Character[0]:FindFirstChild("Wins")
-            and state.localPlayer.Character[0][0]:FindFirstChild("BackpackFrame")
-            and state.localPlayer.Character[0][0][0]:FindFirstChild("Amount")
+        value023 = state.localPlayer.Character:FindFirstChild("Main")
+            and state.localPlayer.Character.unknownField:FindFirstChild("Wins")
+            and state.localPlayer.Character.unknownField.unknownField:FindFirstChild("BackpackFrame")
+            and state.localPlayer.Character.unknownField.unknownField.unknownField:FindFirstChild("Amount")
     end)
     
-    local _1Ol1IloOo110 = nil
-    if _0xl1ii0oOollI1i then
+    local value024 = nil
+    if value023 then
         pcall(function()
-            local _OIllliOo0 = _0xl1ii0oOollI1i[0]
-            _1Ol1IloOo110 = tonumber(_OIllliOo0:match("^(%d+)%s*/"))
+            local value025 = value023.unknownField
+            value024 = tonumber(value025:match("^(%d+)%s*/"))
         end)
     end
-    if _1Ol1IloOo110 then
-        return _1Ol1IloOo110
+    if value024 then
+        return value024
     end
     
-    local _0xloOOiI0o0 = 0
-    if state.dataReplica and state.dataReplica[0] and state.dataReplica[0][0] then
-        for _lIiIio0i, _OIOII0olI in pairs(state.dataReplica[0][0]) do
-            _0xloOOiI0o0 = _0xloOOiI0o0 + 1
+    local value026 = 0
+    if state.dataReplica and state.dataReplica.unknownField and state.dataReplica.unknownField.unknownField then
+        for value027, value028 in pairs(state.dataReplica.unknownField.unknownField) do
+            value026 = value026 + 1
         end
     end
-    return _0xloOOiI0o0
+    return value026
 end
 else
-  local _1O1IIiOOi={} _1O1IIiOOi[1]="953" _1O1IIiOOi=nil
+  local value029={} value029[1]="953" value029=nil
 end
 
 state.getBackpackMax = function()
-    local _0xOiO010 = nil
+    local value030 = nil
     pcall(function()
-        _0xOiO010 = state.localPlayer.Character:FindFirstChild("Main")
-            and state.localPlayer.Character[0]:FindFirstChild("Wins")
-            and state.localPlayer.Character[0][0]:FindFirstChild("BackpackFrame")
-            and state.localPlayer.Character[0][0][0]:FindFirstChild("Amount")
+        value030 = state.localPlayer.Character:FindFirstChild("Main")
+            and state.localPlayer.Character.unknownField:FindFirstChild("Wins")
+            and state.localPlayer.Character.unknownField.unknownField:FindFirstChild("BackpackFrame")
+            and state.localPlayer.Character.unknownField.unknownField.unknownField:FindFirstChild("Amount")
     end)
     
-    local _lIoli1lO = nil
-    if _0xOiO010 then
+    local value031 = nil
+    if value030 then
         pcall(function()
-            local _lIi01iII1l0 = _0xOiO010[0]
-            _lIoli1lO = tonumber(_lIi01iII1l0:match("/%s*(%d+)"))
+            local value032 = value030.unknownField
+            value031 = tonumber(value032:match("/%s*(%d+)"))
         end)
     end
-    if _lIoli1lO then
-        return _lIoli1lO
+    if value031 then
+        return value031
     end
     
-    if state.dataReplica and state.dataReplica[0] then
-        return state.dataReplica[0][0] or 10
+    if state.dataReplica and state.dataReplica.unknownField then
+        return state.dataReplica.unknownField.unknownField or 10
     end
     return 10
 end
 
 state.getCurrentStage = function()
-    local _O1i10i0I = nil
+    local value033 = nil
     pcall(function()
-        _O1i10i0I = require(state.replicatedStorage:WaitForChild("Client"):WaitForChild("StageClient"))
+        value033 = require(state.replicatedStorage:WaitForChild("Client"):WaitForChild("StageClient"))
     end)
-    if _O1i10i0I and _O1i10i0I[0] then
-        return "Stage " .. tostring(_O1i10i0I[0])
+    if value033 and value033.unknownField then
+        return "Stage " .. tostring(value033.unknownField)
     end
     
-    local _lIOOOl0loiiI = workspace:FindFirstChild("Stages")
-    if _lIOOOl0loiiI then
-        local _0x1oi0111OioolO = nil
-        local _lI00I0il1i = math.huge
-        local _0xii0O0I1iI1Ioo = state.getRootPart()
-        if _0xii0O0I1iI1Ioo then
-            for _1OO0iio0i, _OI11I0o1ol0o11 in ipairs(_lIOOOl0loiiI:GetChildren()) do
-                local _0xIOoii1i1 = _OI11I0o1ol0o11:FindFirstChild("Hitbox")
-                if _0xIOoii1i1 then
-                    local _O10IoOo1Ioo = (_0xii0O0I1iI1Ioo.Position - _0xIOoii1i1.Position).Magnitude
-                    if _O10IoOo1Ioo < _lI00I0il1i then
-                        _lI00I0il1i = _O10IoOo1Ioo
-                        _0x1oi0111OioolO = _OI11I0o1ol0o11[0]
+    local value034 = workspace:FindFirstChild("Stages")
+    if value034 then
+        local value035 = nil
+        local value036 = math.huge
+        local value037 = state.getRootPart()
+        if value037 then
+            for value038, value039 in ipairs(value034:GetChildren()) do
+                local value040 = value039:FindFirstChild("Hitbox")
+                if value040 then
+                    local value041 = (value037.Position - value040.Position).Magnitude
+                    if value041 < value036 then
+                        value036 = value041
+                        value035 = value039.unknownField
                     end
                 end
             end
         end
-        if _0x1oi0111OioolO then
-            return _0x1oi0111OioolO
+        if value035 then
+            return value035
         end
     end
     return "Stage 1"
 end
 
-state.uiLibraryState = _G[0]
+state.uiLibraryState = _G.unknownField
 if ((63747*(63747+1))%2==0) then
 if not state.uiLibraryState then
-    local _lO0OoOI0IOi00, _lIo0loIlio1 = pcall(function()
+    local value042, value043 = pcall(function()
         state.uiLibraryState = loadstring(game:HttpGet(
             "https://cdn.vinzhub.com/scripts/Liblery%20Ui/VALINC%20QUARTZ/1e72163d8c3b5ce2340659f7f67776e3/ff342f0b0e66c7835ba0697c21422a0229a990d57e7c2f6f.lua"
         ))()
     end)
-    if not _lO0OoOI0IOi00 then return end
+    if not value042 then return end
 end
 
-state.window = state.uiLibraryState[0]({
+state.window = state.uiLibraryState.CreateWindow({
     Title = "VALINC SYNDICATE",
     Subtitle = "Mine Per Click Free v1.0.0",
     Logo = "rbxassetid://107101390544126",
     ToggleKey = Enum.KeyCode.G
 })
 
-_G[0][0] = state.window[0] or state.window[0] or state.window
+_G.unknownField.unknownField = state.window.unknownField or state.window.unknownField or state.window
 else
-  local _1O0IloOlooiI010=math.floor(914/914) _1O0IloOlooiI010=nil
+  local value044=math.floor(914/914) value044=nil
 end
 
 if ((38406>0)) then
 pcall(function()
-    local _lOooOO1oill = _G[0][0]
-    local _O1Il1i00IIl = _lOooOO1oill:FindFirstChild("TabList", true)
-    local _lOI1l101oi11ioI = _O1Il1i00IIl and _O1Il1i00IIl:FindFirstChildOfClass("UIListLayout")
-    if _lOI1l101oi11ioI then _lOI1l101oi11ioI.SortOrder = Enum.SortOrder.LayoutOrder end
+    local value045 = _G.unknownField.unknownField
+    local value046 = value045:FindFirstChild("TabList", true)
+    local value047 = value046 and value046:FindFirstChildOfClass("UIListLayout")
+    if value047 then value047.SortOrder = Enum.SortOrder.LayoutOrder end
 end)
 
 state.tabs = {
@@ -329,11 +330,11 @@ state.tabs = {
 
 state.autoSection = state.tabs.Automatic:CreateSection("Auto Farming")
 else
-  local _lIlOIIi000lIo0=nil _lIlOIIi000lIo0=212 _lIlOIIi000lIo0=nil
+  local value048=nil value048=212 value048=nil
 end
 
-state.autoSection:CreateToggle("Auto Training", false, function(_OI0IIilOOl)
-    state.config.AutoTraining = _OI0IIilOOl
+state.autoSection:CreateToggle("Auto Training", false, function(value049)
+    state.config.AutoTraining = value049
 end)
 
 state.autoSection:CreateDropdown("Select Ore / Strength", {
@@ -347,51 +348,51 @@ state.autoSection:CreateDropdown("Select Ore / Strength", {
     "Amethyst (Gamepass)",
     "Emerald (Gamepass)",
     "Azurite (Gamepass)"
-}, "Auto (Best Available)", function(_lOO0iioiliO)
-    state.config.SelectedOre = _lOO0iioiliO
+}, "Auto (Best Available)", function(value050)
+    state.config.SelectedOre = value050
 end)
 
-state.autoSection:CreateSlider("Training Speed (Seconds)", 0.01, 1.0, 0.05, false, function(_lIoOl0ii)
-    state.config.SpeedDelay = _lIoOl0ii
+state.autoSection:CreateSlider("Training Speed (Seconds)", 0.01, 1.0, 0.05, false, function(value051)
+    state.config.SpeedDelay = value051
 end)
 
 if ((228+208)>=0) then
-state.autoSection:CreateToggle("Fast Mining (Wall)", false, function(_lO0OolI0oO1Oo)
-    state.config.FastMining = _lO0OolI0oO1Oo
+state.autoSection:CreateToggle("Fast Mining (Wall)", false, function(value052)
+    state.config.FastMining = value052
 end)
 
-state.autoSection:CreateSlider("Mining Speed (Seconds)", 0.001, 1.0, 0.05, false, function(_O1Oilil00loIi)
-    state.config.MiningDelay = _O1Oilil00loIi
+state.autoSection:CreateSlider("Mining Speed (Seconds)", 0.001, 1.0, 0.05, false, function(value053)
+    state.config.MiningDelay = value053
 end)
 
-state.autoMineToggle = state.autoSection:CreateToggle("Auto Mine", false, function(_lOlO01l0o0il)
-    state.config.AutoMine = _lOlO01l0o0il
-    _G[0] = _lOlO01l0o0il
-    if _lOlO01l0o0il then
-        _G[0] = nil
-        _G[0] = state.scriptId
+state.autoMineToggle = state.autoSection:CreateToggle("Auto Mine", false, function(value054)
+    state.config.AutoMine = value054
+    _G.unknownField = value054
+    if value054 then
+        _G.unknownField = nil
+        _G.unknownField = state.scriptId
     end
 end)
 else
-  local _lI0000io0lI0I0I=bit32.bxor(522,522) _lI0000io0lI0I0I=nil
+  local value055=bit32.bxor(522,522) value055=nil
 end
 
-state.autoSection:CreateDropdown("Select Stage", state.stageNames, state.stageNames[1], function(_lIiioIolilio0O1)
-    state.config.SelectedMineStage = _lIiioIolilio0O1
+state.autoSection:CreateDropdown("Select Stage", state.stageNames, state.stageNames[1], function(value056)
+    state.config.SelectedMineStage = value056
 end)
 
 state.sellSection = state.tabs.Automatic:CreateSection("Auto Sell Settings")
 do
 if (1 - 1) ~= 0 then
-  local _OI01IlOO, _OI0oll1ooi, _O1IlIlo0 = nil, nil, nil
-  _OI01IlOO = 869
-  _OI0oll1ooi = _OI01IlOO - _OI01IlOO
-  _O1IlIlo0 = _OI0oll1ooi
+  local value057, value058, value059 = nil, nil, nil
+  value057 = 869
+  value058 = value057 - value057
+  value059 = value058
 end
 end
 
-state.sellSection:CreateToggle("Auto Claim Loot", false, function(_OIlillIIiOil01i)
-    state.config.AutoClaimLoot = _OIlillIIiOil01i
+state.sellSection:CreateToggle("Auto Claim Loot", false, function(value060)
+    state.config.AutoClaimLoot = value060
 end)
 
 if ((58191>0)) then
@@ -402,25 +403,25 @@ state.claimRarityDropdown = state.sellSection:CreateMultiDropdown(
     function() end
 )
 
-state.sellSection:CreateToggle("Auto Sell Loot", false, function(_lOoil00ioO)
-    state.config.AutoSellLoot = _lOoil00ioO
+state.sellSection:CreateToggle("Auto Sell Loot", false, function(value061)
+    state.config.AutoSellLoot = value061
 end)
 
 state.sellRarities = { "All", "Common", "Uncommon & Below", "Rare & Below", "Epic & Below", "Legendary & Below", "Mythic & Below" }
 else
-  local _O1O1liOoiliil=nil _O1O1liOoiliil=213 _O1O1liOoiliil=nil
+  local value062=nil value062=213 value062=nil
 end
-state.sellSection:CreateDropdown("Select Sell Rarity", state.sellRarities, state.sellRarities[1], function(_O1l1OlIIo0l)
-    state.config.AutoSellRarity = _O1l1OlIIo0l
+state.sellSection:CreateDropdown("Select Sell Rarity", state.sellRarities, state.sellRarities[1], function(value063)
+    state.config.AutoSellRarity = value063
 end)
 
 state.sellSection:CreateButton("Teleport to Surface (GotoSurface)", function()
     pcall(function()
-        local _1OI1l1I1IIooI1l = state.replicatedStorage:WaitForChild("Remotes", (((5)-0)))
-        local _0xOIIoio01io = _1OI1l1I1IIooI1l and _1OI1l1I1IIooI1l:WaitForChild("Server", (((5)-0)))
-        local _1Oll0IlO01iO = _0xOIIoio01io and _0xOIIoio01io:WaitForChild("GotoSurface", (((5)-0)))
-        if _1Oll0IlO01iO then
-            _1Oll0IlO01iO:FireServer()
+        local value064 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0)))
+        local value065 = value064 and value064:WaitForChild("Server", (((5)-0)))
+        local value066 = value065 and value065:WaitForChild("GotoSurface", (((5)-0)))
+        if value066 then
+            value066:FireServer()
         end
     end)
 end)
@@ -428,19 +429,19 @@ end)
 state.upgradeSection = state.tabs.Automatic:CreateSection("Auto Upgrades")
 
 if ((19670>0)) then
-state.upgradeSection:CreateToggle("Auto Rebirth", false, function(_OIlI11li)
-    state.config.AutoRebirth = _OIlI11li
+state.upgradeSection:CreateToggle("Auto Rebirth", false, function(value067)
+    state.config.AutoRebirth = value067
 end)
 
-state.upgradeSection:CreateToggle("Auto Upgrade Carry (Slots)", false, function(_1OiOOi1lIO0lI)
-    state.config.AutoUpgradeCarry = _1OiOOi1lIO0lI
+state.upgradeSection:CreateToggle("Auto Upgrade Carry (Slots)", false, function(value068)
+    state.config.AutoUpgradeCarry = value068
 end)
 
-state.upgradeSection:CreateToggle("Auto Upgrade Walkspeed", false, function(_OIlolo00ioi)
-    state.config.AutoUpgradeWalkspeed = _OIlolo00ioi
+state.upgradeSection:CreateToggle("Auto Upgrade Walkspeed", false, function(value069)
+    state.config.AutoUpgradeWalkspeed = value069
 end)
 else
-  local _1OO1OlOllIioOOi={} _1OO1OlOllIioOOi[1]="184" _1OO1OlOllIioOOi=nil
+  local value070={} value070[1]="184" value070=nil
 end
 
 if ((42877-42877)==0) then
@@ -452,40 +453,40 @@ state.upgradeStatus = state.upgradeSection:CreateStatusList("Upgrade Statistics 
 
 state.shopSection = state.tabs.Shop:CreateSection("Manual Shop")
 
-state.pickaxeDropdown = state.shopSection:CreateDropdown("Select Pickaxe", { "-" }, "-", function(_OIil1iliIoi1OO)
-    state.config.SelectedShopPickaxe = _OIil1iliIoi1OO
+state.pickaxeDropdown = state.shopSection:CreateDropdown("Select Pickaxe", { "-" }, "-", function(value071)
+    state.config.SelectedShopPickaxe = value071
 end)
 else
-  local _lOiillO1l1o=nil _lOiillO1l1o=655 _lOiillO1l1o=nil
+  local value072=nil value072=655 value072=nil
 end
 
 state.shopSection:CreateButton("Purchase Selected Pickaxe", function()
-    local _O11OIIOl111 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
+    local value073 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
         and state.replicatedStorage:WaitForChild("Remotes"):WaitForChild("Server") 
         and state.replicatedStorage.Remotes.Server:WaitForChild("PurchasePickaxe", (((5)-0)))
-    if _O11OIIOl111 and state.config.SelectedShopPickaxe then
+    if value073 and state.config.SelectedShopPickaxe then
         pcall(function()
-            local _OIli0lili01oiIo = state.config.SelectedShopPickaxe:match("^(.-)%s*%(%$.-%)$") or state.config.SelectedShopPickaxe
-            if _OIli0lili01oiIo ~= "All Pickaxes Purchased" and _OIli0lili01oiIo ~= "-" then
-                _O11OIIOl111:FireServer(_OIli0lili01oiIo, "Cash")
+            local value074 = state.config.SelectedShopPickaxe:match("^(.-)%s*%(%$.-%)$") or state.config.SelectedShopPickaxe
+            if value074 ~= "All Pickaxes Purchased" and value074 ~= "-" then
+                value073:FireServer(value074, "Cash")
             end
         end)
     end
 end)
 
-state.auraDropdown = state.shopSection:CreateDropdown("Select Aura", { "-" }, "-", function(_Il00Oi0O1II)
-    state.config.SelectedShopAura = _Il00Oi0O1II
+state.auraDropdown = state.shopSection:CreateDropdown("Select Aura", { "-" }, "-", function(value075)
+    state.config.SelectedShopAura = value075
 end)
 
 state.shopSection:CreateButton("Purchase Selected Aura", function()
-    local _lOI1i00Ilii = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
+    local value076 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
         and state.replicatedStorage:WaitForChild("Remotes"):WaitForChild("Server") 
         and state.replicatedStorage.Remotes.Server:WaitForChild("PurchaseAura", (((5)-0)))
-    if _lOI1i00Ilii and state.config.SelectedShopAura then
+    if value076 and state.config.SelectedShopAura then
         pcall(function()
-            local _1O0oOOo1IiOlo = state.config.SelectedShopAura:match("^(.-)%s*%(%$.-%)$") or state.config.SelectedShopAura
-            if _1O0oOOo1IiOlo ~= "All Auras Purchased" and _1O0oOOo1IiOlo ~= "-" then
-                _lOI1i00Ilii:FireServer(_1O0oOOo1IiOlo)
+            local value077 = state.config.SelectedShopAura:match("^(.-)%s*%(%$.-%)$") or state.config.SelectedShopAura
+            if value077 ~= "All Auras Purchased" and value077 ~= "-" then
+                value076:FireServer(value077)
             end
         end)
     end
@@ -493,56 +494,56 @@ end)
 
 state.autoBuySection = state.tabs.Shop:CreateSection("Auto Buy Shop")
 
-state.autoBuySection:CreateToggle("Auto Buy Pickaxes", false, function(_O1lliio1oIOIII1)
-    state.config.AutoBuyPickaxes = _O1lliio1oIOIII1
+state.autoBuySection:CreateToggle("Auto Buy Pickaxes", false, function(value078)
+    state.config.AutoBuyPickaxes = value078
 end)
 
-state.autoBuySection:CreateToggle("Auto Buy Auras", false, function(_0x0lOiO0)
-    state.config.AutoBuyAuras = _0x0lOiO0
+state.autoBuySection:CreateToggle("Auto Buy Auras", false, function(value079)
+    state.config.AutoBuyAuras = value079
 end)
 do
 if (223 - 223) ~= 0 then
-  local _lIo1iIl0I = ""
-  local _OIOIoolI = _lIo1iIl0I .. "611"
-  _OIOIoolI = nil
+  local value080 = ""
+  local value081 = value080 .. "611"
+  value081 = nil
 end
 end
 
 state.physicsSection = state.tabs.Movement:CreateSection("Custom Physics")
 
-state.physicsSection:CreateToggle("Walk Speed Hack", false, function(_1OI10oOoOOO1lO)
-    state.config.SpeedHack = _1OI10oOoOOO1lO
-    if not _1OI10oOoOOO1lO then
-        local _lO0OOioiO00 = state.getHumanoid()
-        if _lO0OOioiO00 then _lO0OOioiO00.WalkSpeed = 16 end
+state.physicsSection:CreateToggle("Walk Speed Hack", false, function(value082)
+    state.config.SpeedHack = value082
+    if not value082 then
+        local value083 = state.getHumanoid()
+        if value083 then value083.WalkSpeed = 16 end
     end
 end)
 
-state.physicsSection:CreateSlider("Walk Speed Value", 16, (((150)*5)-(((150))*4)), 24, false, function(_1OOo1i1ol)
-    state.config.SpeedValue = _1OOo1i1ol
+state.physicsSection:CreateSlider("Walk Speed Value", 16, (((150)*5)-(((150))*4)), 24, false, function(value084)
+    state.config.SpeedValue = value084
 end)
 
-state.physicsSection:CreateToggle("Jump Hack", false, function(_0xliIOollIi1o1)
-    state.config.JumpHack = _0xliIOollIi1o1
-    if not _0xliIOollIi1o1 then
-        local _lOo0o1OOl1 = state.getHumanoid()
-        if _lOo0o1OOl1 then _lOo0o1OOl1.JumpPower = 50 end
+state.physicsSection:CreateToggle("Jump Hack", false, function(value085)
+    state.config.JumpHack = value085
+    if not value085 then
+        local value086 = state.getHumanoid()
+        if value086 then value086.JumpPower = 50 end
     end
 end)
 
-state.physicsSection:CreateSlider("Jump Value", 50, 300, ((((80)+(80))*0+(80))), false, function(_Illlo0iIoII1o1)
-    state.config.JumpValue = _Illlo0iIoII1o1
+state.physicsSection:CreateSlider("Jump Value", 50, 300, ((((80)+(80))*0+(80))), false, function(value087)
+    state.config.JumpValue = value087
 end)
 
-state.physicsSection:CreateToggle("Noclip", false, function(_lIlOi1i10OolI00)
-    state.config.Noclip = _lIlOi1i10OolI00
-    if not _lIlOi1i10OolI00 then
+state.physicsSection:CreateToggle("Noclip", false, function(value088)
+    state.config.Noclip = value088
+    if not value088 then
         pcall(function()
-            local _IlIOo1Ol = state.localPlayer.Character
-            if _IlIOo1Ol then
-                for _OI1oo1ii10I1iII, _O1iIiI00Ioi in ipairs(_IlIOo1Ol:GetDescendants()) do
-                    if _O1iIiI00Ioi:IsA("BasePart") then
-                        _O1iIiI00Ioi.CanCollide = true
+            local value089 = state.localPlayer.Character
+            if value089 then
+                for value090, value091 in ipairs(value089:GetDescendants()) do
+                    if value091:IsA("BasePart") then
+                        value091.CanCollide = true
                     end
                 end
             end
@@ -550,26 +551,26 @@ state.physicsSection:CreateToggle("Noclip", false, function(_lIlOi1i10OolI00)
     end
 end)
 
-state.physicsSection:CreateToggle("Infinite Jump", false, function(_O1IOOIoI)
-    state.config.InfiniteJump = _O1IOOIoI
+state.physicsSection:CreateToggle("Infinite Jump", false, function(value092)
+    state.config.InfiniteJump = value092
 end)
 
 state.teleportSection = state.tabs.Teleport:CreateSection("Instant Teleports")
 
-state.teleportTo = function(_O10iO01o0Il00I)
-    local _1O0loi0i1oi1I = state.getRootPart()
-    if _1O0loi0i1oi1I then
-        _1O0loi0i1oi1I[0] = _O10iO01o0Il00I
+state.teleportTo = function(value093)
+    local value094 = state.getRootPart()
+    if value094 then
+        value094.unknownField = value093
     end
 end
 
 state.teleportSection:CreateButton("Teleport to Lobby Spawn", function()
     pcall(function()
-        local _IlIi0i01 = workspace:FindFirstChild("SpawnLocations")
-        if _IlIi0i01 then
-            local _Illolli01I = _IlIi0i01:GetChildren()
-            if #_Illolli01I > 0 then
-                state.teleportTo(_Illolli01I[0][0] + Vector3.new(0, (((3)*3)-(((3))*2)), 0))
+        local value095 = workspace:FindFirstChild("SpawnLocations")
+        if value095 then
+            local value096 = value095:GetChildren()
+            if #value096 > 0 then
+                state.teleportTo(value096.unknownField.unknownField + Vector3.new(0, (((3)*3)-(((3))*2)), 0))
                 return
             end
         end
@@ -579,11 +580,11 @@ end)
 
 state.teleportSection:CreateButton("Teleport to Surface (GotoSurface)", function()
     pcall(function()
-        local _O1oOOool = state.replicatedStorage:WaitForChild("Remotes", (((5)-0)))
-        local _IlOIIoI11 = _O1oOOool and _O1oOOool:WaitForChild("Server", (((5)-0)))
-        local _O1lil1110lii = _IlOIIoI11 and _IlOIIoI11:WaitForChild("GotoSurface", (((5)-0)))
-        if _O1lil1110lii then
-            _O1lil1110lii:FireServer()
+        local value097 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0)))
+        local value098 = value097 and value097:WaitForChild("Server", (((5)-0)))
+        local value099 = value098 and value098:WaitForChild("GotoSurface", (((5)-0)))
+        if value099 then
+            value099:FireServer()
         end
     end)
 end)
@@ -604,124 +605,124 @@ state.rarityColors = {
     Celestial = Color3.fromRGB((((100)*1)-0), (((240)*11)-(((240))*10)), 255),
 }
 
-state.rarityColor = function(_lIIo0o0o)
-    return state.rarityColors[_lIIo0o0o] or Color3.fromRGB(255, 255, 255)
+state.rarityColor = function(value100)
+    return state.rarityColors[value100] or Color3.fromRGB(255, 255, 255)
 end
 
-state.getItemInfo = function(_0xio100oO)
-    local _O1IiOio10O = _0xio100oO
-    if _O1IiOio10O:IsA("BasePart") and _O1IiOio10O[0] and not _O1IiOio10O[0]:IsA("Folder") and not _O1IiOio10O[0]:IsA("Workspace") then
-        if _O1IiOio10O[0]:FindFirstChild("ItemStats", true) then
-            _O1IiOio10O = _O1IiOio10O[0]
+state.getItemInfo = function(value101)
+    local value102 = value101
+    if value102:IsA("BasePart") and value102.unknownField and not value102.unknownField:IsA("Folder") and not value102.unknownField:IsA("Workspace") then
+        if value102.unknownField:FindFirstChild("ItemStats", true) then
+            value102 = value102.unknownField
         end
     end
 
-    local _lIoiloOIO0oo1 = _O1IiOio10O[0]
-    local _IlllI1olI0Olo0 = "Common"
-    local _O10llOi0 = "$0"
+    local value103 = value102.unknownField
+    local value104 = "Common"
+    local value105 = "$0"
     
-    local _lIOioI1lIii0 = _O1IiOio10O:FindFirstChild("ItemStats", true)
+    local value106 = value102:FindFirstChild("ItemStats", true)
     
-    if _lIOioI1lIii0 then
-        local _OIoOI1OlOii0 = _lIOioI1lIii0:FindFirstChildWhichIsA("BillboardGui") or _lIOioI1lIii0:WaitForChild("BillboardGui", 0.5)
-        if _OIoOI1OlOii0 then
-            local _lOIOl1OiO = _OIoOI1OlOii0:WaitForChild("Rarity", 0.5)
-            if _lOIOl1OiO and _lOIOl1OiO:IsA("TextLabel") then _IlllI1olI0Olo0 = _lOIOl1OiO[0] end
+    if value106 then
+        local value107 = value106:FindFirstChildWhichIsA("BillboardGui") or value106:WaitForChild("BillboardGui", 0.5)
+        if value107 then
+            local value108 = value107:WaitForChild("Rarity", 0.5)
+            if value108 and value108:IsA("TextLabel") then value104 = value108.unknownField end
             
-            local _lO0o0O0IiOiI0 = _OIoOI1OlOii0:WaitForChild("Revenue", 0.5)
-            if _lO0o0O0IiOiI0 and _lO0o0O0IiOiI0:IsA("TextLabel") then _O10llOi0 = _lO0o0O0IiOiI0[0] end
+            local value109 = value107:WaitForChild("Revenue", 0.5)
+            if value109 and value109:IsA("TextLabel") then value105 = value109.unknownField end
             
-            local _lOloIOOO0iOii = _OIoOI1OlOii0:WaitForChild("Name", 0.5)
-            if _lOloIOOO0iOii and _lOloIOOO0iOii:IsA("TextLabel") then _lIoiloOIO0oo1 = _lOloIOOO0iOii[0] end
+            local value110 = value107:WaitForChild("Name", 0.5)
+            if value110 and value110:IsA("TextLabel") then value103 = value110.unknownField end
         end
     end
     
-    return _lIoiloOIO0oo1, _IlllI1olI0Olo0, _O10llOi0
+    return value103, value104, value105
 end
 else
-  local _lOl1Oo10O={} _lOl1Oo10O[1]="996" _lOl1Oo10O=nil
+  local value111={} value111[1]="996" value111=nil
 end
 do
 if (69 - 69) ~= 0 then
-  local _O11O0ll10o = (777 * 347)
-  local _OI10oO010o = _O11O0ll10o / 777
-  _OI10oO010o = nil
+  local value112 = (777 * 347)
+  local value113 = value112 / 777
+  value113 = nil
 end
 end
 
-state.matchesRarity = function(_IlIlIlIOI0O)
+state.matchesRarity = function(value114)
     if not state.config.ESPFilter then return false end
-    local _O111l10Ol0I10I0 = state.config.ESPFilter
-    if _O111l10Ol0I10I0 == "All" then return true end
+    local value115 = state.config.ESPFilter
+    if value115 == "All" then return true end
     
-    local _O1l1IOoIO, _lOI1ll0ioi, _lOOliiioo0 = state.getItemInfo(_IlIlIlIOI0O)
-    return _lOI1ll0ioi:lower() == _O111l10Ol0I10I0:lower()
+    local value116, value117, value118 = state.getItemInfo(value114)
+    return value117:lower() == value115:lower()
 end
 
 state.espObjects = {}
 
-state.createESP = function(_lI0OilOIii0I0lo)
-    if not _lI0OilOIii0I0lo:IsA("Model") and not _lI0OilOIii0I0lo:IsA("BasePart") then return end
-    if state.espObjects[_lI0OilOIii0I0lo] then return end
+state.createESP = function(value119)
+    if not value119:IsA("Model") and not value119:IsA("BasePart") then return end
+    if state.espObjects[value119] then return end
     
-    local _0x0i00loOi0io, _O1i1lOiOll1l, _lOO00iilIolIooO = state.getItemInfo(_lI0OilOIii0I0lo)
-    local _O1ollo0OlOo = state.rarityColor(_O1i1lOiOll1l)
+    local value120, value121, value122 = state.getItemInfo(value119)
+    local value123 = state.rarityColor(value121)
     
-    local _OIlliOOOi1l0l = Instance.new("Highlight")
-    _OIlliOOOi1l0l.FillColor = _O1ollo0OlOo
-    _OIlliOOOi1l0l.FillTransparency = 0.7
-    _OIlliOOOi1l0l.OutlineColor = _O1ollo0OlOo
-    _OIlliOOOi1l0l.OutlineTransparency = 0.2
-    _OIlliOOOi1l0l.Adornee = _lI0OilOIii0I0lo
-    _OIlliOOOi1l0l.Parent = _lI0OilOIii0I0lo
+    local value124 = Instance.new("Highlight")
+    value124.FillColor = value123
+    value124.FillTransparency = 0.7
+    value124.OutlineColor = value123
+    value124.OutlineTransparency = 0.2
+    value124.Adornee = value119
+    value124.Parent = value119
     
-    local _lIiO01li1o00li0 = Instance.new("BillboardGui")
-    _lIiO01li1o00li0.Size = UDim2.new(0, 160, 0, (((30)*13)-(((30))*12)))
-    _lIiO01li1o00li0.AlwaysOnTop = true
-    _lIiO01li1o00li0.MaxDistance = math.huge
-    _lIiO01li1o00li0.StudsOffset = Vector3.new(0, 3.5, 0)
-    _lIiO01li1o00li0.Adornee = _lI0OilOIii0I0lo
+    local value125 = Instance.new("BillboardGui")
+    value125.Size = UDim2.new(0, 160, 0, (((30)*13)-(((30))*12)))
+    value125.AlwaysOnTop = true
+    value125.MaxDistance = math.huge
+    value125.StudsOffset = Vector3.new(0, 3.5, 0)
+    value125.Adornee = value119
     
-    local _1Oooo0OIoO = Instance.new("TextLabel")
-    _1Oooo0OIoO.Size = UDim2.new(1, 0, 1, 0)
-    _1Oooo0OIoO.BackgroundTransparency = 1
-    _1Oooo0OIoO.Text = string.format("%s [%s] - %s", _0x0i00loOi0io, _O1i1lOiOll1l, _lOO00iilIolIooO)
-    _1Oooo0OIoO.TextColor3 = _O1ollo0OlOo
-    _1Oooo0OIoO.TextStrokeTransparency = 0
-    _1Oooo0OIoO.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-    _1Oooo0OIoO.TextSize = ((((12)+(12))*0+(12)))
-    _1Oooo0OIoO.Font = Enum.Font.SourceSansBold
-    _1Oooo0OIoO.Parent = _lIiO01li1o00li0
-    _lIiO01li1o00li0.Parent = _lI0OilOIii0I0lo
+    local value126 = Instance.new("TextLabel")
+    value126.Size = UDim2.new(1, 0, 1, 0)
+    value126.BackgroundTransparency = 1
+    value126.Text = string.format("%s [%s] - %s", value120, value121, value122)
+    value126.TextColor3 = value123
+    value126.TextStrokeTransparency = 0
+    value126.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    value126.TextSize = ((((12)+(12))*0+(12)))
+    value126.Font = Enum.Font.SourceSansBold
+    value126.Parent = value125
+    value125.Parent = value119
     
-    state.espObjects[_lI0OilOIii0I0lo] = { Highlight = _OIlliOOOi1l0l, Billboard = _lIiO01li1o00li0 }
+    state.espObjects[value119] = { Highlight = value124, Billboard = value125 }
 end
 
-state.removeESP = function(_OIoiII0i)
-    local _1OOIo101I1Iiii = state.espObjects[_OIoiII0i]
-    if _1OOIo101I1Iiii then
-        if _1OOIo101I1Iiii.Highlight then pcall(function() _1OOIo101I1Iiii.Billboard:Destroy() end) end
-        if _1OOIo101I1Iiii[0] then pcall(function() _1OOIo101I1Iiii[0]:Destroy() end) end
-        state.espObjects[_OIoiII0i] = nil
+state.removeESP = function(value127)
+    local value128 = state.espObjects[value127]
+    if value128 then
+        if value128.Highlight then pcall(function() value128.Billboard:Destroy() end) end
+        if value128.unknownField then pcall(function() value128.unknownField:Destroy() end) end
+        state.espObjects[value127] = nil
     end
 end
 
 state.refreshESP = function()
-    for _lI0lllll1I, _OIoIi00liiIlio0 in pairs(state.espObjects) do
-        state.removeESP(_lI0lllll1I)
+    for value129, value130 in pairs(state.espObjects) do
+        state.removeESP(value129)
     end
     
     if not state.config.ItemESP then return end
     
-    local _OIo0O1Ili0 = workspace:FindFirstChild("Stages")
-    if _OIo0O1Ili0 then
-        for _1O0oio1il, _0x000oOO0oOOii in ipairs(_OIo0O1Ili0:GetChildren()) do
-            local _lIOlooIiIl = _0x000oOO0oOOii:FindFirstChild("Spawnpoints")
-            if _lIOlooIiIl then
-                for _1O0ioi0lO11li, _1Oll10iol0l in ipairs(_lIOlooIiIl:GetChildren()) do
-                    for _OIOIlIO0iIll01, _OIiloI1OloO0I in ipairs(_1Oll10iol0l:GetChildren()) do
-                        if state.matchesRarity(_OIiloI1OloO0I) then
-                            state.createESP(_OIiloI1OloO0I)
+    local value131 = workspace:FindFirstChild("Stages")
+    if value131 then
+        for value132, value133 in ipairs(value131:GetChildren()) do
+            local value134 = value133:FindFirstChild("Spawnpoints")
+            if value134 then
+                for value135, value136 in ipairs(value134:GetChildren()) do
+                    for value137, value138 in ipairs(value136:GetChildren()) do
+                        if state.matchesRarity(value138) then
+                            state.createESP(value138)
                         end
                     end
                 end
@@ -734,8 +735,8 @@ state.scannedItems = {}
 state.espLabels = {}
 
 state.clearESP = function()
-    for _0x0o0iooiI, _lIl11IO10I1 in ipairs(state.espLabels) do
-        pcall(function() _lIl11IO10I1:Destroy() end)
+    for value139, value140 in ipairs(state.espLabels) do
+        pcall(function() value140:Destroy() end)
     end
     state.espLabels = {}
     state.scannedItems = {}
@@ -743,75 +744,75 @@ end
 
 state.updateESP = function()
     if not state.config.ESPFilter then return end
-    for _O1O0oO0Oii00I11, _0xlOiOol in ipairs(state.scannedItems) do
-        local _1OoO10oillolOil = state.config.ESPFilter
-        if _1OoO10oillolOil == "All" or _0xlOiOol[0]:lower() == _1OoO10oillolOil:lower() then
-            local _lOiO0Io0Ooi = Instance.new("Attachment")
-            _lOiO0Io0Ooi.Name = _0xlOiOol[0]
-            _lOiO0Io0Ooi.Parent = workspace[0]
+    for value141, value142 in ipairs(state.scannedItems) do
+        local value143 = state.config.ESPFilter
+        if value143 == "All" or value142.unknownField:lower() == value143:lower() then
+            local value144 = Instance.new("Attachment")
+            value144.Name = value142.unknownField
+            value144.Parent = workspace.unknownField
             
-            local _OIi1IIII0I = Instance.new("BillboardGui")
-            _OIi1IIII0I.Size = UDim2.new(0, 160, 0, (((30)*13)-(((30))*12)))
-            _OIi1IIII0I.AlwaysOnTop = true
-            _OIi1IIII0I.MaxDistance = math.huge
-            _OIi1IIII0I.StudsOffset = Vector3.new(0, 3.5, 0)
-            _OIi1IIII0I.Adornee = _lOiO0Io0Ooi
+            local value145 = Instance.new("BillboardGui")
+            value145.Size = UDim2.new(0, 160, 0, (((30)*13)-(((30))*12)))
+            value145.AlwaysOnTop = true
+            value145.MaxDistance = math.huge
+            value145.StudsOffset = Vector3.new(0, 3.5, 0)
+            value145.Adornee = value144
             
-            local _O11li0Oil = Instance.new("TextLabel")
-            _O11li0Oil.Size = UDim2.new(1, 0, 1, 0)
-            _O11li0Oil.BackgroundTransparency = 1
-            _O11li0Oil.Text = string.format("%s [%s] - %s", _0xlOiOol[0], _0xlOiOol[0], _0xlOiOol[0])
-            _O11li0Oil.TextColor3 = state.rarityColor(_0xlOiOol[0])
-            _O11li0Oil.TextStrokeTransparency = 0
-            _O11li0Oil.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-            _O11li0Oil.TextSize = ((((12)+(12))*0+(12)))
-            _O11li0Oil.Font = Enum.Font.SourceSansBold
-            _O11li0Oil.Parent = _OIi1IIII0I
-            _OIi1IIII0I.Parent = _lOiO0Io0Ooi
+            local value146 = Instance.new("TextLabel")
+            value146.Size = UDim2.new(1, 0, 1, 0)
+            value146.BackgroundTransparency = 1
+            value146.Text = string.format("%s [%s] - %s", value142.unknownField, value142.unknownField, value142.unknownField)
+            value146.TextColor3 = state.rarityColor(value142.unknownField)
+            value146.TextStrokeTransparency = 0
+            value146.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            value146.TextSize = ((((12)+(12))*0+(12)))
+            value146.Font = Enum.Font.SourceSansBold
+            value146.Parent = value145
+            value145.Parent = value144
             
-            table.insert(state.espLabels, _lOiO0Io0Ooi)
+            table.insert(state.espLabels, value144)
         end
     end
 end
 
 state.scanItems = function()
-    local _1Oll0o1OloOO0 = state.getRootPart()
-    if not _1Oll0o1OloOO0 then return end
+    local value147 = state.getRootPart()
+    if not value147 then return end
     
-    local _0xI1IOl1io = _1Oll0o1OloOO0[0]
-    local _OI111l1lll1 = _1Oll0o1OloOO0[0]
+    local value148 = value147.unknownField
+    local value149 = value147.unknownField
     
-    _1Oll0o1OloOO0[0] = true
+    value147.unknownField = true
     state.clearESP()
     
-    local _0xlIIIOOl1oI1o = workspace:FindFirstChild("Stages")
-    if _0xlIIIOOl1oI1o then
-        local _1OI0OO0IiOiI = {}
-        for _lIiOoioio, _Ilo1lo01IiI in ipairs(_0xlIIIOOl1oI1o:GetChildren()) do
-            local _lII0IO1I = tonumber(_Ilo1lo01IiI[0]:match("%d+"))
-            if _lII0IO1I then
-                table.insert(_1OI0OO0IiOiI, { Folder = _Ilo1lo01IiI, Num = _lII0IO1I })
+    local value150 = workspace:FindFirstChild("Stages")
+    if value150 then
+        local value151 = {}
+        for value152, value153 in ipairs(value150:GetChildren()) do
+            local value154 = tonumber(value153.unknownField:match("%d+"))
+            if value154 then
+                table.insert(value151, { Folder = value153, Num = value154 })
             end
         end
-        table.sort(_1OI0OO0IiOiI, function(_OI1iOol1li00, _IlOl0ilo11) return _OI1iOol1li00[0] < _IlOl0ilo11[0] end)
+        table.sort(value151, function(value155, value156) return value155.unknownField < value156.unknownField end)
         
-        for _O11oOo0lI0, _lI0il1iOooOi0 in ipairs(_1OI0OO0IiOiI) do
-            local _O1O0IIo1lOl1l1 = _lI0il1iOooOi0[0]
-            local _1Ol0Io1oO = _O1O0IIo1lOl1l1:FindFirstChild("Hitbox")
-            if _1Ol0Io1oO then
-                _1Oll0o1OloOO0[0] = _1Ol0Io1oO[0] + Vector3.new(0, (((5)-0)), 0)
+        for value157, value158 in ipairs(value151) do
+            local value159 = value158.unknownField
+            local value160 = value159:FindFirstChild("Hitbox")
+            if value160 then
+                value147.unknownField = value160.unknownField + Vector3.new(0, (((5)-0)), 0)
                 task.wait(0.04)
                 
-                local _OIoio0iIO0 = _O1O0IIo1lOl1l1:FindFirstChild("Spawnpoints")
-                if _OIoio0iIO0 then
-                    for _1O1I1o10I0OI, _OIoIII1o1 in ipairs(_OIoio0iIO0:GetChildren()) do
-                        for _1OIlOo10ioio1oO, _OIiOI0i1lOIiI in ipairs(_OIoIII1o1:GetChildren()) do
-                            local _lIiI0l0I1i, _lOo0ilI0oOlli, _lIlIOooioIO = state.getItemInfo(_OIiOI0i1lOIiI)
+                local value161 = value159:FindFirstChild("Spawnpoints")
+                if value161 then
+                    for value162, value163 in ipairs(value161:GetChildren()) do
+                        for value164, value165 in ipairs(value163:GetChildren()) do
+                            local value166, value167, value168 = state.getItemInfo(value165)
                             table.insert(state.scannedItems, {
-                                Name = _lIiI0l0I1i,
-                                Rarity = _lOo0ilI0oOlli,
-                                Price = _lIlIOooioIO,
-                                Position = _OIiOI0i1lOIiI:IsA("BasePart") and _OIiOI0i1lOIiI[0] or (_OIiOI0i1lOIiI[0] and _OIiOI0i1lOIiI[0][0]) or _1Ol0Io1oO[0]
+                                Name = value166,
+                                Rarity = value167,
+                                Price = value168,
+                                Position = value165:IsA("BasePart") and value165.unknownField or (value165.unknownField and value165.unknownField.unknownField) or value160.unknownField
                             })
                         end
                     end
@@ -820,15 +821,15 @@ state.scanItems = function()
         end
     end
     
-    _1Oll0o1OloOO0[0] = _0xI1IOl1io
-    _1Oll0o1OloOO0[0] = _OI111l1lll1
+    value147.unknownField = value148
+    value147.unknownField = value149
     state.updateESP()
 end
 
-state.espSection:CreateToggle("Enable Item ESP", false, function(_O11iOi1oIliO)
-    state.config.ItemESP = _O11iOi1oIliO
+state.espSection:CreateToggle("Enable Item ESP", false, function(value169)
+    state.config.ItemESP = value169
     state.refreshESP()
-    if not _O11iOi1oIliO then
+    if not value169 then
         state.clearESP()
     else
         state.updateESP()
@@ -840,29 +841,29 @@ state.espSection:CreateButton("Scan Map for Items (Bypass Streaming)", function(
 end)
 
 state.espRarities = { "All", "Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Secret", "Godly", "Divine", "Celestial" }
-state.espSection:CreateDropdown("Select ESP Rarity", state.espRarities, state.espRarities[1], function(_O1lo10o00I1O)
-    state.config.ESPFilter = _O1lo10o00I1O
+state.espSection:CreateDropdown("Select ESP Rarity", state.espRarities, state.espRarities[1], function(value170)
+    state.config.ESPFilter = value170
     state.refreshESP()
     
-    local _OIi1OOlI1o0IiIl = {}
-    for _1OIi10oI, _OIO1O0OI in ipairs(state.scannedItems) do
-        table.insert(_OIi1OOlI1o0IiIl, _OIO1O0OI)
+    local value171 = {}
+    for value172, value173 in ipairs(state.scannedItems) do
+        table.insert(value171, value173)
     end
     state.clearESP()
-    state.scannedItems = _OIi1OOlI1o0IiIl
+    state.scannedItems = value171
     state.updateESP()
 end)
 
 task.spawn(function()
-    local _OI10o1oI0i1Io1I = workspace:WaitForChild("Stages", (((5)-0)))
-    if _OI10o1oI0i1Io1I then
-        _OI10o1oI0i1Io1I[0]:Connect(function(_1O1IOoIoI1o10)
-            if _1O1IOoIoI1o10[0] == "ItemStats" then
-                local _lII0l1OliO = _1O1IOoIoI1o10[0]
-                if _lII0l1OliO and _lII0l1OliO:IsDescendantOf(_OI10o1oI0i1Io1I) then
+    local value174 = workspace:WaitForChild("Stages", (((5)-0)))
+    if value174 then
+        value174.unknownField:Connect(function(value175)
+            if value175.unknownField == "ItemStats" then
+                local value176 = value175.unknownField
+                if value176 and value176:IsDescendantOf(value174) then
                     task.wait(0.1)
-                    if state.matchesRarity(_lII0l1OliO) then
-                        state.createESP(_lII0l1OliO)
+                    if state.matchesRarity(value176) then
+                        state.createESP(value176)
                     end
                 end
             end
@@ -872,25 +873,25 @@ end)
 
 task.spawn(function()
     while task.wait(((2*1)+0)) do
-        if not state.isActive() or _G[0][0] ~= state.scriptId then break end
+        if not state.isActive() or _G.unknownField.unknownField ~= state.scriptId then break end
         
-        for _lIooi0ill, _lOIOl11O0l0O1oo in pairs(state.espObjects) do
-            if not _lIooi0ill or not _lIooi0ill[0] then
-                state.espObjects[_lIooi0ill] = nil
+        for value177, value178 in pairs(state.espObjects) do
+            if not value177 or not value177.unknownField then
+                state.espObjects[value177] = nil
             end
         end
         
         if state.config.ItemESP then
             pcall(function()
-                local _1OoIlllIo1O1 = workspace:FindFirstChild("Stages")
-                if _1OoIlllIo1O1 then
-                    for _O11ololl, _1OOO1lOI in ipairs(_1OoIlllIo1O1:GetChildren()) do
-                        local _Il0ooOOoOl100I0 = _1OOO1lOI:FindFirstChild("Spawnpoints")
-                        if _Il0ooOOoOl100I0 then
-                            for _OIiiO0i11lI, _Il0lo000 in ipairs(_Il0ooOOoOl100I0:GetChildren()) do
-                                for _lI0oll1IlI, _IlilooI1oi1oloi in ipairs(_Il0lo000:GetChildren()) do
-                                    if state.matchesRarity(_IlilooI1oi1oloi) and not state.espObjects[_IlilooI1oi1oloi] then
-                                        state.createESP(_IlilooI1oi1oloi)
+                local value179 = workspace:FindFirstChild("Stages")
+                if value179 then
+                    for value180, value181 in ipairs(value179:GetChildren()) do
+                        local value182 = value181:FindFirstChild("Spawnpoints")
+                        if value182 then
+                            for value183, value184 in ipairs(value182:GetChildren()) do
+                                for value185, value186 in ipairs(value184:GetChildren()) do
+                                    if state.matchesRarity(value186) and not state.espObjects[value186] then
+                                        state.createESP(value186)
                                     end
                                 end
                             end
@@ -914,164 +915,164 @@ state.linksSection = state.tabs.Info:CreateSection("Links")
 state.linksSection:CreateLabel("Portal: valincsyndicate.com (coming soon)")
 state.linksSection:CreateLabel("Discord: join for updates & support")
 
-state.parsePrice = function(_1OoOI1iilIOli)
-    _1OoOI1iilIOli = _1OoOI1iilIOli:gsub("%%$", ""):gsub(",", ""):gsub(" ", "")
-    local _OI0000iOOlol11 = 1
-    if _1OoOI1iilIOli:lower():match("k") then
-        _OI0000iOOlol11 = (((1000)*5)-(((1000))*4))
-        _1OoOI1iilIOli = _1OoOI1iilIOli:lower():gsub("k", "")
-    elseif _1OoOI1iilIOli:lower():match("m") then
-        _OI0000iOOlol11 = 1000000
-        _1OoOI1iilIOli = _1OoOI1iilIOli:lower():gsub("m", "")
-    elseif _1OoOI1iilIOli:lower():match("b") then
-        _OI0000iOOlol11 = 1000000000
-        _1OoOI1iilIOli = _1OoOI1iilIOli:lower():gsub("b", "")
-    elseif _1OoOI1iilIOli:lower():match("t") then
-        _OI0000iOOlol11 = 1000000000000
-        _1OoOI1iilIOli = _1OoOI1iilIOli:lower():gsub("t", "")
+state.parsePrice = function(value187)
+    value187 = value187:gsub("%%$", ""):gsub(",", ""):gsub(" ", "")
+    local value188 = 1
+    if value187:lower():match("k") then
+        value188 = (((1000)*5)-(((1000))*4))
+        value187 = value187:lower():gsub("k", "")
+    elseif value187:lower():match("m") then
+        value188 = 1000000
+        value187 = value187:lower():gsub("m", "")
+    elseif value187:lower():match("b") then
+        value188 = 1000000000
+        value187 = value187:lower():gsub("b", "")
+    elseif value187:lower():match("t") then
+        value188 = 1000000000000
+        value187 = value187:lower():gsub("t", "")
     end
-    return (tonumber(_1OoOI1iilIOli) or 0) * _OI0000iOOlol11
+    return (tonumber(value187) or 0) * value188
 end
-state.triggerPrompt = function(_Ilol1Iiol)
+state.triggerPrompt = function(value189)
     if fireproximityprompt then
-        fireproximityprompt(_Ilol1Iiol)
+        fireproximityprompt(value189)
     else
-        _Ilol1Iiol:InputHoldBegin()
-        task.wait(_Ilol1Iiol.HoldDuration)
-        _Ilol1Iiol:InputHoldEnd()
+        value189:InputHoldBegin()
+        task.wait(value189.HoldDuration)
+        value189:InputHoldEnd()
     end
 end
 
 task.spawn(function()
-    local _1O11lO0o = state.replicatedStorage:WaitForChild("Remotes", (((5)-0)))
-    local _0x1lOoOll1 = _1O11lO0o and _1O11lO0o:WaitForChild("Server", (((5)-0)))
-    local _0xi0OloO = _0x1lOoOll1 and _0x1lOoOll1:WaitForChild("SellAllLoot", (((5)-0)))
+    local value190 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0)))
+    local value191 = value190 and value190:WaitForChild("Server", (((5)-0)))
+    local value192 = value191 and value191:WaitForChild("SellAllLoot", (((5)-0)))
 
 
 
     while task.wait(0.3) do
-        if not state.isActive() or _G[0][0] ~= state.scriptId then break end
+        if not state.isActive() or _G.unknownField.unknownField ~= state.scriptId then break end
         if state.config.AutoClaimLoot then
-            local _1OooIlIl0Io1lO = state.getBackpackAmount()
-            local _1Ol01O0i0lOl0 = state.getBackpackMax()
+            local value193 = state.getBackpackAmount()
+            local value194 = state.getBackpackMax()
             
             pcall(function()
-                if _1OooIlIl0Io1lO >= _1Ol01O0i0lOl0 then
-                    local _lIi0l0oi10 = _0x1lOoOll1 and _0x1lOoOll1:FindFirstChild("GotoSurface")
-                    if _lIi0l0oi10 then
-                        _lIi0l0oi10:FireServer()
+                if value193 >= value194 then
+                    local value195 = value191 and value191:FindFirstChild("GotoSurface")
+                    if value195 then
+                        value195:FireServer()
                         task.wait(1.0)
-                        local _1Ol1i1III1 = workspace:FindFirstChild("Map", true)
-                            and workspace[0]:FindFirstChild("Shops")
-                            and workspace[0][0]:FindFirstChild("Selling")
-                            and workspace[0][0][0]:FindFirstChild("Model")
-                            and workspace[0][0][0][0]:FindFirstChild("Marker")
-                        local _lIlio0OlOO = state.localPlayer.Character
-                        local _OIIO0IlIi = _lIlio0OlOO and (_lIlio0OlOO:FindFirstChild("HumanoidRootPart") or _lIlio0OlOO[0])
-                        if _1Ol1i1III1 and _OIIO0IlIi then
-                            _OIIO0IlIi.CFrame = _1Ol1i1III1.Position + Vector3.new(0, (((3)*3)-(((3))*2)), 0)
+                        local value196 = workspace:FindFirstChild("Map", true)
+                            and workspace.unknownField:FindFirstChild("Shops")
+                            and workspace.unknownField.unknownField:FindFirstChild("Selling")
+                            and workspace.unknownField.unknownField.unknownField:FindFirstChild("Model")
+                            and workspace.unknownField.unknownField.unknownField.unknownField:FindFirstChild("Marker")
+                        local value197 = state.localPlayer.Character
+                        local value198 = value197 and (value197:FindFirstChild("HumanoidRootPart") or value197.unknownField)
+                        if value196 and value198 then
+                            value198.CFrame = value196.Position + Vector3.new(0, (((3)*3)-(((3))*2)), 0)
                             task.wait(0.5)
                         end
                     end
-                    if _0xi0OloO then
+                    if value192 then
                         pcall(function()
-                            if state.dataReplica and state.dataReplica[0] and state.dataReplica[0][0] then
-                                state.dataReplica[0][0][0] = ((2*1)+0)
+                            if state.dataReplica and state.dataReplica.unknownField and state.dataReplica.unknownField.unknownField then
+                                state.dataReplica.unknownField.unknownField.unknownField = ((2*1)+0)
                             end
                         end)
-                        _0xi0OloO:FireServer()
-                        local _lIoii1I0i0IIO0 = os.clock()
-                        while state.getBackpackAmount() >= _1Ol01O0i0lOl0 and os.clock() - _lIoii1I0i0IIO0 < 1.5 do
+                        value192:FireServer()
+                        local value199 = os.clock()
+                        while state.getBackpackAmount() >= value194 and os.clock() - value199 < 1.5 do
                             task.wait(0.05)
                         end
                     end
                 end
             end)
             
-            if state.getBackpackAmount() >= _1Ol01O0i0lOl0 then
+            if state.getBackpackAmount() >= value194 then
                 
 continue
             end
             
-            local _O1lio01IO0io1i, _OIloOliI00 = pcall(function()
-                local _0xoIil1ol0li0 = workspace:FindFirstChild("Stages")
-                if _0xoIil1ol0li0 then
-                    local _Ilooo0IIO = {}
+            local value200, value201 = pcall(function()
+                local value202 = workspace:FindFirstChild("Stages")
+                if value202 then
+                    local value203 = {}
                     if state.claimRarityDropdown and state.claimRarityDropdown then
-                        _Ilooo0IIO = state.claimRarityDropdown:GetValue() or {}
+                        value203 = state.claimRarityDropdown:GetValue() or {}
                     end
-                    local _lIl00OOlI11010l = {}
-                    for _0xo0IO101i, _OI01O0I0oOi0 in ipairs(_0xoIil1ol0li0:GetDescendants()) do
-                        if _OI01O0I0oOi0:IsA("ProximityPrompt") and _OI01O0I0oOi0.ActionText == "Pickup?" then
-                            local _lIi11lol0l1lI = _OI01O0I0oOi0.ActionText
-                            if _lIi11lol0l1lI then
-                                local _0x0OOooIO, _O1O0olooOi, _lIO1i101i0IIo = state.getItemInfo(_lIi11lol0l1lI)
-                                local _1Oo1l1Ioo1O = table.insert(_Ilooo0IIO, _O1O0olooOi) ~= nil
+                    local value204 = {}
+                    for value205, value206 in ipairs(value202:GetDescendants()) do
+                        if value206:IsA("ProximityPrompt") and value206.ActionText == "Pickup?" then
+                            local value207 = value206.ActionText
+                            if value207 then
+                                local value208, value209, value210 = state.getItemInfo(value207)
+                                local value211 = table.insert(value203, value209) ~= nil
                                 
-                                if _1Oo1l1Ioo1O then
-                                    local _lIo1OlioO1ilo = state.parsePrice(_lIO1i101i0IIo)
-                                    table.insert(_lIl00OOlI11010l, { Prompt = _OI01O0I0oOi0, PriceVal = _lIo1OlioO1ilo })
+                                if value211 then
+                                    local value212 = state.parsePrice(value210)
+                                    table.insert(value204, { Prompt = value206, PriceVal = value212 })
                                 end
                             end
                         end
                     end
 
-                    table.sort(_lIl00OOlI11010l, function(_O110ooO0lii0I1o, _0xo0IOi0l)
-                        return _O110ooO0lii0I1o.PriceVal > _0xo0IOi0l.PriceVal
+                    table.sort(value204, function(value213, value214)
+                        return value213.PriceVal > value214.PriceVal
                     end)
 
-                    for _OIOIO1i00IIoIO, _O10iI1IiiI in ipairs(_lIl00OOlI11010l) do
+                    for value215, value216 in ipairs(value204) do
                         task.spawn(function()
-                            pcall(state.triggerPrompt, _O10iI1IiiI.Prompt)
+                            pcall(state.triggerPrompt, value216.Prompt)
                         end)
                         task.wait(0.02)
                     end
                 end
             end)
-            if not _O1lio01IO0io1i then
-                print("AutoClaimLoop ERROR:", _OIloOliI00)
+            if not value200 then
+                print("AutoClaimLoop ERROR:", value201)
             end
         end
     end
 end)
 
 task.spawn(function()
-    local _1Oo1o0oo0o0I1ll = state.replicatedStorage:WaitForChild("Remotes", (((5)-0)))
-    local _lIO1IIioI = _1Oo1o0oo0o0I1ll and _1Oo1o0oo0o0I1ll:WaitForChild("Server", (((5)-0)))
-    local _Il0I0Oo1O = _lIO1IIioI and _lIO1IIioI:WaitForChild("SellAllLoot", (((5)-0)))
-    local _O1OO1olI1O = _lIO1IIioI and _lIO1IIioI:WaitForChild("SellLoot", (((5)-0)))
+    local value217 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0)))
+    local value218 = value217 and value217:WaitForChild("Server", (((5)-0)))
+    local value219 = value218 and value218:WaitForChild("SellAllLoot", (((5)-0)))
+    local value220 = value218 and value218:WaitForChild("SellLoot", (((5)-0)))
     
-    local _1O1i0oOi1lIiii0 = nil
+    local value221 = nil
     pcall(function()
-        _1O1i0oOi1lIiii0 = require(state.replicatedStorage:WaitForChild("Databases"):WaitForChild("ItemsList"))
+        value221 = require(state.replicatedStorage:WaitForChild("Databases"):WaitForChild("ItemsList"))
     end)
     
-    local function _0xilOI1ll(_lOo0lOiIlloO)
-        local _1OO0ol0IooOll10 = state.config.AutoSellRarity
-        if _1OO0ol0IooOll10 == "All" then
+    local function value222(value223)
+        local value224 = state.config.AutoSellRarity
+        if value224 == "All" then
             return true
         end
-        local _1O01oll0ol = _1OO0ol0IooOll10:match("^([%w%s]+) & Below$") or _1OO0ol0IooOll10
-        local _0xIO1l01o1 = state.rarityRanks[_1O01oll0ol] or 1
-        local _IlI0iI1010 = state.rarityRanks[_lOo0lOiIlloO] or 1
-        return _IlI0iI1010 <= _0xIO1l01o1
+        local value225 = value224:match("^([%w%s]+) & Below$") or value224
+        local value226 = state.rarityRanks[value225] or 1
+        local value227 = state.rarityRanks[value223] or 1
+        return value227 <= value226
     end
         
     while task.wait(1.0) do
-        if not state.isActive() or _G[0][0] ~= state.scriptId then break end
+        if not state.isActive() or _G.unknownField.unknownField ~= state.scriptId then break end
         if state.config.AutoSellLoot then
             pcall(function()
-                if state.dataReplica and state.dataReplica[0] and state.dataReplica[0][0] and _O1OO1olI1O and _1O1i0oOi1lIiii0 then
+                if state.dataReplica and state.dataReplica.unknownField and state.dataReplica.unknownField.unknownField and value220 and value221 then
                     -- Spoof CashMultiplier to 2 locally to request double cash
-                    if state.dataReplica[0][0] then
-                        state.dataReplica[0][0][0] = ((2*1)+0)
+                    if state.dataReplica.unknownField.unknownField then
+                        state.dataReplica.unknownField.unknownField.unknownField = ((2*1)+0)
                     end
-                    for _O1i0OioIo001i, _1Oi0iio1OOi1O0O in pairs(state.dataReplica[0][0]) do
-                        local _lIIIo0oi01Ii1o = _1Oi0iio1OOi1O0O[0]
-                        local _1OlO11iIili = _1O1i0oOi1lIiii0[_lIIIo0oi01Ii1o]
-                        local _lIOl1oool0l = _1OlO11iIili and _1OlO11iIili[0] or "Common"
-                        if _0xilOI1ll(_lIOl1oool0l) then
-                            _O1OO1olI1O:FireServer(_O1i0OioIo001i)
+                    for value228, value229 in pairs(state.dataReplica.unknownField.unknownField) do
+                        local value230 = value229.unknownField
+                        local value231 = value221[value230]
+                        local value232 = value231 and value231.unknownField or "Common"
+                        if value222(value232) then
+                            value220:FireServer(value228)
                             task.wait(0.03) -- Small delay to prevent rate limit
                         end
                     end
@@ -1083,22 +1084,22 @@ end)
 
 task.spawn(function()
     while task.wait(0.1) do
-        if not state.isActive() or _G[0][0] ~= state.scriptId then break end
+        if not state.isActive() or _G.unknownField.unknownField ~= state.scriptId then break end
         pcall(function()
-            local _Il1oi1oOI = state.getHumanoid()
-            if not _Il1oi1oOI then return end
+            local value233 = state.getHumanoid()
+            if not value233 then return end
 
-            if state.config.SpeedHack and _Il1oi1oOI.WalkSpeed ~= state.config.SpeedValue then
-                _Il1oi1oOI.WalkSpeed = state.config.SpeedValue
-            elseif not state.config.SpeedHack and _Il1oi1oOI.WalkSpeed ~= 16 then
-                _Il1oi1oOI.WalkSpeed = 16
+            if state.config.SpeedHack and value233.WalkSpeed ~= state.config.SpeedValue then
+                value233.WalkSpeed = state.config.SpeedValue
+            elseif not state.config.SpeedHack and value233.WalkSpeed ~= 16 then
+                value233.WalkSpeed = 16
             end
 
-            if state.config.JumpHack and _Il1oi1oOI.JumpPower ~= state.config.JumpValue then
-                _Il1oi1oOI.UseJumpPower = true
-                _Il1oi1oOI.JumpPower = state.config.JumpValue
-            elseif not state.config.JumpHack and _Il1oi1oOI.JumpPower ~= 50 then
-                _Il1oi1oOI.JumpPower = 50
+            if state.config.JumpHack and value233.JumpPower ~= state.config.JumpValue then
+                value233.UseJumpPower = true
+                value233.JumpPower = state.config.JumpValue
+            elseif not state.config.JumpHack and value233.JumpPower ~= 50 then
+                value233.JumpPower = 50
             end
         end)
     end
@@ -1108,11 +1109,11 @@ state.runConnection = state.runService.Stepped:Connect(function()
     if not state.isActive() then return end
     if not state.config.Noclip then return end
     pcall(function()
-        local _OI1OiIi000l = state.localPlayer.Character
-        if not _OI1OiIi000l then return end
-        for _0xoO0OOiI, _OIiOi0l1 in ipairs(_OI1OiIi000l:GetDescendants()) do
-            if _OIiOi0l1:IsA("BasePart") and _OIiOi0l1[0] then
-                _OIiOi0l1.CanCollide = false
+        local value234 = state.localPlayer.Character
+        if not value234 then return end
+        for value235, value236 in ipairs(value234:GetDescendants()) do
+            if value236:IsA("BasePart") and value236.unknownField then
+                value236.CanCollide = false
             end
         end
     end)
@@ -1129,20 +1130,20 @@ state.inputConnection = state.userInputService.JumpRequest:Connect(function()
     end
     if not state.config.InfiniteJump then return end
     pcall(function()
-        local _IlIo0o01O0O0oI = state.getHumanoid()
-        if _IlIo0o01O0O0oI then
-            _IlIo0o01O0O0oI:ChangeState(Enum.HumanoidStateType.Jumping)
+        local value237 = state.getHumanoid()
+        if value237 then
+            value237:ChangeState(Enum.HumanoidStateType.Jumping)
         end
     end)
 end)
 table.insert(state.connections, state.inputConnection)
 
 task.spawn(function()
-    local _0xiOoO1l = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
+    local value238 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
         and state.replicatedStorage:WaitForChild("Remotes"):WaitForChild("Server") 
         and state.replicatedStorage.Remotes.Server:WaitForChild("Click", (((5)-0)))
 
-    local _0x11lIIii = {
+    local value239 = {
         ["Coal Ore"] = "Coal Ore",
         ["Iron Ore"] = "Iron Ore",
         ["Gold Ore"] = "Gold Ore",
@@ -1154,53 +1155,53 @@ task.spawn(function()
         ["Azurite (Gamepass)"] = "Azurite",
     }
 
-    local function _1Olii00oili1()
-        local _0x0l0lll0 = 0
-        if state.dataReplica and state.dataReplica[0] then
-            _0x0l0lll0 = state.dataReplica[0][0] or 0
+    local function value240()
+        local value241 = 0
+        if state.dataReplica and state.dataReplica.unknownField then
+            value241 = state.dataReplica.unknownField.unknownField or 0
         end
 
-        if _0x0l0lll0 >= (((15)*1)-0) then
+        if value241 >= (((15)*1)-0) then
             return "Demonite"
-        elseif _0x0l0lll0 >= ((((12)+(12))*0+(12))) then
+        elseif value241 >= ((((12)+(12))*0+(12))) then
             return "Diamond Ore"
-        elseif _0x0l0lll0 >= 9 then
+        elseif value241 >= 9 then
             return "Quartz Ore"
-        elseif _0x0l0lll0 >= (((5)-0)) then
+        elseif value241 >= (((5)-0)) then
             return "Gold Ore"
-        elseif _0x0l0lll0 >= ((2*1)+0) then
+        elseif value241 >= ((2*1)+0) then
             return "Iron Ore"
         else
             return "Coal Ore"
         end
     end
 
-    local _lOlIIIo10l0ll = nil
+    local value242 = nil
 
     while true do
         local delay = state.config.SpeedDelay or 0.05
         task.wait(delay)
         if not state.isActive() then break end
         
-        if state.config.AutoTraining and _0xiOoO1l then
+        if state.config.AutoTraining and value238 then
             pcall(function()
-                local _OI10Ooli = state.localPlayer.Character
-                if _OI10Ooli then
-                    local _IlO10Ii00 = _OI10Ooli:FindFirstChildOfClass("Humanoid")
-                    if _IlO10Ii00 then
-                        local _1O0ll1i10ooo = false
-                        for _lO00II1oOI1OOiI, _1OIi0oI1oI1 in ipairs(_OI10Ooli:GetChildren()) do
-                            if _1OIi0oI1oI1:IsA("Tool") and _1OIi0oI1oI1:GetAttribute("Pickaxe") then
-                                _1O0ll1i10ooo = true
+                local value243 = state.localPlayer.Character
+                if value243 then
+                    local value244 = value243:FindFirstChildOfClass("Humanoid")
+                    if value244 then
+                        local value245 = false
+                        for value246, value247 in ipairs(value243:GetChildren()) do
+                            if value247:IsA("Tool") and value247:GetAttribute("Pickaxe") then
+                                value245 = true
                                 break
                             end
                         end
-                        if not _1O0ll1i10ooo then
-                            local _0xI11Ii1iO1O0 = state.localPlayer:FindFirstChildOfClass("Backpack")
-                            if _0xI11Ii1iO1O0 then
-                                for _OI1li0o1ooi01Oo, _0xl0oOI0i0I in ipairs(_0xI11Ii1iO1O0:GetChildren()) do
-                                    if _0xl0oOI0i0I:IsA("Tool") and _0xl0oOI0i0I:GetAttribute("Pickaxe") then
-                                        _IlO10Ii00:EquipTool(_0xl0oOI0i0I)
+                        if not value245 then
+                            local value248 = state.localPlayer:FindFirstChildOfClass("Backpack")
+                            if value248 then
+                                for value249, value250 in ipairs(value248:GetChildren()) do
+                                    if value250:IsA("Tool") and value250:GetAttribute("Pickaxe") then
+                                        value244:EquipTool(value250)
                                         break
                                     end
                                 end
@@ -1209,81 +1210,81 @@ task.spawn(function()
                     end
                 end
 
-                local _lIoio110ll1iii1 = state.config.SelectedOre
-                if _lIoio110ll1iii1 == "Auto (Best Available)" then
-                    _lIoio110ll1iii1 = _1Olii00oili1()
+                local value251 = state.config.SelectedOre
+                if value251 == "Auto (Best Available)" then
+                    value251 = value240()
                 else
-                    _lIoio110ll1iii1 = _0x11lIIii[_lIoio110ll1iii1] or _lIoio110ll1iii1
+                    value251 = value239[value251] or value251
                 end
 
-                local _lOo0lo11IO1i11O = state.localPlayer:GetAttribute("IsTraining")
-                local _OIoIO10l1i1 = (not _lOo0lo11IO1i11O) or (_lOlIIIo10l0ll ~= _lIoio110ll1iii1)
+                local value252 = state.localPlayer:GetAttribute("IsTraining")
+                local value253 = (not value252) or (value242 ~= value251)
 
-                if _OIoIO10l1i1 then
-                    local _lOi00Ol00IlI1iO = workspace:FindFirstChild("Map") 
-                        and workspace[0]:FindFirstChild("Training Areas")
-                    local _OIIo1OIoOl = _lOi00Ol00IlI1iO and _lOi00Ol00IlI1iO:FindFirstChild(_lIoio110ll1iii1)
-                    local _lIl1Il0IoOl = _OIIo1OIoOl and _OIIo1OIoOl:FindFirstChild("Hitbox")
+                if value253 then
+                    local value254 = workspace:FindFirstChild("Map") 
+                        and workspace.unknownField:FindFirstChild("Training Areas")
+                    local value255 = value254 and value254:FindFirstChild(value251)
+                    local value256 = value255 and value255:FindFirstChild("Hitbox")
 
-                    if _lIl1Il0IoOl then
-                        local _O1ooIioilI0o = state.getRootPart()
-                        if _O1ooIioilI0o then
-                            local _IlloI0oOI = _lIl1Il0IoOl[0] + _lIl1Il0IoOl[0][0] * -6.5
-                            _IlloI0oOI = Vector3.new(_IlloI0oOI[0], _lIl1Il0IoOl[0][0] + 1.5, _IlloI0oOI[0])
-                            _O1ooIioilI0o[0] = CFrame.new(_IlloI0oOI, _lIl1Il0IoOl[0])
-                            _lOlIIIo10l0ll = _lIoio110ll1iii1
+                    if value256 then
+                        local value257 = state.getRootPart()
+                        if value257 then
+                            local value258 = value256.unknownField + value256.unknownField.unknownField * -6.5
+                            value258 = Vector3.new(value258.unknownField, value256.unknownField.unknownField + 1.5, value258.unknownField)
+                            value257.unknownField = CFrame.new(value258, value256.unknownField)
+                            value242 = value251
                             task.wait(0.1)
                         end
                     end
                 end
 
-                _0xiOoO1l:FireServer()
+                value238:FireServer()
             end)
         else
-            _lOlIIIo10l0ll = nil
+            value242 = nil
         end
     end
 end)
 
 if ((55683-55683)==0) then
 task.spawn(function()
-    local _O1il0o00 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
+    local value259 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
         and state.replicatedStorage:WaitForChild("Remotes"):WaitForChild("Server") 
         and state.replicatedStorage.Remotes.Server:WaitForChild("HitWall", (((5)-0)))
         
-    local _OIo1Ol010oO = nil
+    local value260 = nil
     pcall(function()
-        _OIo1Ol010oO = require(state.replicatedStorage:WaitForChild("Client"):WaitForChild("StageClient"))
+        value260 = require(state.replicatedStorage:WaitForChild("Client"):WaitForChild("StageClient"))
     end)
 
     while true do
         local delay = state.config.MiningDelay or 0.05
         task.wait(delay)
-        if not state.isActive() or _G[0][0] ~= state.scriptId then break end
-        if state.config.FastMining and _O1il0o00 and _OIo1Ol010oO then
+        if not state.isActive() or _G.unknownField.unknownField ~= state.scriptId then break end
+        if state.config.FastMining and value259 and value260 then
             pcall(function()
-                local _O1I010lOlo1oo11 = _OIo1Ol010oO[0]
-                local _IlOIo1OOloo0 = _OIo1Ol010oO[0]
-                local _O10liOOIOlO10i = _OIo1Ol010oO[0]
+                local value261 = value260.unknownField
+                local value262 = value260.unknownField
+                local value263 = value260.unknownField
                 
-                if _O10liOOIOlO10i and _O1I010lOlo1oo11 and _IlOIo1OOloo0 then
-                    local _lOOOI0OOIO = state.localPlayer.Character
-                    if _lOOOI0OOIO then
-                        local _0xOloI0oO = _lOOOI0OOIO:FindFirstChildOfClass("Humanoid")
-                        if _0xOloI0oO then
-                            local _IlI0oiI1IIi00li = false
-                            for _O1ooIi1lO0IIIi, _lI1olOiOIolIo in ipairs(_lOOOI0OOIO:GetChildren()) do
-                                if _lI1olOiOIolIo:IsA("Tool") and _lI1olOiOIolIo:GetAttribute("Pickaxe") then
-                                    _IlI0oiI1IIi00li = true
+                if value263 and value261 and value262 then
+                    local value264 = state.localPlayer.Character
+                    if value264 then
+                        local value265 = value264:FindFirstChildOfClass("Humanoid")
+                        if value265 then
+                            local value266 = false
+                            for value267, value268 in ipairs(value264:GetChildren()) do
+                                if value268:IsA("Tool") and value268:GetAttribute("Pickaxe") then
+                                    value266 = true
                                     break
                                 end
                             end
-                            if not _IlI0oiI1IIi00li then
-                                local _O1oO0io0ii10I0l = state.localPlayer:FindFirstChildOfClass("Backpack")
-                                if _O1oO0io0ii10I0l then
-                                    for _Ill1oI0ilo, _0xo0i0Il00 in ipairs(_O1oO0io0ii10I0l:GetChildren()) do
-                                        if _0xo0i0Il00:IsA("Tool") and _0xo0i0Il00:GetAttribute("Pickaxe") then
-                                            _0xOloI0oO:EquipTool(_0xo0i0Il00)
+                            if not value266 then
+                                local value269 = state.localPlayer:FindFirstChildOfClass("Backpack")
+                                if value269 then
+                                    for value270, value271 in ipairs(value269:GetChildren()) do
+                                        if value271:IsA("Tool") and value271:GetAttribute("Pickaxe") then
+                                            value265:EquipTool(value271)
                                             break
                                         end
                                     end
@@ -1292,7 +1293,7 @@ task.spawn(function()
                         end
                     end
                     
-                    _O1il0o00:FireServer(_O1I010lOlo1oo11, _IlOIo1OOloo0)
+                    value259:FireServer(value261, value262)
                 end
             end)
         end
@@ -1300,29 +1301,29 @@ task.spawn(function()
 end)
 
 task.spawn(function()
-    local _lIlI0I0II1O = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
+    local value272 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
         and state.replicatedStorage:WaitForChild("Remotes"):WaitForChild("Server") 
         and state.replicatedStorage.Remotes.Server:WaitForChild("Rebirth", (((5)-0)))
 
-    local _lIIIOoll11lo = nil
+    local value273 = nil
     pcall(function()
-        _lIIIOoll11lo = require(state.replicatedStorage:WaitForChild("Helpers"):WaitForChild("LevelsHelper"))
+        value273 = require(state.replicatedStorage:WaitForChild("Helpers"):WaitForChild("LevelsHelper"))
     end)
 
     while task.wait(1.0) do
-        if not state.isActive() or _G[0][0] ~= state.scriptId then break end
-        if state.config.AutoRebirth and _lIlI0I0II1O and _lIIIOoll11lo then
-            if state.dataReplica and state.dataReplica[0] then
+        if not state.isActive() or _G.unknownField.unknownField ~= state.scriptId then break end
+        if state.config.AutoRebirth and value272 and value273 then
+            if state.dataReplica and state.dataReplica.unknownField then
                 pcall(function()
-                    local _lOl10iOoOolI = state.dataReplica[0]
-                    local _lOi0ioO0Oo1O = _lOl10iOoOolI[0] or 0
-                    local _OIi0OI0O1 = _lOl10iOoOolI[0] or 0
+                    local value274 = state.dataReplica.unknownField
+                    local value275 = value274.unknownField or 0
+                    local value276 = value274.unknownField or 0
                     
-                    local _0xl1l0ooO = _lIIIOoll11lo:GetLevel(_OIi0OI0O1)
-                    local _lOo11olOloiOo = _lIIIOoll11lo:GetRequiredRebirthLevel(_lOi0ioO0Oo1O)
+                    local value277 = value273:GetLevel(value276)
+                    local value278 = value273:GetRequiredRebirthLevel(value275)
                     
-                    if _0xl1l0ooO >= _lOo11olOloiOo then
-                        _lIlI0I0II1O:FireServer("Rebirth")
+                    if value277 >= value278 then
+                        value272:FireServer("Rebirth")
                         task.wait(1.5)
                     end
                 end)
@@ -1332,45 +1333,45 @@ task.spawn(function()
 end)
 
 task.spawn(function()
-    local _O1010li01 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
+    local value279 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
         and state.replicatedStorage:WaitForChild("Remotes"):WaitForChild("Server") 
         and state.replicatedStorage.Remotes.Server:WaitForChild("UpgradeSlot", (((5)-0)))
         
-    local _OIolII011oli1I1 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
+    local value280 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
         and state.replicatedStorage:WaitForChild("Remotes"):WaitForChild("Server") 
         and state.replicatedStorage.Remotes.Server:WaitForChild("UpgradeWalkspeed", (((5)-0)))
 
-    local _1Oio0OiOo = nil
+    local value281 = nil
     pcall(function()
-        _1Oio0OiOo = require(state.replicatedStorage:WaitForChild("Helpers"):WaitForChild("UpgradesHelper"))
+        value281 = require(state.replicatedStorage:WaitForChild("Helpers"):WaitForChild("UpgradesHelper"))
     end)
 
     while task.wait(1.0) do
-        if not state.isActive() or _G[0][0] ~= state.scriptId then break end
+        if not state.isActive() or _G.unknownField.unknownField ~= state.scriptId then break end
         
-        if (state.config.AutoUpgradeCarry or state.config.AutoUpgradeWalkspeed) and _1Oio0OiOo then
-            if state.dataReplica and state.dataReplica[0] then
+        if (state.config.AutoUpgradeCarry or state.config.AutoUpgradeWalkspeed) and value281 then
+            if state.dataReplica and state.dataReplica.unknownField then
                 pcall(function()
-                    local _IllOIi1oIIOOoOO = state.dataReplica[0]
-                    local _0xo1liOIil = _IllOIi1oIIOOoOO[0] or 0
+                    local value282 = state.dataReplica.unknownField
+                    local value283 = value282.unknownField or 0
 
-                    if state.config.AutoUpgradeCarry and _O1010li01 then
-                        local _OIOoOOio1O1loI = _IllOIi1oIIOOoOO[0] or 0
-                        if _OIOoOOio1O1loI < (_1Oio0OiOo[0] or (((15)*1)-0)) then
-                            local _OIIiOiOl = _1Oio0OiOo:GetBackpackUpgradeCost(_OIOoOOio1O1loI)
-                            if _0xo1liOIil >= _OIIiOiOl then
-                                _O1010li01:FireServer("Cash")
+                    if state.config.AutoUpgradeCarry and value279 then
+                        local value284 = value282.unknownField or 0
+                        if value284 < (value281.unknownField or (((15)*1)-0)) then
+                            local value285 = value281:GetBackpackUpgradeCost(value284)
+                            if value283 >= value285 then
+                                value279:FireServer("Cash")
                                 task.wait(0.2)
                             end
                         end
                     end
 
-                    if state.config.AutoUpgradeWalkspeed and _OIolII011oli1I1 then
-                        local _0x1OOO1ii = _IllOIi1oIIOOoOO[0] or 0
-                        if (((25)*7)-(((25))*6)) + _0x1OOO1ii < (_1Oio0OiOo[0] or 50) then
-                            local _lIIi01IIOIoIo11 = _1Oio0OiOo:GetWalkspeedUpgradeCost(_0x1OOO1ii)
-                            if _0xo1liOIil >= _lIIi01IIOIoIo11 then
-                                _OIolII011oli1I1:FireServer("Cash")
+                    if state.config.AutoUpgradeWalkspeed and value280 then
+                        local value286 = value282.unknownField or 0
+                        if (((25)*7)-(((25))*6)) + value286 < (value281.unknownField or 50) then
+                            local value287 = value281:GetWalkspeedUpgradeCost(value286)
+                            if value283 >= value287 then
+                                value280:FireServer("Cash")
                                 task.wait(0.2)
                             end
                         end
@@ -1381,25 +1382,25 @@ task.spawn(function()
     end
 end)
 else
-  local _IlOIloi0={} _IlOIloi0[1]="516" _IlOIloi0=nil
+  local value288={} value288[1]="516" value288=nil
 end
 
 if (math.ceil(10824)==10824) then
 task.spawn(function()
     while task.wait(0.5) do
-        if not state.isActive() or _G[0][0] ~= state.scriptId then break end
+        if not state.isActive() or _G.unknownField.unknownField ~= state.scriptId then break end
         if state.upgradeStatus then
-            if state.dataReplica and state.dataReplica[0] then
+            if state.dataReplica and state.dataReplica.unknownField then
                 pcall(function()
-                    local _lOiOoI0olOO0 = state.dataReplica[0]
-                    local _0xIlO1i1oO = _lOiOoI0olOO0[0] or 0
-                    local _IlIOIooiII1 = _lOiOoI0olOO0[0] or 0
-                    local _IlO11o00O10li = _lOiOoI0olOO0[0] or 0
+                    local value289 = state.dataReplica.unknownField
+                    local value290 = value289.unknownField or 0
+                    local value291 = value289.unknownField or 0
+                    local value292 = value289.unknownField or 0
                     
                     state.upgradeStatus:Update({
-                        { name = "Current Rebirths", value = tostring(_0xIlO1i1oO) },
-                        { name = "Carry Slots", value = tostring(_IlIOIooiII1) },
-                        { name = "Extra Walkspeed", value = "+" .. tostring(_IlO11o00O10li) }
+                        { name = "Current Rebirths", value = tostring(value290) },
+                        { name = "Carry Slots", value = tostring(value291) },
+                        { name = "Extra Walkspeed", value = "+" .. tostring(value292) }
                     })
                 end)
             end
@@ -1408,94 +1409,94 @@ task.spawn(function()
 end)
 
 task.spawn(function()
-    local _OIOOi0IIolIO = nil
+    local value293 = nil
     pcall(function()
-        _OIOOi0IIolIO = require(state.replicatedStorage:WaitForChild("Databases"):WaitForChild("PickaxeList"))
+        value293 = require(state.replicatedStorage:WaitForChild("Databases"):WaitForChild("PickaxeList"))
     end)
 
-    local _O1ili1I1lolO1 = nil
+    local value294 = nil
     pcall(function()
-        _O1ili1I1lolO1 = require(state.replicatedStorage:WaitForChild("Databases"):WaitForChild("AurasList"))
+        value294 = require(state.replicatedStorage:WaitForChild("Databases"):WaitForChild("AurasList"))
     end)
 
-    local _lOOi1i00o1 = ""
-    local _lO1Oll1OOIlo = ""
+    local value295 = ""
+    local value296 = ""
 
     while task.wait(0.1) do
-        if not state.isActive() or _G[0][0] ~= state.scriptId then break end
+        if not state.isActive() or _G.unknownField.unknownField ~= state.scriptId then break end
         if (state.pickaxeDropdown or state.auraDropdown) then
-            if state.dataReplica and state.dataReplica[0] then
+            if state.dataReplica and state.dataReplica.unknownField then
                 pcall(function()
-                    local _1O10IlIiiO0O = state.dataReplica[0]
-                    local _O1IlO0iiiIi0Ii = _1O10IlIiiO0O[0] or {}
-                    local _IlOIIloIiOIOl0I = _1O10IlIiiO0O[0] or {}
+                    local value297 = state.dataReplica.unknownField
+                    local value298 = value297.unknownField or {}
+                    local value299 = value297.unknownField or {}
 
-                    if state.pickaxeDropdown and _OIOOi0IIolIO then
-                        local _Il1O0I0l1o0lol = {}
-                        for _O1lI0oIolliIi, _Ili110liOO1I in pairs(_OIOOi0IIolIO) do
-                            if _Ili110liOO1I[0] and _Ili110liOO1I[0] > 0 and not table.insert(_O1IlO0iiiIi0Ii, _O1lI0oIolliIi) then
-                                table.insert(_Il1O0I0l1o0lol, { id = _O1lI0oIolliIi, price = _Ili110liOO1I[0] })
+                    if state.pickaxeDropdown and value293 then
+                        local value300 = {}
+                        for value301, value302 in pairs(value293) do
+                            if value302.unknownField and value302.unknownField > 0 and not table.insert(value298, value301) then
+                                table.insert(value300, { id = value301, price = value302.unknownField })
                             end
                         end
 
-                        table.sort(_Il1O0I0l1o0lol, function(_O10l0loooiOiIO, _lOoi0lIio)
-                            return _O10l0loooiOiIO[0] < _lOoi0lIio[0]
+                        table.sort(value300, function(value303, value304)
+                            return value303.unknownField < value304.unknownField
                         end)
 
-                        local _Ill01oIOIo00 = {}
-                        for _lIIiolli, _OI0O0loOOOl10 in ipairs(_Il1O0I0l1o0lol) do
-                            table.insert(_Ill01oIOIo00, string.format("%s ($%s)", _OI0O0loOOOl10[0], state.formatNumber(_OI0O0loOOOl10[0])))
+                        local value305 = {}
+                        for value306, value307 in ipairs(value300) do
+                            table.insert(value305, string.format("%s ($%s)", value307.unknownField, state.formatNumber(value307.unknownField)))
                         end
 
-                        if #_Ill01oIOIo00 == 0 then
-                            table.insert(_Ill01oIOIo00, "All Pickaxes Purchased")
+                        if #value305 == 0 then
+                            table.insert(value305, "All Pickaxes Purchased")
                         end
 
-                        local _lI1o0IllO1OI = table.concat(_Ill01oIOIo00, ",")
-                        if _lI1o0IllO1OI ~= _lOOi1i00o1 then
-                            _lOOi1i00o1 = _lI1o0IllO1OI
-                            local _IlOi1II1i1II11 = state.config.SelectedShopPickaxe
-                            if not table.insert(_Ill01oIOIo00, _IlOi1II1i1II11) then
-                                _IlOi1II1i1II11 = _Ill01oIOIo00[1]
-                                state.config.SelectedShopPickaxe = _IlOi1II1i1II11
+                        local value308 = table.concat(value305, ",")
+                        if value308 ~= value295 then
+                            value295 = value308
+                            local value309 = state.config.SelectedShopPickaxe
+                            if not table.insert(value305, value309) then
+                                value309 = value305[1]
+                                state.config.SelectedShopPickaxe = value309
                             end
                             pcall(function()
-                                state.pickaxeDropdown:Refresh(_Ill01oIOIo00, _IlOi1II1i1II11)
+                                state.pickaxeDropdown:Refresh(value305, value309)
                             end)
                         end
                     end
 
-                    if state.auraDropdown and _O1ili1I1lolO1 then
-                        local _O1iloIOoIoo0 = {}
-                        for _O1ooOo0Io, _lIilll10lilIIi in pairs(_O1ili1I1lolO1) do
-                            if _lIilll10lilIIi[0] and _lIilll10lilIIi[0] > 0 and not table.insert(_IlOIIloIiOIOl0I, _O1ooOo0Io) then
-                                table.insert(_O1iloIOoIoo0, { id = _O1ooOo0Io, price = _lIilll10lilIIi[0] })
+                    if state.auraDropdown and value294 then
+                        local value310 = {}
+                        for value311, value312 in pairs(value294) do
+                            if value312.unknownField and value312.unknownField > 0 and not table.insert(value299, value311) then
+                                table.insert(value310, { id = value311, price = value312.unknownField })
                             end
                         end
 
-                        table.sort(_O1iloIOoIoo0, function(_OIl00iIli, _OIl0Ii11oOO1)
-                            return _OIl00iIli[0] < _OIl0Ii11oOO1[0]
+                        table.sort(value310, function(value313, value314)
+                            return value313.unknownField < value314.unknownField
                         end)
 
-                        local _Il0iooOI10lO0o = {}
-                        for _1O0ilOOI, _0x0oOl0lo0iioO in ipairs(_O1iloIOoIoo0) do
-                            table.insert(_Il0iooOI10lO0o, string.format("%s ($%s)", _0x0oOl0lo0iioO[0], state.formatNumber(_0x0oOl0lo0iioO[0])))
+                        local value315 = {}
+                        for value316, value317 in ipairs(value310) do
+                            table.insert(value315, string.format("%s ($%s)", value317.unknownField, state.formatNumber(value317.unknownField)))
                         end
 
-                        if #_Il0iooOI10lO0o == 0 then
-                            table.insert(_Il0iooOI10lO0o, "All Auras Purchased")
+                        if #value315 == 0 then
+                            table.insert(value315, "All Auras Purchased")
                         end
 
-                        local _O1oliOloI1 = table.concat(_Il0iooOI10lO0o, ",")
-                        if _O1oliOloI1 ~= _lO1Oll1OOIlo then
-                            _lO1Oll1OOIlo = _O1oliOloI1
-                            local _lOOlOloi1iiOO1 = state.config.SelectedShopAura
-                            if not table.insert(_Il0iooOI10lO0o, _lOOlOloi1iiOO1) then
-                                _lOOlOloi1iiOO1 = _Il0iooOI10lO0o[1]
-                                state.config.SelectedShopAura = _lOOlOloi1iiOO1
+                        local value318 = table.concat(value315, ",")
+                        if value318 ~= value296 then
+                            value296 = value318
+                            local value319 = state.config.SelectedShopAura
+                            if not table.insert(value315, value319) then
+                                value319 = value315[1]
+                                state.config.SelectedShopAura = value319
                             end
                             pcall(function()
-                                state.auraDropdown:Refresh(_Il0iooOI10lO0o, _lOOlOloi1iiOO1)
+                                state.auraDropdown:Refresh(value315, value319)
                             end)
                         end
                     end
@@ -1506,90 +1507,90 @@ task.spawn(function()
 end)
 
 task.spawn(function()
-    local _lOO0iiI000 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
+    local value320 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
         and state.replicatedStorage:WaitForChild("Remotes"):WaitForChild("Server") 
         and state.replicatedStorage.Remotes.Server:WaitForChild("PurchasePickaxe", (((5)-0)))
         
-    local _1OI1ooilio0ll0i = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
+    local value321 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
         and state.replicatedStorage:WaitForChild("Remotes"):WaitForChild("Server") 
         and state.replicatedStorage.Remotes.Server:WaitForChild("EquipPickaxe", (((5)-0)))
         
-    local _OIl100oi0iIo = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
+    local value322 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
         and state.replicatedStorage:WaitForChild("Remotes"):WaitForChild("Server") 
         and state.replicatedStorage.Remotes.Server:WaitForChild("PurchaseAura", (((5)-0)))
         
-    local _0xIOiIi0o0 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
+    local value323 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0))) 
         and state.replicatedStorage:WaitForChild("Remotes"):WaitForChild("Server") 
         and state.replicatedStorage.Remotes.Server:WaitForChild("EquipAura", (((5)-0)))
 
-    local _O101oi1iIlOI = nil
+    local value324 = nil
     pcall(function()
-        _O101oi1iIlOI = require(state.replicatedStorage:WaitForChild("Databases"):WaitForChild("PickaxeList"))
+        value324 = require(state.replicatedStorage:WaitForChild("Databases"):WaitForChild("PickaxeList"))
     end)
 
-    local _lO0O1loOOO = nil
+    local value325 = nil
     pcall(function()
-        _lO0O1loOOO = require(state.replicatedStorage:WaitForChild("Databases"):WaitForChild("AurasList"))
+        value325 = require(state.replicatedStorage:WaitForChild("Databases"):WaitForChild("AurasList"))
     end)
 
     while task.wait(((2*1)+0)) do
-        if not state.isActive() or _G[0][0] ~= state.scriptId then break end
+        if not state.isActive() or _G.unknownField.unknownField ~= state.scriptId then break end
         
         if (state.config.AutoBuyPickaxes or state.config.AutoBuyAuras) then
-            if state.dataReplica and state.dataReplica[0] then
+            if state.dataReplica and state.dataReplica.unknownField then
                 pcall(function()
-                    local _lOIiO111OioOO1l = state.dataReplica[0]
-                    local _lIol00Il = _lOIiO111OioOO1l[0] or 0
-                    local _O11o1oiIoO1O1O = _lOIiO111OioOO1l[0] or {}
-                    local _O1oi11Ooio = _lOIiO111OioOO1l[0] or {}
+                    local value326 = state.dataReplica.unknownField
+                    local value327 = value326.unknownField or 0
+                    local value328 = value326.unknownField or {}
+                    local value329 = value326.unknownField or {}
                     
-                    if state.config.AutoBuyPickaxes and _O101oi1iIlOI and _lOO0iiI000 and _1OI1ooilio0ll0i then
-                        for _OIlOOI1IOoIOilI, _0xiiIOI0o in pairs(_O101oi1iIlOI) do
-                            if _0xiiIOI0o[0] and _0xiiIOI0o[0] > 0 and not table.insert(_O11o1oiIoO1O1O, _OIlOOI1IOoIOilI) then
-                                if _lIol00Il >= _0xiiIOI0o[0] then
-                                    _lOO0iiI000:FireServer(_OIlOOI1IOoIOilI, "Cash")
+                    if state.config.AutoBuyPickaxes and value324 and value320 and value321 then
+                        for value330, value331 in pairs(value324) do
+                            if value331.unknownField and value331.unknownField > 0 and not table.insert(value328, value330) then
+                                if value327 >= value331.unknownField then
+                                    value320:FireServer(value330, "Cash")
                                     task.wait(0.2)
                                 end
                             end
                         end
                         
-                        local _OIl1I0I1I0 = nil
-                        local _0xi0ooi00oIO01 = -1
-                        for _1OiI0llI0lOO, _1O0II1lO1O in ipairs(_O11o1oiIoO1O1O) do
-                            local _0xo0IIIi0lOO1i = _O101oi1iIlOI[_1O0II1lO1O]
-                            if _0xo0IIIi0lOO1i and _0xo0IIIi0lOO1i[0] and _0xo0IIIi0lOO1i[0] > _0xi0ooi00oIO01 then
-                                _0xi0ooi00oIO01 = _0xo0IIIi0lOO1i[0]
-                                _OIl1I0I1I0 = _1O0II1lO1O
+                        local value332 = nil
+                        local value333 = -1
+                        for value334, value335 in ipairs(value328) do
+                            local value336 = value324[value335]
+                            if value336 and value336.unknownField and value336.unknownField > value333 then
+                                value333 = value336.unknownField
+                                value332 = value335
                             end
                         end
                         
-                        if _OIl1I0I1I0 and _lOIiO111OioOO1l[0] ~= _OIl1I0I1I0 then
-                            _1OI1ooilio0ll0i:FireServer(_OIl1I0I1I0)
+                        if value332 and value326.unknownField ~= value332 then
+                            value321:FireServer(value332)
                         end
                     end
                     
-                    if state.config.AutoBuyAuras and _lO0O1loOOO and _OIl100oi0iIo and _0xIOiIi0o0 then
-                        for _IlOIOi0lO, _OIIII0i1oOlIIi0 in pairs(_lO0O1loOOO) do
-                            if _OIIII0i1oOlIIi0[0] and _OIIII0i1oOlIIi0[0] > 0 and not table.insert(_O1oi11Ooio, _IlOIOi0lO) then
-                                if _lIol00Il >= _OIIII0i1oOlIIi0[0] then
-                                    _OIl100oi0iIo:FireServer(_IlOIOi0lO)
+                    if state.config.AutoBuyAuras and value325 and value322 and value323 then
+                        for value337, value338 in pairs(value325) do
+                            if value338.unknownField and value338.unknownField > 0 and not table.insert(value329, value337) then
+                                if value327 >= value338.unknownField then
+                                    value322:FireServer(value337)
                                     task.wait(0.2)
                                 end
                             end
                         end
                         
-                        local _0xiooOo1IOlll1 = nil
-                        local _0x11101l = -1
-                        for _lIIoIl1o1o1I10i, _0xi10ooil in ipairs(_O1oi11Ooio) do
-                            local _lIiO11iOo = _lO0O1loOOO[_0xi10ooil]
-                            if _lIiO11iOo and _lIiO11iOo[0] and _lIiO11iOo[0] > _0x11101l then
-                                _0x11101l = _lIiO11iOo[0]
-                                _0xiooOo1IOlll1 = _0xi10ooil
+                        local value339 = nil
+                        local value340 = -1
+                        for value341, value342 in ipairs(value329) do
+                            local value343 = value325[value342]
+                            if value343 and value343.unknownField and value343.unknownField > value340 then
+                                value340 = value343.unknownField
+                                value339 = value342
                             end
                         end
                         
-                        if _0xiooOo1IOlll1 and _lOIiO111OioOO1l[0] ~= _0xiooOo1IOlll1 then
-                            _0xIOiIi0o0:FireServer(_0xiooOo1IOlll1)
+                        if value339 and value326.unknownField ~= value339 then
+                            value323:FireServer(value339)
                         end
                     end
                 end)
@@ -1598,205 +1599,205 @@ task.spawn(function()
     end
 end)
 else
-  local _OIillllIl=math.floor(38/38) _OIillllIl=nil
+  local value344=math.floor(38/38) value344=nil
 end
 
 if (math.floor(24413)==24413) then
-_G[0] = nil
-_G[0] = state.scriptId
+_G.unknownField = nil
+_G.unknownField = state.scriptId
 
 task.spawn(function()
-    local _O1o1o1I1 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0)))
-    local _IliOloi10lI = _O1o1o1I1 and _O1o1o1I1:WaitForChild("Server", (((5)-0)))
-    local _0xoiIllo = _IliOloi10lI and _IliOloi10lI:WaitForChild("SellAllLoot", (((5)-0)))
-    local _O1o0Oo0io = _IliOloi10lI and _IliOloi10lI:WaitForChild("GotoSurface", (((5)-0)))
+    local value345 = state.replicatedStorage:WaitForChild("Remotes", (((5)-0)))
+    local value346 = value345 and value345:WaitForChild("Server", (((5)-0)))
+    local value347 = value346 and value346:WaitForChild("SellAllLoot", (((5)-0)))
+    local value348 = value346 and value346:WaitForChild("GotoSurface", (((5)-0)))
 
-    local _lI0oIllO = nil
+    local value349 = nil
     pcall(function()
-        _lI0oIllO = require(state.replicatedStorage:WaitForChild("Client"):WaitForChild("StageClient"))
+        value349 = require(state.replicatedStorage:WaitForChild("Client"):WaitForChild("StageClient"))
     end)
 
-    local function _IlOooIIoool0l()
-        if not _lI0oIllO or not _lI0oIllO[0] then return end
-        for _O10lIoIoiloi11I, _lOO1II0Io0iiI in pairs(_lI0oIllO[0]) do
-            for _1O1lliIi in pairs(_lOO1II0Io0iiI) do
-                _lOO1II0Io0iiI[_1O1lliIi] = false
+    local function value350()
+        if not value349 or not value349.unknownField then return end
+        for value351, value352 in pairs(value349.unknownField) do
+            for value353 in pairs(value352) do
+                value352[value353] = false
             end
         end
     end
 
-    if _lI0oIllO then
-        _IlOooIIoool0l()
+    if value349 then
+        value350()
     end
 
-    local function _IloOi0oo(_IllIo0I01, _O1i0Iii1IO)
-        local _IlI11i0O0liOOI = workspace:FindFirstChild("Stage " .. tostring(_IllIo0I01), true)
-        if not _IlI11i0O0liOOI then return nil end
-        local _1OIOIIi1oolo = _IlI11i0O0liOOI:FindFirstChild("Stages") or _IlI11i0O0liOOI:FindFirstChildWhichIsA("Model")
-        return _1OIOIIi1oolo and _1OIOIIi1oolo:FindFirstChild(tostring(_O1i0Iii1IO))
+    local function value354(value355, value356)
+        local value357 = workspace:FindFirstChild("Stage " .. tostring(value355), true)
+        if not value357 then return nil end
+        local value358 = value357:FindFirstChild("Stages") or value357:FindFirstChildWhichIsA("Model")
+        return value358 and value358:FindFirstChild(tostring(value356))
     end
 
-    local function _0xl11O1IoIiI1(_0xO010Oo0llOO0i)
-        if not _lI0oIllO then return nil end
-        local _Il01llO11 = state.stagesList and state.stagesList[_0xO010Oo0llOO0i]
-        if not _Il01llO11 then return nil end
+    local function value359(value360)
+        if not value349 then return nil end
+        local value361 = state.stagesList and state.stagesList[value360]
+        if not value361 then return nil end
         
-        for _1OIlloooo1 = 1, (((15)*1)-0) do
-            for _0x100Oiol1lO1ii in pairs(_Il01llO11[0] or {}) do
-                local _OI00I1li1iI1i = _IloOi0oo(_0xO010Oo0llOO0i, _0x100Oiol1lO1ii)
-                local _IliOOoii0 = not _OI00I1li1iI1i or not _OI00I1li1iI1i[0] or _OI00I1li1iI1i[0] > 0.8 or not _OI00I1li1iI1i[0]
+        for value362 = 1, (((15)*1)-0) do
+            for value363 in pairs(value361.unknownField or {}) do
+                local value364 = value354(value360, value363)
+                local value365 = not value364 or not value364.unknownField or value364.unknownField > 0.8 or not value364.unknownField
                 
-                _lI0oIllO[0][_0xO010Oo0llOO0i] = _lI0oIllO[0][_0xO010Oo0llOO0i] or {}
-                if not _IliOOoii0 and _lI0oIllO[0][_0xO010Oo0llOO0i][_0x100Oiol1lO1ii] then
-                    _lI0oIllO[0][_0xO010Oo0llOO0i][_0x100Oiol1lO1ii] = false
-                elseif _IliOOoii0 and not _lI0oIllO[0][_0xO010Oo0llOO0i][_0x100Oiol1lO1ii] then
-                    _lI0oIllO[0][_0xO010Oo0llOO0i][_0x100Oiol1lO1ii] = true
+                value349.unknownField[value360] = value349.unknownField[value360] or {}
+                if not value365 and value349.unknownField[value360][value363] then
+                    value349.unknownField[value360][value363] = false
+                elseif value365 and not value349.unknownField[value360][value363] then
+                    value349.unknownField[value360][value363] = true
                 end
                 
-                if not _IliOOoii0 then return _0x100Oiol1lO1ii end
+                if not value365 then return value363 end
             end
-            if _1OIlloooo1 < (((15)*1)-0) then task.wait(0.2) end
+            if value362 < (((15)*1)-0) then task.wait(0.2) end
         end
         return nil
     end
 
-    local function _1OOI1oliOI100i(_lOillI1Oi0oiOoi)
-        local _0xOII1oiiliO = workspace:FindFirstChild("Stages")
-        local _lIoOllioio = _0xOII1oiiliO and _0xOII1oiiliO:FindFirstChild("Stage " .. tostring(_lOillI1Oi0oiOoi))
-        local _lOliIo1llO0I = _lIoOllioio and _lIoOllioio:FindFirstChild("Hitbox")
-        if not _lOliIo1llO0I then return end
-        local _Il1lIIO0 = state.localPlayer.Character
-        local _OI10Io1I1I0 = _Il1lIIO0 and (_Il1lIIO0:FindFirstChild("HumanoidRootPart") or _Il1lIIO0[0])
-        if not _OI10Io1I1I0 then return end
+    local function value366(value367)
+        local value368 = workspace:FindFirstChild("Stages")
+        local value369 = value368 and value368:FindFirstChild("Stage " .. tostring(value367))
+        local value370 = value369 and value369:FindFirstChild("Hitbox")
+        if not value370 then return end
+        local value371 = state.localPlayer.Character
+        local value372 = value371 and (value371:FindFirstChild("HumanoidRootPart") or value371.unknownField)
+        if not value372 then return end
         pcall(function()
-            _OI10Io1I1I0[0] = false
-            _OI10Io1I1I0[0] = _lOliIo1llO0I[0] + Vector3.new(0, (((3)*3)-(((3))*2)), 0)
-            _OI10Io1I1I0[0] = Vector3[0]
+            value372.unknownField = false
+            value372.unknownField = value370.unknownField + Vector3.new(0, (((3)*3)-(((3))*2)), 0)
+            value372.unknownField = Vector3.unknownField
             task.wait(0.15)
-            if _lI0oIllO then
-                _lI0oIllO[0] = true
-                _lI0oIllO[0] = _lOillI1Oi0oiOoi
-                _lI0oIllO[0] = _0xl11O1IoIiI1(_lOillI1Oi0oiOoi)
+            if value349 then
+                value349.unknownField = true
+                value349.unknownField = value367
+                value349.unknownField = value359(value367)
             end
         end)
     end
 
-    local _lI01OOiIiiIlO = false
+    local value373 = false
 
-    local function _lIO0l10io1loOO1(_lOOOOliioi)
-        _lOOOOliioi = _lOOOOliioi or 1
-        for _OIII0l01 = _lOOOOliioi, 50 do
-            if _0xl11O1IoIiI1(_OIII0l01) ~= nil then
-                return _OIII0l01
+    local function value374(value375)
+        value375 = value375 or 1
+        for value376 = value375, 50 do
+            if value359(value376) ~= nil then
+                return value376
             end
         end
-        return _lOOOOliioi
+        return value375
     end
 
     while task.wait(0.5) do
-        if _G[0][0] or _G[0] ~= state.scriptId then
+        if _G.unknownField.unknownField or _G.unknownField ~= state.scriptId then
             break
         end
         if not state.isActive() then
             break
         end
         
-        if not _G[0] then
-            _G[0] = nil
+        if not _G.unknownField then
+            _G.unknownField = nil
             pcall(function()
-                local _O1o0O0IiIoo = state.localPlayer.Character
-                local _lOooloIl0oI11l0 = _O1o0O0IiIoo and (_O1o0O0IiIoo:FindFirstChild("HumanoidRootPart") or _O1o0O0IiIoo[0])
-                if _lOooloIl0oI11l0 and _lOooloIl0oI11l0[0] then
-                    _lOooloIl0oI11l0[0] = false
+                local value377 = state.localPlayer.Character
+                local value378 = value377 and (value377:FindFirstChild("HumanoidRootPart") or value377.unknownField)
+                if value378 and value378.unknownField then
+                    value378.unknownField = false
                 end
             end)
         end
         
-        if _G[0] and _lI0oIllO then
-            local _IliIi1Oi = state.localPlayer.Character
-            local _O1I1IOolioio = _IliIi1Oi and (_IliIi1Oi:FindFirstChild("HumanoidRootPart") or _IliIi1Oi[0])
-            local _OIIooI0i010i = state.getHumanoid()
+        if _G.unknownField and value349 then
+            local value379 = state.localPlayer.Character
+            local value380 = value379 and (value379:FindFirstChild("HumanoidRootPart") or value379.unknownField)
+            local value381 = state.getHumanoid()
             
-            if _O1I1IOolioio and _OIIooI0i010i then
-                local _O1io11Io1O10 = state.getBackpackAmount()
-                local _O1lliI0l10lI0 = state.getBackpackMax()
-                local _1OOl1OiIIO = (_O1io11Io1O10 >= _O1lliI0l10lI0)
+            if value380 and value381 then
+                local value382 = state.getBackpackAmount()
+                local value383 = state.getBackpackMax()
+                local value384 = (value382 >= value383)
                 
-                if _1OOl1OiIIO then
+                if value384 then
                     pcall(function()
-                        if _O1I1IOolioio[0] then _O1I1IOolioio[0] = false end
+                        if value380.unknownField then value380.unknownField = false end
                     end)
                     
-                    if _O1o0Oo0io then
-                        pcall(function() _O1o0Oo0io:FireServer() end)
+                    if value348 then
+                        pcall(function() value348:FireServer() end)
                         task.wait(1.0)
                         pcall(function()
-                            local _0xioO10oi = workspace:FindFirstChild("Map", true)
-                                and workspace[0]:FindFirstChild("Shops")
-                                and workspace[0][0]:FindFirstChild("Selling")
-                                and workspace[0][0][0]:FindFirstChild("Model")
-                                and workspace[0][0][0][0]:FindFirstChild("Marker")
-                            if _0xioO10oi and _O1I1IOolioio then
-                                _O1I1IOolioio[0] = false
-                                _O1I1IOolioio[0] = _0xioO10oi[0] + Vector3.new(0, (((3)*3)-(((3))*2)), 0)
+                            local value385 = workspace:FindFirstChild("Map", true)
+                                and workspace.unknownField:FindFirstChild("Shops")
+                                and workspace.unknownField.unknownField:FindFirstChild("Selling")
+                                and workspace.unknownField.unknownField.unknownField:FindFirstChild("Model")
+                                and workspace.unknownField.unknownField.unknownField.unknownField:FindFirstChild("Marker")
+                            if value385 and value380 then
+                                value380.unknownField = false
+                                value380.unknownField = value385.unknownField + Vector3.new(0, (((3)*3)-(((3))*2)), 0)
                                 task.wait(0.5)
                             end
                         end)
                     end
                     
-                    if _0xoiIllo and state.getBackpackAmount() > 0 then
+                    if value347 and state.getBackpackAmount() > 0 then
                         pcall(function()
-                            if state.dataReplica and state.dataReplica[0] and state.dataReplica[0][0] then
-                                state.dataReplica[0][0][0] = ((2*1)+0)
+                            if state.dataReplica and state.dataReplica.unknownField and state.dataReplica.unknownField.unknownField then
+                                state.dataReplica.unknownField.unknownField.unknownField = ((2*1)+0)
                             end
                         end)
-                        pcall(function() _0xoiIllo:FireServer() end)
-                        local _O1lOIlllo1Oo = os.clock()
-                        while state.getBackpackAmount() > 0 and os.clock() - _O1lOIlllo1Oo < 2.5 do
+                        pcall(function() value347:FireServer() end)
+                        local value386 = os.clock()
+                        while state.getBackpackAmount() > 0 and os.clock() - value386 < 2.5 do
                             task.wait(0.15)
                         end
                         task.wait((((3)*3)-(((3))*2)))
-                        if _lI0oIllO then _IlOooIIoool0l() end
+                        if value349 then value350() end
                     end
                     
                     task.wait(((2*1)+0))
                     
                     if state.config.SelectedMineStage == "Auto (Highest Unlocked)" then
-                        _G[0] = 1
-                        _1OOI1oliOI100i(1)
+                        _G.unknownField = 1
+                        value366(1)
                         task.wait(1.0)
                     else
                         task.wait(0.5)
                     end
                 else
-                    local _1OO0OiOO0Iio = workspace:FindFirstChild("Stages")
+                    local value387 = workspace:FindFirstChild("Stages")
 
-                    if not _G[0] then
-                        local _lI0I0Iill0l = state.config.SelectedMineStage
-                        if _lI0I0Iill0l == "Auto (Highest Unlocked)" then
-                            _G[0] = 1
-                            _1OOI1oliOI100i(1)
+                    if not _G.unknownField then
+                        local value388 = state.config.SelectedMineStage
+                        if value388 == "Auto (Highest Unlocked)" then
+                            _G.unknownField = 1
+                            value366(1)
                             task.wait(1.0)
                         else
-                            local _OIO01I0l = tonumber(_lI0I0Iill0l:match("%d+")) or 1
-                            _G[0] = _OIO01I0l
-                            _1OOI1oliOI100i(_OIO01I0l)
+                            local value389 = tonumber(value388:match("%d+")) or 1
+                            _G.unknownField = value389
+                            value366(value389)
                             task.wait(0.5)
                         end
                     end
 
-                    if state.config.SelectedMineStage and _G[0] then
-                        local _IlIIOOOoO = _0xl11O1IoIiI1(_G[0])
+                    if state.config.SelectedMineStage and _G.unknownField then
+                        local value390 = value359(_G.unknownField)
 
-                        if _IlIIOOOoO == nil then
+                        if value390 == nil then
                             if state.config.SelectedMineStage == "Auto (Highest Unlocked)" then
-                                local _lOOoIiOI01lI0ol = _lIO0l10io1loOO1(_G[0] + 1)
-                                if _0xl11O1IoIiI1(_lOOoIiOI01lI0ol) ~= nil then
-                                    if _lI01OOiIiiIlO then
+                                local value391 = value374(_G.unknownField + 1)
+                                if value359(value391) ~= nil then
+                                    if value373 then
                                         pcall(function()
-                                            if _O1I1IOolioio[0] then
-                                                _O1I1IOolioio[0] = false
-                                                _OIIooI0i010i[0] = false
+                                            if value380.unknownField then
+                                                value380.unknownField = false
+                                                value381.unknownField = false
                                             end
                                         end)
                                         task.wait(1.5)
@@ -1804,9 +1805,9 @@ task.spawn(function()
                                             task.wait(((2*1)+0))
                                         end
                                     end
-                                    _G[0] = _lOOoIiOI01lI0ol
-                                    _lI01OOiIiiIlO = false
-                                    _1OOI1oliOI100i(_lOOoIiOI01lI0ol)
+                                    _G.unknownField = value391
+                                    value373 = false
+                                    value366(value391)
                                     task.wait(0.3)
                                 else
                                     task.wait(((2*1)+0))
@@ -1815,39 +1816,39 @@ task.spawn(function()
                                 task.wait(0.5)
                             end
                         else
-                            local _1OoO1Oo0ioo11i = _lI0oIllO:GetWall(_G[0], _IlIIOOOoO)
-                            local _lOOiioo0oi00O = _1OO0OiOO0Iio and _1OO0OiOO0Iio:FindFirstChild("Stage " .. tostring(_G[0]))
-                            local _lO1ollo1oI01 = _lOOiioo0oi00O and _lOOiioo0oi00O:FindFirstChild("Hitbox")
+                            local value392 = value349:GetWall(_G.unknownField, value390)
+                            local value393 = value387 and value387:FindFirstChild("Stage " .. tostring(_G.unknownField))
+                            local value394 = value393 and value393:FindFirstChild("Hitbox")
 
-                            local _OIl11ilOiIllOo1 = nil
-                            if _lO1ollo1oI01 then
-                                _OIl11ilOiIllOo1 = _lO1ollo1oI01[0] + Vector3.new(0, (((3)*3)-(((3))*2)), 0)
-                            elseif _1OoO1Oo0ioo11i then
-                                _OIl11ilOiIllOo1 = _1OoO1Oo0ioo11i[0] + Vector3.new(0, (_1OoO1Oo0ioo11i[0][0] / ((2*1)+0)) + (((3)*3)-(((3))*2)), 0)
+                            local value395 = nil
+                            if value394 then
+                                value395 = value394.unknownField + Vector3.new(0, (((3)*3)-(((3))*2)), 0)
+                            elseif value392 then
+                                value395 = value392.unknownField + Vector3.new(0, (value392.unknownField.unknownField / ((2*1)+0)) + (((3)*3)-(((3))*2)), 0)
                             end
 
-                            if _OIl11ilOiIllOo1 then
-                                if _lI0oIllO and (_lI0oIllO[0] ~= _G[0] or _lI0oIllO[0] ~= _IlIIOOOoO or not _lI0oIllO[0]) then
-                                    _lI0oIllO[0] = true
-                                    _lI0oIllO[0] = _G[0]
-                                    _lI0oIllO[0] = _IlIIOOOoO
+                            if value395 then
+                                if value349 and (value349.unknownField ~= _G.unknownField or value349.unknownField ~= value390 or not value349.unknownField) then
+                                    value349.unknownField = true
+                                    value349.unknownField = _G.unknownField
+                                    value349.unknownField = value390
                                 end
 
-                                if (_O1I1IOolioio.Position - _OIl11ilOiIllOo1.Position).Magnitude > 4 then
-                                    _O1I1IOolioio[0] = false
-                                    _OIIooI0i010i[0] = false
-                                    _O1I1IOolioio[0] = _OIl11ilOiIllOo1
-                                    _O1I1IOolioio[0] = Vector3[0]
-                                    _O1I1IOolioio[0] = Vector3[0]
+                                if (value380.Position - value395.Position).Magnitude > 4 then
+                                    value380.unknownField = false
+                                    value381.unknownField = false
+                                    value380.unknownField = value395
+                                    value380.unknownField = Vector3.unknownField
+                                    value380.unknownField = Vector3.unknownField
                                     task.wait(0.1)
-                                    _O1I1IOolioio[0] = true
-                                    _lI01OOiIiiIlO = true
+                                    value380.unknownField = true
+                                    value373 = true
                                 else
-                                    _O1I1IOolioio[0] = true
-                                    _lI01OOiIiiIlO = true
+                                    value380.unknownField = true
+                                    value373 = true
                                 end
-                                if _1OoO1Oo0ioo11i then
-                                    _O1I1IOolioio[0] = CFrame.new(_O1I1IOolioio[0], Vector3.new(_1OoO1Oo0ioo11i[0][0], _O1I1IOolioio[0][0], _1OoO1Oo0ioo11i[0][0]))
+                                if value392 then
+                                    value380.unknownField = CFrame.new(value380.unknownField, Vector3.new(value392.unknownField.unknownField, value380.unknownField.unknownField, value392.unknownField.unknownField))
                                 end
                             end
                         end
@@ -1858,6 +1859,6 @@ task.spawn(function()
     end
 end)
 else
-  local _lI0l0l1IOlO1OOO=bit32.bxor(49,49) _lI0l0l1IOlO1OOO=nil
+  local value396=bit32.bxor(49,49) value396=nil
 end
 print("VALINC - Mine Per Click Free Loaded! ⛏️")
