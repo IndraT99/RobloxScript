@@ -388,9 +388,6 @@ state.uiLibraryState = {
 state.window = state.uiLibraryState:CreateWindow()
 _G.unknownField.unknownField = Window
 
-else
-  local value044=math.floor(914/914) value044=nil
-end
 
 if ((38406>0)) then
 pcall(function()
