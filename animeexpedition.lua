@@ -484,7 +484,7 @@ end
 IH_AE_Callbacks.loadSelectedMacro = function()
     local ok, message = exportMacro(config.SelectedMacro)
     ui:Notify({
-        Title = "AE Macro",
+        Title = "IndraHub",
         Description = ok and "Copied to clipboard." or message,
         Time = 4,
     })
@@ -584,7 +584,7 @@ IH_AE_Callbacks.on_PlayMacro = function(enabled)
         return
     end
     if not loadCurrentMacro() then
-        ui:Notify({ Title = "AE Macro", Description = "No macro selected.", Time = 3 })
+        ui:Notify({ Title = "IndraHub", Description = "No macro selected.", Time = 3 })
         config.PlayMacro = false
         pcall(function() zN.PlayMacro:SetValue(false) end)
         return
@@ -1141,7 +1141,7 @@ IH_AE_Callbacks.enum = Enum
 IH_AE_Callbacks.testWebhook = function()
     local ok = zM(Ay("Test"))
     ui:Notify({
-        Title = "AE Macro",
+        Title = "IndraHub",
         Description = ok and "Test sent." or "Failed (check URL / executor http).",
         Time = 4,
     })
@@ -1292,7 +1292,7 @@ y9 = function(unitId, unitData)
     local display = metadata.Display or unitId
     local rarity = metadata.Rarity or (unitData and unitData.Rarity) or "?"
     local body = An:JSONEncode({
-        username = "Euroboros | Anime Expedition",
+        username = "IndraHub | Anime Expedition",
         content = discordMention(config.SummonPing),
         embeds = {{
             title = "Summon hit!",
@@ -1649,10 +1649,10 @@ zM = function(report)
         .. "]** - " .. tostring(report.Map or "?") .. ": " .. tostring(report.Act or "?")
         .. " - **[" .. (victory and "VICTORY" or "DEFEAT") .. "]**"
     local body = An:JSONEncode({
-        username = "Euroboros | Anime Expedition",
+        username = "IndraHub | Anime Expedition",
         content = discordMention(config.GameDropPing),
         embeds = {{
-            title = "Euroboros | Anime Expedition",
+            title = "IndraHub | Anime Expedition",
             description = "**<**\n**[USER]** " .. report.User .. "\n**[LEVEL]** " .. tostring(report.Level),
             color = color,
             fields = {
@@ -1873,6 +1873,7 @@ IH_VectorSlot_14 = function()
         if config.Recording and not config.Replaying then Ao(remote, args) end
     end
     if runtimeEnv.AeHookInstalled then return end
+    if type(hookfunction) ~= "function" then return end
     local original
     original = hookfunction(Ae.FireServer, function(self, ...)
         local callback = runtimeEnv.AeRecordCallback
@@ -1941,16 +1942,6 @@ config = { ["Recording"] = false, ["Replaying"] = false, ["RecordStart"] = 0, ["
 end
 do
 stateIndex = (stateIndex + 15) % 16
-end
-    if runtimeEnv.AeHookInstalled then return end
-    local original
-    original = hookfunction(Ae.FireServer, function(self, ...)
-        local callback = runtimeEnv.AeRecordCallback
-        if callback then pcall(callback, self, table.pack(...)) end
-        return original(self, ...)
-    end)
-    runtimeEnv.AeHookInstalled = true
-end
 end
 do
 runtimeEnv = getgenv()
@@ -2554,6 +2545,7 @@ IH_VectorSlot_14 = function()
         if config.Recording and not config.Replaying then Ao(remote, args) end
     end
     if runtimeEnv.AeHookInstalled then return end
+    if type(hookfunction) ~= "function" then return end
     local original
     original = hookfunction(Ae.FireServer, function(self, ...)
         local callback = runtimeEnv.AeRecordCallback
@@ -2848,7 +2840,10 @@ do
 scratchValue = (scratchValue + 25) % 32
 end
 do
-IH_AE_slot_5 = syn["request"]
+IH_AE_slot_5 = (syn and syn.request)
+    or http_request
+    or request
+    or (http and http.request)
 end
 do
 stateIndex = IH_AE_slot_5
@@ -3026,10 +3021,10 @@ zM = function(report)
         .. "]** - " .. tostring(report.Map or "?") .. ": " .. tostring(report.Act or "?")
         .. " - **[" .. (victory and "VICTORY" or "DEFEAT") .. "]**"
     local body = An:JSONEncode({
-        username = "Euroboros | Anime Expedition",
+        username = "IndraHub | Anime Expedition",
         content = discordMention(config.GameDropPing),
         embeds = {{
-            title = "Euroboros | Anime Expedition",
+            title = "IndraHub | Anime Expedition",
             description = "**<**\n**[USER]** " .. report.User .. "\n**[LEVEL]** " .. tostring(report.Level),
             color = color,
             fields = {
@@ -3090,10 +3085,10 @@ IH_AE_Callbacks.pcall(function() local Ko = nil;
 local Kp = nil;
 Ko = ka
 if Ko then
-ui:Notify({ ["Title"] = "AE Macro", ["Description"] = j9, ["Time"] = Ko })
+ui:Notify({ ["Title"] = "IndraHub", ["Description"] = j9, ["Time"] = Ko })
 else
 Ko = 4
-ui:Notify({ ["Title"] = "AE Macro", ["Description"] = j9, ["Time"] = Ko })
+ui:Notify({ ["Title"] = "IndraHub", ["Description"] = j9, ["Time"] = Ko })
 end
 
 end
@@ -3275,7 +3270,7 @@ y9 = function(unitId, unitData)
     local display = metadata.Display or unitId
     local rarity = metadata.Rarity or (unitData and unitData.Rarity) or "?"
     local body = An:JSONEncode({
-        username = "Euroboros | Anime Expedition",
+        username = "IndraHub | Anime Expedition",
         content = discordMention(config.SummonPing),
         embeds = {{
             title = "Summon hit!",
@@ -3304,24 +3299,29 @@ IH_AE_Callbacks.spawn(IH_AE_Callbacks.periodicRefreshLoop)
 IH_VectorSlot_32()
 IH_VectorSlot_23()
 IH_VectorSlot_14()
-scratchValue = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 
-do
-    runtimeEnv.AeRecordCallback = function(remote, args)
-        if config.Recording and not config.Replaying then Ao(remote, args) end
+-- Mock Linoria UI elements to prevent core logic from breaking
+y7 = setmetatable({}, {
+    __index = function(t, k)
+        return {
+            SetValue = function(self, val) config[k] = val end,
+            SetValues = function(self, val) end,
+            Value = config[k]
+        }
     end
-    if not runtimeEnv.AeHookInstalled then
-        local original
-        original = hookfunction(Ae.FireServer, function(self, ...)
-            local callback = runtimeEnv.AeRecordCallback
-            if callback then pcall(callback, self, table.pack(...)) end
-            return original(self, ...)
-        end)
-        runtimeEnv.AeHookInstalled = true
+})
+zN = setmetatable({}, {
+    __index = function(t, k)
+        return {
+            SetValue = function(self, val) config[k] = val end,
+            SetValues = function(self, val) end,
+            Value = config[k]
+        }
     end
-end
+})
 
 -- WindUI Setup for IndraHub
+local function setupIndraUI()
 local WindUI = nil
 pcall(function()
     WindUI = loadstring(game:HttpGet("https://tree-hub.vercel.app/api/UI/WindUI"))()
@@ -3340,10 +3340,42 @@ local Window = WindUI:CreateWindow({
     HasOutline = true
 })
 
+-- Compatibility bridge for callbacks reconstructed from old UI library.
+ui = { Unloaded = false }
+function ui:Notify(message)
+    local data = type(message) == "table" and message or { Description = tostring(message) }
+    WindUI:Notify({
+        Title = data.Title or "IndraHub",
+        Content = data.Description or data.Content or "",
+        Duration = data.Time or data.Duration or 4,
+    })
+end
+function ui:Unload()
+    self.Unloaded = true
+    pcall(function()
+        if Window.Destroy then Window:Destroy()
+        elseif Window.Close then Window:Close() end
+    end)
+end
+
 local MacroTab = Window:Tab({ Title = "Macro", Icon = "list-video" })
 local JoinerTab = Window:Tab({ Title = "Joiner", Icon = "swords" })
 local LobbyTab = Window:Tab({ Title = "Lobby", Icon = "gift" })
 local WebhookTab = Window:Tab({ Title = "Webhook", Icon = "webhook" })
+local SettingsTab = Window:Tab({ Title = "Settings", Icon = "settings" })
+
+local function normalizeMulti(value)
+    local selected = {}
+    if type(value) ~= "table" then return selected end
+    for key, enabled in value do
+        if type(key) == "number" then
+            selected[enabled] = true
+        elseif enabled then
+            selected[key] = true
+        end
+    end
+    return selected
+end
 
 local statusPara = MacroTab:Paragraph({ Title = "Status", Desc = "Idle" })
 local yenPara = MacroTab:Paragraph({ Title = "Economy", Desc = "Yen: --" })
@@ -3363,12 +3395,12 @@ MacroTab:Toggle({
     Callback = function(pm)
         if pm then
             yC()
-            WindUI:Notify({ Title = "AE Macro", Content = "Recording - play your round.", Duration = 3 })
+            WindUI:Notify({ Title = "IndraHub", Content = "Recording - play your round.", Duration = 3 })
         else
             local Or, Os = Al()
             if not Or then return end
             config["LastSavedMacro"] = nil
-            WindUI:Notify({ Title = "AE Macro", Content = "Saved '" .. Or .. "' (" .. tostring(Os) .. " actions).", Duration = 4 })
+            WindUI:Notify({ Title = "IndraHub", Content = "Saved '" .. Or .. "' (" .. tostring(Os) .. " actions).", Duration = 4 })
         end
     end
 })
@@ -3412,12 +3444,102 @@ LobbyTab:Toggle({ Title = "Auto claim battlepass", Default = config["AutoClaimBa
 LobbyTab:Toggle({ Title = "Auto claim codes", Default = config["AutoClaimCodes"] or false, Callback = IH_AE_Callbacks.on_AutoClaimCodes })
 LobbyTab:Toggle({ Title = "Auto sell", Default = config["AutoSellEnabled"] or false, Callback = IH_AE_Callbacks.on_AutoSellEnabled })
 
+local selectedRarities = {}
+for _, rarity in config.AutoSellRarities do selectedRarities[rarity] = true end
+for _, rarity in listAutoSellRarities() do
+    LobbyTab:Toggle({
+        Title = "Auto sell: " .. rarity,
+        Default = selectedRarities[rarity] == true,
+        Callback = function(enabled) IH_AE_Callbacks.on_AutoSellRarities(rarity, enabled) end,
+    })
+end
+
 LobbyTab:Dropdown({ Title = "Summon Banner", Values = stateIndex() or {"Default"}, Default = config["SummonBanner"], Callback = IH_AE_Callbacks.on_SummonBanner })
+LobbyTab:Slider({
+    Title = "Units per summon",
+    Value = { Min = 1, Max = 50, Default = tonumber(config.SummonAmount) or 1 },
+    Step = 1,
+    Callback = IH_AE_Callbacks.on_SummonAmount,
+})
 LobbyTab:Toggle({ Title = "Auto summon", Default = config["AutoSummon"] or false, Callback = IH_AE_Callbacks.on_AutoSummon })
+
+local summonIds = runtimeSlot()
+local summonLabels, defaultSummonLabels = {}, {}
+y5 = {}
+local selectedSummons = {}
+for _, id in config.SummonTargets do selectedSummons[id] = true end
+for _, id in summonIds do
+    local metadata = zo[id] or {}
+    local label = id .. " — " .. tostring(metadata.Display or id) .. " [" .. tostring(metadata.Rarity or "?") .. "]"
+    table.insert(summonLabels, label)
+    y5[label] = id
+    if selectedSummons[id] then table.insert(defaultSummonLabels, label) end
+end
+LobbyTab:Dropdown({
+    Title = "Summon targets",
+    Values = summonLabels,
+    Default = defaultSummonLabels,
+    Multi = true,
+    Searchable = true,
+    Callback = function(value) IH_AE_Callbacks.on_SummonTargets(normalizeMulti(value)) end,
+})
+LobbyTab:Toggle({
+    Title = "Summon until target",
+    Default = config.SummonUntilUnit,
+    Callback = IH_AE_Callbacks.on_SummonUntilUnit,
+})
+
+local merchantLabels, merchantLabelToName, merchantNameToLabel = IH_AE_Callbacks.buildMerchantItemOptions()
+yL = merchantLabelToName
+local defaultMerchantLabels = {}
+for _, name in config.MerchantItems do
+    if merchantNameToLabel[name] then table.insert(defaultMerchantLabels, merchantNameToLabel[name]) end
+end
+LobbyTab:Toggle({ Title = "Auto buy merchant", Default = config.AutoBuyMerchant, Callback = IH_AE_Callbacks.on_AutoBuyMerchant })
+LobbyTab:Dropdown({
+    Title = "Merchant items",
+    Values = merchantLabels,
+    Default = defaultMerchantLabels,
+    Multi = true,
+    Searchable = true,
+    Callback = function(value) IH_AE_Callbacks.on_MerchantItems(normalizeMulti(value)) end,
+})
+
+WebhookTab:Input({ Title = "Webhook URL", Default = config.WebhookUrl, Callback = IH_AE_Callbacks.on_WebhookUrl })
+WebhookTab:Toggle({ Title = "Enable webhook", Default = config.WebhookEnabled, Callback = IH_AE_Callbacks.on_WebhookEnabled })
+
+local webhookLabels, webhookLabelToId = IH_AE_Callbacks.sortedDisplayNames()
+zE = webhookLabelToId
+local defaultWebhookLabels = {}
+for _, id in config.WebhookItems do
+    local label = yR(id)
+    if webhookLabelToId[label] then table.insert(defaultWebhookLabels, label) end
+end
+WebhookTab:Dropdown({
+    Title = "Tracked items",
+    Values = webhookLabels,
+    Default = defaultWebhookLabels,
+    Multi = true,
+    Searchable = true,
+    Callback = function(value) IH_AE_Callbacks.on_WebhookItems(normalizeMulti(value)) end,
+})
+WebhookTab:Input({ Title = "Discord ID", Default = config.DiscordId, Callback = IH_AE_Callbacks.on_DiscordId })
+WebhookTab:Toggle({ Title = "Ping summon", Default = config.SummonPing, Callback = IH_AE_Callbacks.on_SummonPing })
+WebhookTab:Toggle({ Title = "Ping match result", Default = config.GameDropPing, Callback = IH_AE_Callbacks.on_GameDropPing })
+WebhookTab:Button({ Title = "Test webhook", Callback = IH_AE_Callbacks.testWebhook })
+
+SettingsTab:Button({
+    Title = "Save settings",
+    Callback = function()
+        zX()
+        ui:Notify({ Title = "IndraHub", Description = "Settings saved.", Time = 3 })
+    end,
+})
+SettingsTab:Button({ Title = "Unload", Callback = IH_AE_Callbacks.unloadUiSafe })
 
 -- Background Loop
 IH_AE_Callbacks.spawn(function()
-    while true do
+    while not ui.Unloaded do
         pcall(function()
             if config.Recording then
                 local step = config.StepText ~= "" and config.StepText or "Waiting for an action..."
@@ -3442,3 +3564,6 @@ IH_AE_Callbacks.spawn(function()
         task.wait(1)
     end
 end)
+end
+setupIndraUI()
+end
