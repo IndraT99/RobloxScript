@@ -43,16 +43,6 @@ local flags = {
     AntiAfk = true,
 }
 
---[[
-    Ouroboros Hub - Be A Fish Bait
-    Semantic reconstruction of active/beafish.lua.
-
-    The original was control-flow flattened around a shuffled constant pool.
-    Names and behavior below were recovered from runtime traces. UI button
-    discovery is intentionally defensive because several in-game labels were
-    stored under opaque values in the original.
-]]
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CollectionService = game:GetService("CollectionService")
@@ -93,15 +83,8 @@ local ReelCamera = requirePath(TS, "reel-camera")
 local BossConfig = requirePath(TS, "react", "screen", "fishing", "rare-fish-boss", "boss-config")
 
 local clientProducer = ProducerModule.clientProducer
-local INVITE_LNK = "https://discord.gg/ehKVq7pf7v"
+local INVITE_LNK = "https://discord.gg/2PPBJsmqr"
 local WINDUI_URL = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
-
-
-
-
-
-
-
 
 Tabs.M:Toggle({ Title = "Auto Fish (Perfect Charge)", Default = false, Callback = function(v) flags.AutoFish = v end })
 Tabs.M:Toggle({ Title = "Auto Mutation Boost", Default = false, Callback = function(v) flags.AutoMutationBoost = v end })
