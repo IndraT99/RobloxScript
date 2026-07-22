@@ -3,7 +3,7 @@
 -- ==========================================
 shared.IndraHub_BeAFish_Unloaded = false
 
-local WindUI = loadstring(game:HttpGet("https://tree-hub.vercel.app/api/UI/WindUI"))()
+local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/main.lua"))()
 local Window = WindUI:CreateWindow({
     Title = "IndraHub - Be A Fish Bait",
     Icon = "rbxassetid://91400086538074",
@@ -108,11 +108,7 @@ Tabs.M:Toggle({ Title = "Auto Sell All Fish", Default = false, Callback = functi
 Tabs.M:Dropdown({ Title = "Sell Trigger", Values = { "Backpack Full", "Interval", "Backpack Full or Interval" }, Default = 1, Callback = function(v) flags.SellTrigger = v end })
 Tabs.M:Slider({ Title = "Sell Interval (Seconds)", Value = { Min = 1, Max = 300, Default = 30 }, Callback = function(v) flags.SellInterval = v end })
 
-MenuBox:AddLabel("Menu bind"):AddKeyPicker("MenuKeybind", {
-    Text = "Menu keybind",
-    Default = "RightShift",
-    NoUI = true,
-})
+
 
 
 
