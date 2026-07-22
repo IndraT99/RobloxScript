@@ -115,6 +115,22 @@ local RARITIES = {
     "Glorious", "Primordial", "Atomic", "Divine", "Lunatic",
 }
 
+local function singleDropdownValue(value)
+    if type(value) ~= "table" then
+        return value
+    end
+
+    for key, selectedValue in pairs(value) do
+        if selectedValue == true and type(key) == "string" then
+            return key
+        end
+        if type(selectedValue) == "string" then
+            return selectedValue
+        end
+    end
+    return nil
+end
+
 Tabs.R:Toggle({ Title = "Auto Roll", Default = false, Callback = function(v) flags.AutoRoll = v end })
 Tabs.R:Toggle({ Title = "Instant Roll", Default = false, Callback = function(v) flags.InstantRoll = v end })
 Tabs.R:Paragraph({
@@ -129,7 +145,7 @@ local LastRollLabel = Tabs.R:Paragraph({ Title = "Last: none" })
 Tabs.Co:Toggle({ Title = "Auto Farm", Default = false, Callback = function(v) flags.KillAura = v end })
 Tabs.Co:Toggle({ Title = "Only During Wave", Default = false, Callback = function(v) flags.OnlyDuringWave = v end })
 Tabs.Co:Toggle({ Title = "Move To Enemies", Default = false, Callback = function(v) flags.ApproachEnemy = v end })
-Tabs.Co:Dropdown({ Title = "Target Mode", Values = { "Nearest", "Densest Cluster", "Cycle All" }, Default = 1, Multi = false, Callback = function(v) flags.AuraMode = v end })
+Tabs.Co:Dropdown({ Title = "Target Mode", Values = { "Nearest", "Densest Cluster", "Cycle All" }, Default = 1, Multi = false, Callback = function(v) flags.AuraMode = singleDropdownValue(v) or flags.AuraMode end })
 Tabs.Co:Slider({ Title = "Hover Distance", Value = { Min = 0, Max = 20, Default = 2 }, Callback = function(v) flags.AuraHover = v end })
 Tabs.Co:Slider({ Title = "Cluster Radius", Value = { Min = 4, Max = 60, Default = 14 }, Callback = function(v) flags.ClusterRadius = v end })
 Tabs.Co:Slider({ Title = "Attack Delay", Value = { Min = 0.05, Max = 1, Default = 0.14 }, Callback = function(v) flags.AttackDelay = v end })
@@ -149,36 +165,36 @@ Tabs.Co:Slider({ Title = "Buy Delay", Value = { Min = 0.1, Max = 5, Default = 0.
 
 Tabs.B:Toggle({ Title = "Auto Place", Default = false, Callback = function(v) flags.AutoPlace = v end })
 Tabs.B:Toggle({ Title = "Auto Place Random", Default = false, Callback = function(v) flags.AutoPlaceRandom = v end })
-Tabs.B:Dropdown({ Title = "Buildings", Values = {}, Default = 1, Multi = true, Callback = function(v) flags.PlaceBuildings = v end })
-Tabs.B:Dropdown({ Title = "Category", Values = { "Any", "Block", "Turret" }, Default = 1, Multi = false, Callback = function(v) flags.PlaceCategory = v end })
-Tabs.B:Dropdown({ Title = "Minimum Rarity", Values = RARITIES, Default = 1, Multi = false, Callback = function(v) flags.PlaceMinRarity = v end })
-Tabs.B:Dropdown({ Title = "Rotation", Values = { "0", "90", "180", "270" }, Default = 1, Multi = false, Callback = function(v) flags.PlaceRotation = v end })
+local PlaceBuildingsDropdown = Tabs.B:Dropdown({ Title = "Buildings", Values = {}, Default = {}, Multi = true, Callback = function(v) flags.PlaceBuildings = v or {} end })
+Tabs.B:Dropdown({ Title = "Category", Values = { "Any", "Block", "Turret" }, Default = 1, Multi = false, Callback = function(v) flags.PlaceCategory = singleDropdownValue(v) or flags.PlaceCategory end })
+Tabs.B:Dropdown({ Title = "Minimum Rarity", Values = RARITIES, Default = 1, Multi = false, Callback = function(v) flags.PlaceMinRarity = singleDropdownValue(v) or flags.PlaceMinRarity end })
+Tabs.B:Dropdown({ Title = "Rotation", Values = { "0", "90", "180", "270" }, Default = 1, Multi = false, Callback = function(v) flags.PlaceRotation = singleDropdownValue(v) or flags.PlaceRotation end })
 
 Tabs.B:Slider({ Title = "Keep In Inventory", Value = { Min = 0, Max = 50, Default = 0 }, Callback = function(v) flags.PlaceKeep = v end })
 Tabs.B:Slider({ Title = "Max Per Building", Value = { Min = 1, Max = 200, Default = 40 }, Callback = function(v) flags.PlaceMax = v end })
-Tabs.B:Toggle({ Title = "Respect Placement Limit", Default = false, Callback = function(v) flags.RespectLimit = v end })
-Tabs.B:Toggle({ Title = "Pause When Nothing Fits", Default = false, Callback = function(v) flags.StopOnFull = v end })
+Tabs.B:Toggle({ Title = "Respect Placement Limit", Default = true, Callback = function(v) flags.RespectLimit = v end })
+Tabs.B:Toggle({ Title = "Pause When Nothing Fits", Default = true, Callback = function(v) flags.StopOnFull = v end })
 Tabs.B:Slider({ Title = "Place Delay", Value = { Min = 0.05, Max = 3, Default = 0.2 }, Callback = function(v) flags.PlaceDelay = v end })
 
 Tabs.B:Toggle({ Title = "Auto Upgrade", Default = false, Callback = function(v) flags.AutoUpgrade = v end })
-Tabs.B:Toggle({ Title = "Upgrade Everything Unlocked", Default = false, Callback = function(v) flags.UpgradeAll = v end })
-Tabs.B:Dropdown({ Title = "Buildings", Values = {}, Default = 1, Multi = true, Callback = function(v) flags.UpgradeBuildings = v end })
+Tabs.B:Toggle({ Title = "Upgrade Everything Unlocked", Default = true, Callback = function(v) flags.UpgradeAll = v end })
+local UpgradeBuildingsDropdown = Tabs.B:Dropdown({ Title = "Buildings", Values = {}, Default = {}, Multi = true, Callback = function(v) flags.UpgradeBuildings = v or {} end })
 Tabs.B:Slider({ Title = "Max Level", Value = { Min = 2, Max = 64, Default = 64 }, Callback = function(v) flags.UpgradeMaxLevel = v end })
 Tabs.B:Slider({ Title = "Keep Money", Value = { Min = 0, Max = 1000000, Default = 0 }, Callback = function(v) flags.UpgradeKeepMoney = v end })
 Tabs.B:Slider({ Title = "Upgrade Delay", Value = { Min = 0.05, Max = 3, Default = 0.2 }, Callback = function(v) flags.UpgradeDelay = v end })
 local UpgradeStatus = Tabs.B:Paragraph({ Title = "Idle" })
 
 Tabs.Cr:Toggle({ Title = "Auto Craft", Default = false, Callback = function(v) flags.AutoCraft = v end })
-Tabs.Cr:Dropdown({ Title = "Recipes", Values = {}, Default = 1, Multi = true, Callback = function(v) flags.CraftRecipes = v end })
+local CraftRecipesDropdown = Tabs.Cr:Dropdown({ Title = "Recipes", Values = {}, Default = {}, Multi = true, Callback = function(v) flags.CraftRecipes = v or {} end })
 
 Tabs.Cr:Slider({ Title = "Keep In Inventory", Value = { Min = 0, Max = 50, Default = 0 }, Callback = function(v) flags.CraftKeep = v end })
-Tabs.Cr:Dropdown({ Title = "Never Consume Above", Values = RARITIES, Default = 1, Multi = false, Callback = function(v) flags.CraftMaxRarity = v end })
+Tabs.Cr:Dropdown({ Title = "Never Consume Above", Values = RARITIES, Default = 11, Multi = false, Callback = function(v) flags.CraftMaxRarity = singleDropdownValue(v) or flags.CraftMaxRarity end })
 Tabs.Cr:Slider({ Title = "Craft Delay", Value = { Min = 0.2, Max = 10, Default = 1 }, Callback = function(v) flags.CraftDelay = v end })
 local CraftStatus = Tabs.Cr:Paragraph({ Title = "Idle" })
 
-Tabs.St:Dropdown({ Title = "Player", Values = {}, Default = 1, Multi = false, Callback = function(v) flags.StealTarget = v end })
+local StealTargetDropdown = Tabs.St:Dropdown({ Title = "Player", Values = {}, Default = {}, Multi = false, Callback = function(v) flags.StealTarget = singleDropdownValue(v) end })
 
-Tabs.St:Toggle({ Title = "Clear My Plot First", Default = false, Callback = function(v) flags.StealClearFirst = v end })
+Tabs.St:Toggle({ Title = "Clear My Plot First", Default = true, Callback = function(v) flags.StealClearFirst = v end })
 Tabs.St:Toggle({ Title = "Use Normal If Missing Mutated/Shiny", Default = false, Callback = function(v) flags.StealSubstituteNormal = v end })
 Tabs.St:Slider({ Title = "Place Delay", Value = { Min = 0.05, Max = 3, Default = 0.2 }, Callback = function(v) flags.StealDelay = v end })
 local StealStatus = Tabs.St:Paragraph({ Title = "Idle" })
@@ -296,25 +312,79 @@ local function getOwnedBuildings()
     return ok and owned or {}
 end
 
-local function listOwnedBuildingNames()
-    local names, seen = {}, {}
+local function getOwnedBuildingCounts()
+    local counts = {}
     for key, value in pairs(getOwnedBuildings()) do
-        local name = type(key) == "string" and key
-            or type(value) == "string" and value
-            or type(value) == "table" and (value.Identifier or value.Name)
-        if name and not seen[name] then
-            seen[name] = true
-            table.insert(names, name)
+        local identifier
+        local amount = 1
+
+        if type(key) == "string" then
+            identifier = key
+            if type(value) == "number" then
+                amount = value
+            elseif type(value) == "table" then
+                amount = tonumber(value.Amount or value.Count or value.Quantity) or #value
+                if amount <= 0 then
+                    amount = 1
+                end
+            elseif value == false then
+                amount = 0
+            end
+        elseif type(value) == "string" then
+            identifier = value
+        elseif type(value) == "table" then
+            identifier = value.Identifier or value.Name
+            amount = tonumber(value.Amount or value.Count or value.Quantity) or 1
         end
+
+        if identifier and amount > 0 then
+            counts[identifier] = (counts[identifier] or 0) + amount
+        end
+    end
+    return counts
+end
+
+local function listOwnedBuildingNames()
+    local names = {}
+    for identifier in pairs(getOwnedBuildingCounts()) do
+        table.insert(names, identifier)
     end
     table.sort(names)
     return names
 end
 
+local function refreshDropdown(dropdown, values)
+    if not dropdown then
+        return false
+    end
+
+    local ok = pcall(function()
+        if type(dropdown.Refresh) == "function" then
+            dropdown:Refresh(values)
+        elseif type(dropdown.SetValues) == "function" then
+            dropdown:SetValues(values)
+        else
+            error("dropdown refresh is unsupported")
+        end
+    end)
+    return ok
+end
+
+local function notifyRefresh(label, count, refreshed)
+    WindUI:Notify({
+        Title = "IndraHub",
+        Content = string.format(
+            refreshed and "Found %d %s" or "Found %d %s, but dropdown refresh failed",
+            count,
+            label
+        ),
+        Duration = 5,
+    })
+end
+
 local function refreshBuildings()
     local names = listOwnedBuildingNames()
-    -- SetValues not directly supported in flags: PlaceBuildings(names)
-    WindUI:Notify(string.format("Found %d owned buildings", #names))
+    notifyRefresh("owned buildings", #names, refreshDropdown(PlaceBuildingsDropdown, names))
 end
 
 local function refreshUpgrades()
@@ -327,8 +397,7 @@ local function refreshUpgrades()
         end
     end
     table.sort(values)
-    -- SetValues not directly supported in flags: UpgradeBuildings(values)
-    WindUI:Notify(string.format("Found %d upgradable buildings", #values))
+    notifyRefresh("upgradable buildings", #values, refreshDropdown(UpgradeBuildingsDropdown, values))
 end
 
 local function refreshRecipes()
@@ -339,11 +408,15 @@ local function refreshRecipes()
     recipes = ok and recipes or {}
     local values = {}
     for key, value in pairs(recipes) do
-        table.insert(values, type(key) == "string" and key or value)
+        local recipe = type(key) == "string" and key
+            or type(value) == "string" and value
+            or type(value) == "table" and (value.Identifier or value.Name)
+        if recipe then
+            table.insert(values, recipe)
+        end
     end
     table.sort(values)
-    -- SetValues not directly supported in flags: CraftRecipes(values)
-    WindUI:Notify(string.format("Found %d unlocked recipes", #values))
+    notifyRefresh("unlocked recipes", #values, refreshDropdown(CraftRecipesDropdown, values))
 end
 
 local function refreshPlayers()
@@ -354,8 +427,7 @@ local function refreshPlayers()
         end
     end
     table.sort(values)
-    -- SetValues not directly supported in flags: StealTarget(values)
-    WindUI:Notify(string.format("Found %d bases", #values))
+    notifyRefresh("bases", #values, refreshDropdown(StealTargetDropdown, values))
 end
 
 Tabs.B:Button({ Title = "Refresh Buildings", Callback = refreshBuildings })
@@ -364,16 +436,45 @@ Tabs.Cr:Button({ Title = "Refresh Recipes", Callback = refreshRecipes })
 Tabs.St:Button({ Title = "Refresh Players", Callback = refreshPlayers })
 
 Tabs.B:Button({
-    Text = "Clear My Plot",
-    Func = function()
+    Title = "Clear My Plot",
+    Callback = function()
         fire(Remotes.ClearPlot, true)
-        WindUI:Notify("Cleared plot")
+        WindUI:Notify({ Title = "IndraHub", Content = "Cleared plot", Duration = 4 })
     end,
 })
 
-local function selected(option, name)
-    local value = option.Value
-    return type(value) == "table" and value[name] == true
+local function selected(value, name)
+    if type(value) == "string" then
+        return value == name
+    end
+    if type(value) ~= "table" then
+        return false
+    end
+    if value[name] == true then
+        return true
+    end
+    for key, selectedValue in pairs(value) do
+        if selectedValue == name or (key == name and selectedValue) then
+            return true
+        end
+    end
+    return false
+end
+
+local function selectedNames(value)
+    local names = {}
+    if type(value) == "string" then
+        table.insert(names, value)
+    elseif type(value) == "table" then
+        for key, selectedValue in pairs(value) do
+            if selectedValue == true and type(key) == "string" then
+                table.insert(names, key)
+            elseif type(selectedValue) == "string" then
+                table.insert(names, selectedValue)
+            end
+        end
+    end
+    return names
 end
 
 local rarityIndex = {}
@@ -665,13 +766,11 @@ task.spawn(function()
     while not shared.IndraHub_Builabase_Unloaded do
         if flags.AutoCraft then
             local crafted = false
-            for recipe, enabled in pairs(flags.CraftRecipes or {}) do
-                if enabled then
-                    CraftStatus:SetTitle("Crafting " .. tostring(recipe))
-                    invoke(Remotes.Craft, recipe, flags.CraftKeep, flags.CraftMaxRarity)
-                    crafted = true
-                    break
-                end
+            for _, recipe in ipairs(selectedNames(flags.CraftRecipes)) do
+                CraftStatus:SetTitle("Crafting " .. tostring(recipe))
+                invoke(Remotes.Craft, recipe, flags.CraftKeep, flags.CraftMaxRarity)
+                crafted = true
+                break
             end
             if not crafted then
                 CraftStatus:SetTitle("Idle")
@@ -679,6 +778,14 @@ task.spawn(function()
         end
         task.wait(flags.CraftDelay)
     end
+end)
+
+-- Populate all dynamic dropdowns once modules and player plots are available.
+task.defer(function()
+    refreshBuildings()
+    refreshUpgrades()
+    refreshRecipes()
+    refreshPlayers()
 end)
 
 local function targetPlacementData()
@@ -697,10 +804,7 @@ local function targetPlacementData()
 
     local sourceOrigin = SharedPlacement.GetOrigin(sourcePlot)
     local destinationOrigin = SharedPlacement.GetOrigin(destinationPlot)
-    local owned = {}
-    for _, name in ipairs(listOwnedBuildingNames()) do
-        owned[name] = (owned[name] or 0) + 1
-    end
+    local owned = getOwnedBuildingCounts()
 
     local result, missing = {}, {}
     for _, model in ipairs(placement:GetChildren()) do
