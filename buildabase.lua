@@ -1,6 +1,42 @@
 -- ==========================================
 -- WINDUI SETUP & INDRAHUB INITIALIZATION
 -- ==========================================
+local buildABaseEnv = getgenv and getgenv() or _G
+
+local function setBuildABaseGlobal(key, value)
+    rawset(_G, key, value)
+    if buildABaseEnv ~= _G then
+        buildABaseEnv[key] = value
+    end
+end
+
+local function getBuildABaseGlobal(key)
+    local value = buildABaseEnv[key]
+    if value ~= nil then
+        return value
+    end
+    return rawget(_G, key)
+end
+
+-- Prevent manual execution from creating duplicate UI/worker instances.
+if getBuildABaseGlobal("IndraHubBuildABaseRunning") == true then
+    return
+end
+
+local buildABaseSession = tostring(os.clock()) .. "_" .. tostring(math.random(1000, 9999))
+setBuildABaseGlobal("IndraHubBuildABaseSession", buildABaseSession)
+setBuildABaseGlobal("IndraHubBuildABaseRunning", true)
+setBuildABaseGlobal("IndraHubBuildABaseLastHeartbeat", os.clock())
+setBuildABaseGlobal("IndraHubBuildABaseError", nil)
+
+task.spawn(function()
+    while getBuildABaseGlobal("IndraHubBuildABaseRunning") == true
+        and getBuildABaseGlobal("IndraHubBuildABaseSession") == buildABaseSession do
+        setBuildABaseGlobal("IndraHubBuildABaseLastHeartbeat", os.clock())
+        task.wait(5)
+    end
+end)
+
 shared.IndraHub_Builabase_Unloaded = false
 
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
@@ -753,6 +789,11 @@ Tabs.Se:Button({
     Title = "Unload Script",
     Callback = function()
         shared.IndraHub_Builabase_Unloaded = true
+        setBuildABaseGlobal("IndraHubBuildABaseRunning", false)
+        setBuildABaseGlobal("IndraHubBuildABaseLastHeartbeat", os.clock())
+        if getBuildABaseGlobal("IndraHubBuildABaseSession") == buildABaseSession then
+            setBuildABaseGlobal("IndraHubBuildABaseSession", nil)
+        end
         if flags.HB then flags.HB:Disconnect() end
         if Window then Window:Destroy() end
         fire(Remotes.SetAutoWave, false)
