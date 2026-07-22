@@ -187,7 +187,7 @@ local LastRollLabel = Tabs.R:Label({ Title = "Last: none" })
 Tabs.Co:Toggle({ Title = "Auto Farm", Default = false, Callback = function(v) flags.KillAura = v end })
 Tabs.Co:Toggle({ Title = "Only During Wave", Default = false, Callback = function(v) flags.OnlyDuringWave = v end })
 Tabs.Co:Toggle({ Title = "Move To Enemies", Default = false, Callback = function(v) flags.ApproachEnemy = v end })
-Tabs.Co:Dropdown({ Title = "Target Mode", Values = { "Nearest", Default = 1, Multi = false, Callback = function(v) flags.AuraMode = v end })
+Tabs.Co:Dropdown({ Title = "Target Mode", Values = { "Nearest", "Densest Cluster", "Cycle All" }, Default = 1, Multi = false, Callback = function(v) flags.AuraMode = v end })
 Tabs.Co:Slider({ Title = "Hover Distance", Value = { Min = 0, Max = 20, Default = 2 }, Callback = function(v) flags.AuraHover = v end })
 Tabs.Co:Slider({ Title = "Cluster Radius", Value = { Min = 4, Max = 60, Default = 14 }, Callback = function(v) flags.ClusterRadius = v end })
 Tabs.Co:Slider({ Title = "Attack Delay", Value = { Min = 0.05, Max = 1, Default = 0.14 }, Callback = function(v) flags.AttackDelay = v end })
@@ -207,10 +207,10 @@ Tabs.Co:Slider({ Title = "Buy Delay", Value = { Min = 0.1, Max = 5, Default = 0.
 
 Tabs.B:Toggle({ Title = "Auto Place", Default = false, Callback = function(v) flags.AutoPlace = v end })
 Tabs.B:Toggle({ Title = "Auto Place Random", Default = false, Callback = function(v) flags.AutoPlaceRandom = v end })
-Tabs.B:Dropdown({ Title = "Buildings", Values = {, Default = 1, Multi = true, Callback = function(v) flags.PlaceBuildings = v end })
-Tabs.B:Dropdown({ Title = "Category", Values = { "Any", Default = 1, Multi = false, Callback = function(v) flags.PlaceCategory = v end })
+Tabs.B:Dropdown({ Title = "Buildings", Values = {}, Default = 1, Multi = true, Callback = function(v) flags.PlaceBuildings = v end })
+Tabs.B:Dropdown({ Title = "Category", Values = { "Any", "Block", "Turret" }, Default = 1, Multi = false, Callback = function(v) flags.PlaceCategory = v end })
 Tabs.B:Dropdown({ Title = "Minimum Rarity", Values = RARITIES, Default = 1, Multi = false, Callback = function(v) flags.PlaceMinRarity = v end })
-Tabs.B:Dropdown({ Title = "Rotation", Values = { "0", Default = 1, Multi = false, Callback = function(v) flags.PlaceRotation = v end })
+Tabs.B:Dropdown({ Title = "Rotation", Values = { "0", "90", "180", "270" }, Default = 1, Multi = false, Callback = function(v) flags.PlaceRotation = v end })
 
 Tabs.B:Slider({ Title = "Keep In Inventory", Value = { Min = 0, Max = 50, Default = 0 }, Callback = function(v) flags.PlaceKeep = v end })
 Tabs.B:Slider({ Title = "Max Per Building", Value = { Min = 1, Max = 200, Default = 40 }, Callback = function(v) flags.PlaceMax = v end })
@@ -220,21 +220,21 @@ Tabs.B:Slider({ Title = "Place Delay", Value = { Min = 0.05, Max = 3, Default = 
 
 Tabs.B:Toggle({ Title = "Auto Upgrade", Default = false, Callback = function(v) flags.AutoUpgrade = v end })
 Tabs.B:Toggle({ Title = "Upgrade Everything Unlocked", Default = false, Callback = function(v) flags.UpgradeAll = v end })
-Tabs.B:Dropdown({ Title = "Buildings", Values = {, Default = 1, Multi = true, Callback = function(v) flags.UpgradeBuildings = v end })
+Tabs.B:Dropdown({ Title = "Buildings", Values = {}, Default = 1, Multi = true, Callback = function(v) flags.UpgradeBuildings = v end })
 Tabs.B:Slider({ Title = "Max Level", Value = { Min = 2, Max = 64, Default = 64 }, Callback = function(v) flags.UpgradeMaxLevel = v end })
 Tabs.B:Slider({ Title = "Keep Money", Value = { Min = 0, Max = 1000000, Default = 0 }, Callback = function(v) flags.UpgradeKeepMoney = v end })
 Tabs.B:Slider({ Title = "Upgrade Delay", Value = { Min = 0.05, Max = 3, Default = 0.2 }, Callback = function(v) flags.UpgradeDelay = v end })
 local UpgradeStatus = Tabs.B:Label({ Title = "Idle" })
 
 Tabs.Cr:Toggle({ Title = "Auto Craft", Default = false, Callback = function(v) flags.AutoCraft = v end })
-Tabs.Cr:Dropdown({ Title = "Recipes", Values = {, Default = 1, Multi = true, Callback = function(v) flags.CraftRecipes = v end })
+Tabs.Cr:Dropdown({ Title = "Recipes", Values = {}, Default = 1, Multi = true, Callback = function(v) flags.CraftRecipes = v end })
 
 Tabs.Cr:Slider({ Title = "Keep In Inventory", Value = { Min = 0, Max = 50, Default = 0 }, Callback = function(v) flags.CraftKeep = v end })
 Tabs.Cr:Dropdown({ Title = "Never Consume Above", Values = RARITIES, Default = 1, Multi = false, Callback = function(v) flags.CraftMaxRarity = v end })
 Tabs.Cr:Slider({ Title = "Craft Delay", Value = { Min = 0.2, Max = 10, Default = 1 }, Callback = function(v) flags.CraftDelay = v end })
 local CraftStatus = Tabs.Cr:Label({ Title = "Idle" })
 
-Tabs.St:Dropdown({ Title = "Player", Values = {, Default = 1, Multi = false, Callback = function(v) flags.StealTarget = v end })
+Tabs.St:Dropdown({ Title = "Player", Values = {}, Default = 1, Multi = false, Callback = function(v) flags.StealTarget = v end })
 
 Tabs.St:Toggle({ Title = "Clear My Plot First", Default = false, Callback = function(v) flags.StealClearFirst = v end })
 Tabs.St:Toggle({ Title = "Use Normal If Missing Mutated/Shiny", Default = false, Callback = function(v) flags.StealSubstituteNormal = v end })
