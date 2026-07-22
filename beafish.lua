@@ -116,6 +116,98 @@ MenuBox:AddLabel("Menu bind"):AddKeyPicker("MenuKeybind", {
 
 
 
+local function state()
+    return clientProducer:getState()
+end
+
+local function selectForPlayer(selector, ...)
+    local ok, curried = pcall(selector, LocalPlayer.UserId, ...)
+    if not ok or type(curried) ~= "function" then
+        return nil
+    end
+
+    local selected, value = pcall(curried, state())
+    return selected and value or nil
+end
+
+local function expectNetwork(action, ...)
+    if type(action) ~= "function" then
+        return nil
+    end
+
+    local result = action(...)
+    if result and type(result.expect) == "function" then
+        return result:expect()
+    end
+    return result
+end
+
+local function activateGuiObject(object)
+    if not object then
+        return false
+    end
+
+    local button = object
+    while button and not button:IsA("GuiButton") do
+        button = button.Parent
+    end
+
+    if not button then
+        return false
+    end
+
+    if firesignal and button.Activated then
+        firesignal(button.Activated)
+    else
+        button:Activate()
+    end
+    return true
+end
+
+local function activateVisibleText(predicate)
+    for _, screen in ipairs(LocalPlayer.PlayerGui:GetChildren()) do
+        if not string.find(string.lower(screen.Name), "indrahub") and not string.find(string.lower(screen.Name), "windui") then
+            for _, object in ipairs(screen:GetDescendants()) do
+                if (object:IsA("TextButton") or object:IsA("TextLabel"))
+                    and object.Visible and predicate(string.lower(object.Text), object) then
+                    if activateGuiObject(object) then
+                        return true
+                    end
+                end
+            end
+        end
+    end
+    return false
+end
+
+local function isFish(item)
+    local itemType = string.lower(tostring(item and item.itemType or ""))
+    return itemType == "fish" or itemType == "fishingfish"
+end
+
+local function getSellableFishIds(inventory)
+    local ids = {}
+    for _, item in pairs(inventory or {}) do
+        if isFish(item) and not item.locked then
+            local id = item.itemId or item.id or item.uuid or item.itemName
+            if id ~= nil then
+                table.insert(ids, id)
+            end
+        end
+    end
+    return ids
+end
+
+local function sellAllFish()
+    local inventory = selectForPlayer(PlayerDataSelectors.selectPlayerInventory)
+    local ids = getSellableFishIds(inventory)
+    if #ids > 0 then
+        expectNetwork(Network.functions.sellFishItems, ids)
+    end
+end
+
+Tabs.M:Button({ Title = "Sell All Fish Now", Callback = sellAllFish })
+
 local function dispatchTrainingTap()
     if WeightTrainingController and type(WeightTrainingController.dispatch) == "function" then
         WeightTrainingController:dispatch({ action = "tap", multiTap = true })
@@ -349,8 +441,51 @@ task.spawn(function()
     end
 end)
 
+-- The original wrapper keeps the real cutscene result, then accelerates its
+-- sound track while SkipFishAnimation is enabled.
+local originalCastOnStart = CastCutSceneComponent.onStart
+CastCutSceneComponent.onStart = function(self, ...)
+    local result = originalCastOnStart(self, ...)
+    if result and result.track then
+        task.spawn(function()
+            while self.active do
+                if flags.SkipFishAnimation then
+                    result.track.TimePosition = result.track.Length
+                end
+                task.wait()
+            end
+        end)
+    end
+    return result
+end
 
+local originalReelStarted = FishingRodController._onReelStarted
+FishingRodController._onReelStarted = function(self, ...)
+    if flags.SkipFishAnimation then
+        task.defer(function()
+            if self._reeling then
+                local reel = self._reeling
+                if reel.params and reel.params.onCompleted then
+                    reel.params.onCompleted()
+                end
+                self:_endReel()
+            end
+        end)
+    end
+    return originalReelStarted(self, ...)
+end
 
+local reelCameraState = ReelCamera.getState and ReelCamera.getState() or nil
+local originalDiagonalTweenDuration = reelCameraState and reelCameraState.diagonalTweenDuration
+if reelCameraState then
+    task.spawn(function()
+        while not shared.IndraHub_BeAFish_Unloaded do
+            reelCameraState.diagonalTweenDuration = flags.SkipFishAnimation
+                and 0 or originalDiagonalTweenDuration
+            task.wait(0.5)
+        end
+    end)
+end
 
 
 Tabs.S:Toggle({
