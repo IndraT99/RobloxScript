@@ -20,7 +20,7 @@ local Window = WindUI:CreateWindow({
 
 local MainTab = Window:Tab({ Title = "Main", Icon = "home" })
 local ESPTab = Window:Tab({ Title = "ESP", Icon = "eye" })
-local HumanTab = Window:Tab({ Title = "Human Auto", Icon = "shield" })
+
 local DemonTab = Window:Tab({ Title = "Demon Auto", Icon = "skull" })
 local TPTab = Window:Tab({ Title = "Teleports", Icon = "map-pin" })
 
@@ -30,7 +30,7 @@ MainTab:Button({
     Title = "Copy Discord Link",
     Desc = "Join our community for updates!",
     Callback = function()
-        setclipboard("https://discord.gg/AeuSH2EQK")
+        setclipboard("https://discord.gg/2PPBJsmqr")
         WindUI:Notify({
             Title = "IndraHub",
             Content = "Discord link copied to clipboard!",
@@ -49,7 +49,12 @@ local Config = {
     DemonPriority1 = "Attack",
     DemonPriority2 = "HP",
     DemonPriority3 = "Lucky",
-    TargetWeapon = "M4A1"
+    TargetWeapon = "M4A1",
+    HumanAuto = false,
+    AutoAirdrop = false,
+    MaxLootBoxId = 10,
+    AutoDecompose = false,
+    AutoRepair = false,
 }
 
 -- ESP SYSTEM
@@ -230,156 +235,29 @@ ESPTab:Toggle({
 
 -- AUTO UPGRADE REMOTE LOGIC
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local PurchaseUpgradeRE = ReplicatedStorage:FindFirstChild("Remotes") and ReplicatedStorage.Remotes:FindFirstChild("PurchaseUpgrade")
-local KnitPlotUpgradeRF = ReplicatedStorage:FindFirstChild("CommonComponents") and ReplicatedStorage.CommonComponents.Packages.Knit.Services.PlotService.RF:FindFirstChild("Upgrade")
-
-local function interactWith(keyword)
-    -- Fire the ReplicatedStorage Remotes directly with guessed arguments based on the keyword
-    if PurchaseUpgradeRE then
-        pcall(function() PurchaseUpgradeRE:FireServer(keyword) end)
-        pcall(function() PurchaseUpgradeRE:FireServer(string.lower(keyword)) end)
-    end
-    if KnitPlotUpgradeRF then
-        -- Since it's a RemoteFunction, we wrap it in a pcall inside a coroutine so it doesn't yield/block the loop
-        task.spawn(function()
-            pcall(function() KnitPlotUpgradeRF:InvokeServer(keyword) end)
-            pcall(function() KnitPlotUpgradeRF:InvokeServer(string.lower(keyword)) end)
-        end)
-    end
-    
-    -- Fallback: Check for generic ProximityPrompts with matching ActionText/ObjectText
-    for _, prompt in pairs(Workspace:GetDescendants()) do
-        if prompt:IsA("ProximityPrompt") then
-            if string.match(string.lower(prompt.ObjectText), string.lower(keyword)) or string.match(string.lower(prompt.ActionText), string.lower(keyword)) then
-                fireproximityprompt(prompt, 1, true)
-            end
-        end
-    end
-    
-    return true
+local function getServiceRF(serviceName)
+    local ok, rf = pcall(function()
+        return ReplicatedStorage.CommonComponents.Packages.Knit.Services[serviceName].RF
+    end)
+    return ok and rf or nil
 end
 
--- HUMAN TAB
-HumanTab:Section({ Title = "Priorities" })
+local function positiveIntegerArg(id)
+    return {
+        parameterType = "PositiveInteger",
+        parameter = id
+    }
+end
 
-HumanTab:Dropdown({
-    Title = "Priority 1",
-    Values = {"Door", "Turret", "Cash", "Gold", "Decomposer", "Armory"},
-    Default = "Cash",
-    Callback = function(val) Config.HumanPriority1 = val end
-})
+local function invokePlotRemote(remoteName, id)
+    local plotRF = getServiceRF("PlotService")
+    local remote = plotRF and plotRF:FindFirstChild(remoteName)
+    if not remote then return false end
 
-HumanTab:Dropdown({
-    Title = "Priority 2",
-    Values = {"Door", "Turret", "Cash", "Gold", "Decomposer", "Armory"},
-    Default = "Door",
-    Callback = function(val) Config.HumanPriority2 = val end
-})
-
-HumanTab:Dropdown({
-    Title = "Priority 3",
-    Values = {"Door", "Turret", "Cash", "Gold", "Decomposer", "Armory"},
-    Default = "Turret",
-    Callback = function(val) Config.HumanPriority3 = val end
-})
-
-HumanTab:Section({ Title = "Auto Upgrades" })
-
-HumanTab:Toggle({
-    Title = "Auto Upgrades Loop",
-    Desc = "Follows the priority list above",
-    Default = false,
-    Callback = function(state)
-        Config.HumanAuto = state
-        while Config.HumanAuto do
-            local KnitServices = game:GetService("ReplicatedStorage"):FindFirstChild("CommonComponents") and game:GetService("ReplicatedStorage").CommonComponents.Packages.Knit.Services
-            local PlotRF = KnitServices and KnitServices:FindFirstChild("PlotService") and KnitServices.PlotService:FindFirstChild("RF")
-            
-            if PlotRF then
-                local idMap = {
-                    Door = {35},
-                    Turret = {32},
-                    Cash = {31, 34, 36, 37, 38},
-                    Gold = {39},
-                    Decomposer = {40},
-                    Armory = {33}
-                }
-                
-                local priorities = {Config.HumanPriority1, Config.HumanPriority2, Config.HumanPriority3}
-                for _, p in ipairs(priorities) do
-                    local ids = idMap[p]
-                    if ids then
-                        for _, id in ipairs(ids) do
-                            local argObj = {
-                                parameterType = "PositiveInteger",
-                                parameter = id
-                            }
-                            
-                            -- Always attempt to Unlock first
-                            if PlotRF:FindFirstChild("Unlock") then
-                                task.spawn(function() pcall(function() PlotRF.Unlock:InvokeServer(argObj) end) end)
-                            end
-                            -- Then attempt to Upgrade
-                            if PlotRF:FindFirstChild("Upgrade") then
-                                task.spawn(function() pcall(function() PlotRF.Upgrade:InvokeServer(argObj) end) end)
-                            end
-                            -- Specific handling for Decomposer
-                            if id == 40 and PlotRF:FindFirstChild("Decompose") then
-                                task.spawn(function() pcall(function() PlotRF.Decompose:InvokeServer(argObj) end) end)
-                            end
-                        end
-                        task.wait(0.1) -- Small delay between priority actions
-                    end
-                end
-            else
-                -- Priority generic fallback (ProximityPrompts/Touch)
-                local priorities = {Config.HumanPriority1, Config.HumanPriority2, Config.HumanPriority3}
-                for _, p in ipairs(priorities) do
-                    interactWith(p)
-                    task.wait(0.5)
-                end
-            end
-            task.wait(1)
-        end
-    end
-})
-
-HumanTab:Section({ Title = "Weapon Shop" })
-
-local weaponList = {"M4A1", "Inferno", "Tesla"}
-HumanTab:Dropdown({
-    Title = "Select Weapon",
-    Values = weaponList,
-    Default = "M4A1",
-    Callback = function(val)
-        Config.TargetWeapon = val
-    end
-})
-
-HumanTab:Toggle({
-    Title = "Auto Buy & Equip Weapon",
-    Desc = "Automatically buys and equips the selected weapon when you have enough money",
-    Default = false,
-    Callback = function(state)
-        Config.AutoWeapon = state
-        while Config.AutoWeapon do
-            local WeaponShopRF = game:GetService("ReplicatedStorage"):FindFirstChild("CommonComponents") and game:GetService("ReplicatedStorage").CommonComponents.Packages.Knit.Services.WeaponShopService.RF
-            if WeaponShopRF and Config.TargetWeapon then
-                local args = {{parameterType = "String", parameter = Config.TargetWeapon}}
-                task.spawn(function()
-                    if WeaponShopRF:FindFirstChild("BuyWeapon") then
-                        pcall(function() WeaponShopRF.BuyWeapon:InvokeServer(unpack(args)) end)
-                    end
-                    if WeaponShopRF:FindFirstChild("EquipWeapon") then
-                        pcall(function() WeaponShopRF.EquipWeapon:InvokeServer(unpack(args)) end)
-                    end
-                end)
-            end
-            task.wait(1)
-        end
-    end
-})
-
+    return pcall(function()
+        remote:InvokeServer(positiveIntegerArg(id))
+    end)
+end
 -- DEMON TAB
 DemonTab:Section({ Title = "Demon Upgrades" })
 
@@ -410,20 +288,24 @@ DemonTab:Toggle({
     Default = false,
     Callback = function(state)
         Config.DemonAutoStats = state
-        while Config.DemonAutoStats do
-            local KnitServices = game:GetService("ReplicatedStorage"):FindFirstChild("CommonComponents") and game:GetService("ReplicatedStorage").CommonComponents.Packages.Knit.Services
-            local HunterAttrRF = KnitServices and KnitServices:FindFirstChild("HunterAttributeService") and KnitServices.HunterAttributeService:FindFirstChild("RF")
-            
-            if HunterAttrRF and HunterAttrRF:FindFirstChild("Upgrade") then
-                local priorities = {Config.DemonPriority1 or "Attack", Config.DemonPriority2 or "HP", Config.DemonPriority3 or "Lucky"}
-                for _, stat in ipairs(priorities) do
-                    task.spawn(function()
-                        pcall(function() HunterAttrRF.Upgrade:InvokeServer(stat) end)
-                    end)
-                    task.wait(0.2)
+        if state then
+            task.spawn(function()
+                while Config.DemonAutoStats do
+                    local KnitServices = game:GetService("ReplicatedStorage"):FindFirstChild("CommonComponents") and game:GetService("ReplicatedStorage").CommonComponents.Packages.Knit.Services
+                    local HunterAttrRF = KnitServices and KnitServices:FindFirstChild("HunterAttributeService") and KnitServices.HunterAttributeService:FindFirstChild("RF")
+                    
+                    if HunterAttrRF and HunterAttrRF:FindFirstChild("Upgrade") then
+                        local priorities = {Config.DemonPriority1 or "Attack", Config.DemonPriority2 or "HP", Config.DemonPriority3 or "Lucky"}
+                        for _, stat in ipairs(priorities) do
+                            task.spawn(function()
+                                pcall(function() HunterAttrRF.Upgrade:InvokeServer(stat) end)
+                            end)
+                            task.wait(0.2)
+                        end
+                    end
+                    task.wait(1)
                 end
-            end
-            task.wait(1)
+            end)
         end
     end
 })
@@ -434,19 +316,23 @@ DemonTab:Toggle({
     Default = false,
     Callback = function(state)
         Config.DemonAutoEvolve = state
-        while Config.DemonAutoEvolve do
-            local KnitServices = game:GetService("ReplicatedStorage"):FindFirstChild("CommonComponents") and game:GetService("ReplicatedStorage").CommonComponents.Packages.Knit.Services
-            local HunterRF = KnitServices and KnitServices:FindFirstChild("HunterService") and KnitServices.HunterService:FindFirstChild("RF")
-            
-            if HunterRF and HunterRF:FindFirstChild("EvolveHunter") then
-                pcall(function() HunterRF.EvolveHunter:InvokeServer() end)
-            end
-            task.wait(2)
+        if state then
+            task.spawn(function()
+                while Config.DemonAutoEvolve do
+                    local KnitServices = game:GetService("ReplicatedStorage"):FindFirstChild("CommonComponents") and game:GetService("ReplicatedStorage").CommonComponents.Packages.Knit.Services
+                    local HunterRF = KnitServices and KnitServices:FindFirstChild("HunterService") and KnitServices.HunterService:FindFirstChild("RF")
+                    
+                    if HunterRF and HunterRF:FindFirstChild("EvolveHunter") then
+                        pcall(function() HunterRF.EvolveHunter:InvokeServer() end)
+                    end
+                    task.wait(2)
+                end
+            end)
         end
     end
 })
 
--- Lag server feature removed
+
 
 -- TELEPORTS
 local function refreshAirdrops()
@@ -469,10 +355,10 @@ local function refreshAirdrops()
                 -- Check if the item is staged out of bounds (underground or very high)
                 if pos then
                     if pos.Y > -100 and pos.Y < 2000 then
-                        table.insert(drops, model.Name)
+                        table.insert(drops, model)
                     end
                 else
-                    table.insert(drops, model.Name)
+                    table.insert(drops, model)
                 end
             end
         end
@@ -484,45 +370,81 @@ local function refreshAirdrops()
     return drops
 end
 
+local function getDropCFrame(drop)
+    if drop:IsA("BasePart") then
+        return drop.CFrame
+    end
+    if drop:IsA("Model") then
+        if drop.PrimaryPart then
+            return drop.PrimaryPart.CFrame
+        end
+        local firstPart = drop:FindFirstChildWhichIsA("BasePart", true)
+        return firstPart and firstPart.CFrame
+    end
+end
+
+local function fireNearbyPrompts(radius)
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return 0 end
+
+    local fired = 0
+    for _, prompt in ipairs(Workspace:GetDescendants()) do
+        if prompt:IsA("ProximityPrompt") and prompt.Enabled then
+            local parent = prompt.Parent
+            local promptPart = parent and (parent:IsA("BasePart") and parent or parent:FindFirstAncestorWhichIsA("BasePart"))
+            if promptPart and (hrp.Position - promptPart.Position).Magnitude <= radius then
+                local ok = pcall(fireproximityprompt, prompt, 1, true)
+                if ok then fired = fired + 1 end
+            end
+        end
+    end
+    return fired
+end
+
 TPTab:Toggle({
-    Title = "Auto Farm Airdrops",
-    Desc = "Automatically scans and teleports to any active airdrops",
+    Title = "Auto Farm Airdrops & Lootbox",
+    Desc = "Teleports to any airdrops and automatically opens them",
     Default = false,
     Callback = function(state)
         Config.AutoAirdrop = state
-        while Config.AutoAirdrop do
-            local drops = refreshAirdrops()
-            if #drops > 0 then
-                -- Target the first valid drop
-                local targetName = drops[1]
-                local target = nil
-                
-                local airdropFolder = Workspace:FindFirstChild("AirdropFolder")
-                local dropItemFolder = Workspace:FindFirstChild("DropItemFolder")
-                
-                if airdropFolder then target = airdropFolder:FindFirstChild(targetName) end
-                if not target and dropItemFolder then target = dropItemFolder:FindFirstChild(targetName) end
-                
-                if target then
-                    local targetPos = nil
-                    if target:IsA("Model") and target.PrimaryPart then
-                        targetPos = target.PrimaryPart.CFrame
-                    elseif target:IsA("BasePart") then
-                        targetPos = target.CFrame
-                    elseif target:IsA("Model") then
-                        local firstPart = target:FindFirstChildWhichIsA("BasePart", true)
-                        if firstPart then targetPos = firstPart.CFrame end
+        if state then
+            task.spawn(function()
+                while Config.AutoAirdrop do
+                    local char = LocalPlayer.Character
+                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                    local positionBefore = hrp and hrp.Position
+
+                    local airdropRF = getServiceRF("AirdropService")
+                    local lootBox = airdropRF and airdropRF:FindFirstChild("LootBox")
+                    if lootBox then
+                        for lootBoxId = 1, Config.MaxLootBoxId do
+                            if not Config.AutoAirdrop then break end
+                            pcall(function() lootBox:InvokeServer(lootBoxId) end)
+                            task.wait(0.1)
+                        end
                     end
-                    
-                    if targetPos and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                        local hrp = LocalPlayer.Character.HumanoidRootPart
-                        -- Strip rotation and add height
-                        hrp.CFrame = CFrame.new(targetPos.Position + Vector3.new(0, 5, 0))
-                        hrp.Velocity = Vector3.new(0, 0, 0)
+
+                    task.wait(0.5)
+                    char = LocalPlayer.Character
+                    hrp = char and char:FindFirstChild("HumanoidRootPart")
+                    local serverTeleported = positionBefore and hrp and (hrp.Position - positionBefore).Magnitude > 10
+
+                    -- Use the workspace scan only when the server remote did not teleport us.
+                    if not serverTeleported and hrp then
+                        local drops = refreshAirdrops()
+                        local targetCFrame = drops[1] and getDropCFrame(drops[1])
+                        if targetCFrame then
+                            hrp.CFrame = targetCFrame + Vector3.new(0, 5, 0)
+                            hrp.AssemblyLinearVelocity = Vector3.zero
+                            task.wait(0.3)
+                        end
                     end
+
+                    fireNearbyPrompts(30)
+                    task.wait(1.5)
                 end
-            end
-            task.wait(0.5) -- Fast check for new airdrops
+            end)
         end
     end
 })
@@ -548,12 +470,139 @@ TPTab:Button({
         if Config.SavedBaseCFrame then
             local char = LocalPlayer.Character
             if char and char:FindFirstChild("HumanoidRootPart") then
-                char.HumanoidRootPart.CFrame = Config.SavedBaseCFrame
-                char.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+                char.HumanoidRootPart.CFrame = Config.SavedBaseCFrame + Vector3.new(0, 3, 0)
+                char.HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
                 WindUI:Notify({ Title = "Teleported", Content = "Returned to base!", Duration = 2 })
             end
         else
-            WindUI:Notify({ Title = "Error", Content = "No base location saved yet.", Duration = 3 })
+            -- Fallback
+            local spawnPoint = Workspace:FindFirstChild("SpawnLocation") or Workspace:FindFirstChild("Base")
+            if spawnPoint then
+                local char = LocalPlayer.Character
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    char.HumanoidRootPart.CFrame = spawnPoint.CFrame + Vector3.new(0, 5, 0)
+                    WindUI:Notify({ Title = "Teleported", Content = "Returned to Spawn/Base!", Duration = 2 })
+                end
+            else
+                WindUI:Notify({ Title = "Error", Content = "No base location saved yet.", Duration = 3 })
+            end
+        end
+    end
+})
+
+-- UTILITY / PLAYER MODS
+local MiscTab = Window:Tab({ Title = "Misc & Player", Icon = "user" })
+MiscTab:Section({ Title = "Player Settings" })
+
+MiscTab:Slider({
+    Title = "WalkSpeed",
+    Step = 1,
+    Value = { Min = 16, Max = 120, Default = 16 },
+    Callback = function(value)
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChild("Humanoid") then
+            char.Humanoid.WalkSpeed = value
+        end
+    end
+})
+
+MiscTab:Toggle({
+    Title = "Noclip (Walk Through Walls)",
+    Desc = "Disables collision for your character",
+    Default = false,
+    Callback = function(state)
+        Config.Noclip = state
+        if state then
+            task.spawn(function()
+                while Config.Noclip do
+                    local char = LocalPlayer.Character
+                    if char then
+                        for _, part in pairs(char:GetDescendants()) do
+                            if part:IsA("BasePart") and part.CanCollide then
+                                part.CanCollide = false
+                            end
+                        end
+                    end
+                    game:GetService("RunService").Stepped:Wait()
+                end
+            end)
+        end
+    end
+})
+
+MiscTab:Section({ Title = "Combat & Aura" })
+
+MiscTab:Slider({
+    Title = "Attack Aura Range",
+    Step = 1,
+    Value = { Min = 5, Max = 30, Default = 15 },
+    Callback = function(value)
+        Config.AttackRange = value
+    end
+})
+
+MiscTab:Toggle({
+    Title = "Demon Attack Aura",
+    Desc = "Automatically attacks nearby players/demons",
+    Default = false,
+    Callback = function(state)
+        Config.AttackAura = state
+        if state then
+            task.spawn(function()
+                Config.AttackRange = Config.AttackRange or 15
+                while Config.AttackAura do
+                    local char = LocalPlayer.Character
+                    local root = char and char:FindFirstChild("HumanoidRootPart")
+                    local tool = char and char:FindFirstChildOfClass("Tool")
+                    
+                    if root and tool then
+                        for _, player in pairs(Players:GetPlayers()) do
+                            if player ~= LocalPlayer and player.Character then
+                                local targetRoot = player.Character:FindFirstChild("HumanoidRootPart")
+                                local targetHum = player.Character:FindFirstChild("Humanoid")
+                                
+                                if targetRoot and targetHum and targetHum.Health > 0 then
+                                    local distance = (root.Position - targetRoot.Position).Magnitude
+                                    if distance <= Config.AttackRange then
+                                        tool:Activate()
+                                    end
+                                end
+                            end
+                        end
+                    end
+                    task.wait(0.15)
+                end
+            end)
+        end
+    end
+})
+
+MiscTab:Section({ Title = "Automation" })
+
+MiscTab:Toggle({
+    Title = "Auto-Collect Proximity Prompts",
+    Desc = "Automatically activates nearby prompts (e.g. loots)",
+    Default = false,
+    Callback = function(state)
+        Config.AutoCollect = state
+        if state then
+            task.spawn(function()
+                while Config.AutoCollect do
+                    local char = LocalPlayer.Character
+                    local root = char and char:FindFirstChild("HumanoidRootPart")
+                    if root then
+                        for _, prompt in pairs(Workspace:GetDescendants()) do
+                            if prompt:IsA("ProximityPrompt") and prompt.Parent then
+                                local part = prompt.Parent:IsA("BasePart") and prompt.Parent or prompt.Parent:FindFirstChildWhichIsA("BasePart")
+                                if part and (root.Position - part.Position).Magnitude <= 15 then
+                                    pcall(function() fireproximityprompt(prompt, 1, true) end)
+                                end
+                            end
+                        end
+                    end
+                    task.wait(0.5)
+                end
+            end)
         end
     end
 })
