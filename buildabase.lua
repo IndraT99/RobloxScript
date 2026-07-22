@@ -3,7 +3,7 @@
 -- ==========================================
 shared.IndraHub_Builabase_Unloaded = false
 
-local WindUI = loadstring(game:HttpGet("https://tree-hub.vercel.app/api/UI/WindUI"))()
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local Window = WindUI:CreateWindow({
     Title = "IndraHub - Build a Base RNG",
     Icon = "rbxassetid://91400086538074",
@@ -74,14 +74,78 @@ local flags = {
     AntiAfk = true,
 }
 
---[[
-    Ouroboros Hub - Build a Base RNG
-    Semantic reconstruction of active/builabase.lua.
+local RARITIES = {
+    "Basic", "Rare", "Refined", "Epic", "Legendary", "Mythic",
+    "Glorious", "Primordial", "Atomic", "Divine", "Lunatic",
+}
 
-    The original uses a shuffled constant pool and flattened control flow.
-    UI, modules, remote names, defaults, filters, and automation flow were
-    recovered through sandboxed trace emulation.
-]]
+Tabs.R:Toggle({ Title = "Auto Roll", Default = false, Callback = function(v) flags.AutoRoll = v end })
+Tabs.R:Toggle({ Title = "Instant Roll", Default = false, Callback = function(v) flags.InstantRoll = v end })
+Tabs.R:Paragraph({
+    Title = "Notice",
+    Desc = '<font color="rgb(255,70,70)">Instant Roll can look frozen for a while with no rolls coming through. That is normal, it is still faster than the normal auto roll. Do not report this in the Discord as a bug.</font>',
+})
+Tabs.R:Slider({ Title = "Roll Delay", Value = { Min = 0, Max = 2, Default = 0.05 }, Callback = function(v) flags.RollDelay = v end })
+
+local RollsLabel = Tabs.R:Paragraph({ Title = "Rolls this session: 0" })
+local LastRollLabel = Tabs.R:Paragraph({ Title = "Last: none" })
+
+Tabs.Co:Toggle({ Title = "Auto Farm", Default = false, Callback = function(v) flags.KillAura = v end })
+Tabs.Co:Toggle({ Title = "Only During Wave", Default = false, Callback = function(v) flags.OnlyDuringWave = v end })
+Tabs.Co:Toggle({ Title = "Move To Enemies", Default = false, Callback = function(v) flags.ApproachEnemy = v end })
+Tabs.Co:Dropdown({ Title = "Target Mode", Values = { "Nearest", "Densest Cluster", "Cycle All" }, Default = 1, Multi = false, Callback = function(v) flags.AuraMode = v end })
+Tabs.Co:Slider({ Title = "Hover Distance", Value = { Min = 0, Max = 20, Default = 2 }, Callback = function(v) flags.AuraHover = v end })
+Tabs.Co:Slider({ Title = "Cluster Radius", Value = { Min = 4, Max = 60, Default = 14 }, Callback = function(v) flags.ClusterRadius = v end })
+Tabs.Co:Slider({ Title = "Attack Delay", Value = { Min = 0.05, Max = 1, Default = 0.14 }, Callback = function(v) flags.AttackDelay = v end })
+Tabs.Co:Toggle({ Title = "Ignore Weapon Cooldown", Default = false, Callback = function(v) flags.IgnoreCooldown = v end })
+
+Tabs.Co:Toggle({ Title = "Auto Start Wave", Default = false, Callback = function(v) flags.AutoStartWave = v end })
+Tabs.Co:Toggle({ Title = "Auto Stop At Wave", Default = false, Callback = function(v) flags.AutoStopAtWave = v end })
+Tabs.Co:Slider({ Title = "Stop At Wave", Value = { Min = 1, Max = 500, Default = 50 }, Callback = function(v) flags.StopWaveNumber = v end })
+Tabs.Co:Slider({ Title = "Start Delay", Value = { Min = 0.5, Max = 30, Default = 2 }, Callback = function(v) flags.WaveStartDelay = v end })
+local WaveStatus = Tabs.Co:Paragraph({ Title = "Idle" })
+
+Tabs.Co:Toggle({ Title = "Auto Collect Gold", Default = false, Callback = function(v) flags.AutoCollectGold = v end })
+Tabs.Co:Slider({ Title = "Search Range", Value = { Min = 25, Max = 1000, Default = 250 }, Callback = function(v) flags.GoldRange = v end })
+
+Tabs.Co:Toggle({ Title = "Auto Buy Affordable Skills", Default = false, Callback = function(v) flags.AutoBuySkills = v end })
+Tabs.Co:Slider({ Title = "Buy Delay", Value = { Min = 0.1, Max = 5, Default = 0.5 }, Callback = function(v) flags.SkillDelay = v end })
+
+Tabs.B:Toggle({ Title = "Auto Place", Default = false, Callback = function(v) flags.AutoPlace = v end })
+Tabs.B:Toggle({ Title = "Auto Place Random", Default = false, Callback = function(v) flags.AutoPlaceRandom = v end })
+Tabs.B:Dropdown({ Title = "Buildings", Values = {}, Default = 1, Multi = true, Callback = function(v) flags.PlaceBuildings = v end })
+Tabs.B:Dropdown({ Title = "Category", Values = { "Any", "Block", "Turret" }, Default = 1, Multi = false, Callback = function(v) flags.PlaceCategory = v end })
+Tabs.B:Dropdown({ Title = "Minimum Rarity", Values = RARITIES, Default = 1, Multi = false, Callback = function(v) flags.PlaceMinRarity = v end })
+Tabs.B:Dropdown({ Title = "Rotation", Values = { "0", "90", "180", "270" }, Default = 1, Multi = false, Callback = function(v) flags.PlaceRotation = v end })
+
+Tabs.B:Slider({ Title = "Keep In Inventory", Value = { Min = 0, Max = 50, Default = 0 }, Callback = function(v) flags.PlaceKeep = v end })
+Tabs.B:Slider({ Title = "Max Per Building", Value = { Min = 1, Max = 200, Default = 40 }, Callback = function(v) flags.PlaceMax = v end })
+Tabs.B:Toggle({ Title = "Respect Placement Limit", Default = false, Callback = function(v) flags.RespectLimit = v end })
+Tabs.B:Toggle({ Title = "Pause When Nothing Fits", Default = false, Callback = function(v) flags.StopOnFull = v end })
+Tabs.B:Slider({ Title = "Place Delay", Value = { Min = 0.05, Max = 3, Default = 0.2 }, Callback = function(v) flags.PlaceDelay = v end })
+
+Tabs.B:Toggle({ Title = "Auto Upgrade", Default = false, Callback = function(v) flags.AutoUpgrade = v end })
+Tabs.B:Toggle({ Title = "Upgrade Everything Unlocked", Default = false, Callback = function(v) flags.UpgradeAll = v end })
+Tabs.B:Dropdown({ Title = "Buildings", Values = {}, Default = 1, Multi = true, Callback = function(v) flags.UpgradeBuildings = v end })
+Tabs.B:Slider({ Title = "Max Level", Value = { Min = 2, Max = 64, Default = 64 }, Callback = function(v) flags.UpgradeMaxLevel = v end })
+Tabs.B:Slider({ Title = "Keep Money", Value = { Min = 0, Max = 1000000, Default = 0 }, Callback = function(v) flags.UpgradeKeepMoney = v end })
+Tabs.B:Slider({ Title = "Upgrade Delay", Value = { Min = 0.05, Max = 3, Default = 0.2 }, Callback = function(v) flags.UpgradeDelay = v end })
+local UpgradeStatus = Tabs.B:Paragraph({ Title = "Idle" })
+
+Tabs.Cr:Toggle({ Title = "Auto Craft", Default = false, Callback = function(v) flags.AutoCraft = v end })
+Tabs.Cr:Dropdown({ Title = "Recipes", Values = {}, Default = 1, Multi = true, Callback = function(v) flags.CraftRecipes = v end })
+
+Tabs.Cr:Slider({ Title = "Keep In Inventory", Value = { Min = 0, Max = 50, Default = 0 }, Callback = function(v) flags.CraftKeep = v end })
+Tabs.Cr:Dropdown({ Title = "Never Consume Above", Values = RARITIES, Default = 1, Multi = false, Callback = function(v) flags.CraftMaxRarity = v end })
+Tabs.Cr:Slider({ Title = "Craft Delay", Value = { Min = 0.2, Max = 10, Default = 1 }, Callback = function(v) flags.CraftDelay = v end })
+local CraftStatus = Tabs.Cr:Paragraph({ Title = "Idle" })
+
+Tabs.St:Dropdown({ Title = "Player", Values = {}, Default = 1, Multi = false, Callback = function(v) flags.StealTarget = v end })
+
+Tabs.St:Toggle({ Title = "Clear My Plot First", Default = false, Callback = function(v) flags.StealClearFirst = v end })
+Tabs.St:Toggle({ Title = "Use Normal If Missing Mutated/Shiny", Default = false, Callback = function(v) flags.StealSubstituteNormal = v end })
+Tabs.St:Slider({ Title = "Place Delay", Value = { Min = 0.05, Max = 3, Default = 0.2 }, Callback = function(v) flags.StealDelay = v end })
+local StealStatus = Tabs.St:Paragraph({ Title = "Idle" })
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -168,78 +232,7 @@ local WINDUI_URL = "https://raw.githubusercontent.com/deividcomsono/Obsidian/mai
 
 
 
-local RARITIES = {
-    "Basic", "Rare", "Refined", "Epic", "Legendary", "Mythic",
-    "Glorious", "Primordial", "Atomic", "Divine", "Lunatic",
-}
 
-Tabs.R:Toggle({ Title = "Auto Roll", Default = false, Callback = function(v) flags.AutoRoll = v end })
-Tabs.R:Toggle({ Title = "Instant Roll", Default = false, Callback = function(v) flags.InstantRoll = v end })
-Tabs.R:Label({
-    DoesWrap = true,
-    Text = '<font color="rgb(255,70,70)">Instant Roll can look frozen for a while with no rolls coming through. That is normal, it is still faster than the normal auto roll. Do not report this in the Discord as a bug.</font>',
-})
-Tabs.R:Slider({ Title = "Roll Delay", Value = { Min = 0, Max = 2, Default = 0.05 }, Callback = function(v) flags.RollDelay = v end })
-
-local RollsLabel = Tabs.R:Label({ Title = "Rolls this session: 0" })
-local LastRollLabel = Tabs.R:Label({ Title = "Last: none" })
-
-Tabs.Co:Toggle({ Title = "Auto Farm", Default = false, Callback = function(v) flags.KillAura = v end })
-Tabs.Co:Toggle({ Title = "Only During Wave", Default = false, Callback = function(v) flags.OnlyDuringWave = v end })
-Tabs.Co:Toggle({ Title = "Move To Enemies", Default = false, Callback = function(v) flags.ApproachEnemy = v end })
-Tabs.Co:Dropdown({ Title = "Target Mode", Values = { "Nearest", "Densest Cluster", "Cycle All" }, Default = 1, Multi = false, Callback = function(v) flags.AuraMode = v end })
-Tabs.Co:Slider({ Title = "Hover Distance", Value = { Min = 0, Max = 20, Default = 2 }, Callback = function(v) flags.AuraHover = v end })
-Tabs.Co:Slider({ Title = "Cluster Radius", Value = { Min = 4, Max = 60, Default = 14 }, Callback = function(v) flags.ClusterRadius = v end })
-Tabs.Co:Slider({ Title = "Attack Delay", Value = { Min = 0.05, Max = 1, Default = 0.14 }, Callback = function(v) flags.AttackDelay = v end })
-Tabs.Co:Toggle({ Title = "Ignore Weapon Cooldown", Default = false, Callback = function(v) flags.IgnoreCooldown = v end })
-
-Tabs.Co:Toggle({ Title = "Auto Start Wave", Default = false, Callback = function(v) flags.AutoStartWave = v end })
-Tabs.Co:Toggle({ Title = "Auto Stop At Wave", Default = false, Callback = function(v) flags.AutoStopAtWave = v end })
-Tabs.Co:Slider({ Title = "Stop At Wave", Value = { Min = 1, Max = 500, Default = 50 }, Callback = function(v) flags.StopWaveNumber = v end })
-Tabs.Co:Slider({ Title = "Start Delay", Value = { Min = 0.5, Max = 30, Default = 2 }, Callback = function(v) flags.WaveStartDelay = v end })
-local WaveStatus = Tabs.Co:Label({ Title = "Idle" })
-
-Tabs.Co:Toggle({ Title = "Auto Collect Gold", Default = false, Callback = function(v) flags.AutoCollectGold = v end })
-Tabs.Co:Slider({ Title = "Search Range", Value = { Min = 25, Max = 1000, Default = 250 }, Callback = function(v) flags.GoldRange = v end })
-
-Tabs.Co:Toggle({ Title = "Auto Buy Affordable Skills", Default = false, Callback = function(v) flags.AutoBuySkills = v end })
-Tabs.Co:Slider({ Title = "Buy Delay", Value = { Min = 0.1, Max = 5, Default = 0.5 }, Callback = function(v) flags.SkillDelay = v end })
-
-Tabs.B:Toggle({ Title = "Auto Place", Default = false, Callback = function(v) flags.AutoPlace = v end })
-Tabs.B:Toggle({ Title = "Auto Place Random", Default = false, Callback = function(v) flags.AutoPlaceRandom = v end })
-Tabs.B:Dropdown({ Title = "Buildings", Values = {}, Default = 1, Multi = true, Callback = function(v) flags.PlaceBuildings = v end })
-Tabs.B:Dropdown({ Title = "Category", Values = { "Any", "Block", "Turret" }, Default = 1, Multi = false, Callback = function(v) flags.PlaceCategory = v end })
-Tabs.B:Dropdown({ Title = "Minimum Rarity", Values = RARITIES, Default = 1, Multi = false, Callback = function(v) flags.PlaceMinRarity = v end })
-Tabs.B:Dropdown({ Title = "Rotation", Values = { "0", "90", "180", "270" }, Default = 1, Multi = false, Callback = function(v) flags.PlaceRotation = v end })
-
-Tabs.B:Slider({ Title = "Keep In Inventory", Value = { Min = 0, Max = 50, Default = 0 }, Callback = function(v) flags.PlaceKeep = v end })
-Tabs.B:Slider({ Title = "Max Per Building", Value = { Min = 1, Max = 200, Default = 40 }, Callback = function(v) flags.PlaceMax = v end })
-Tabs.B:Toggle({ Title = "Respect Placement Limit", Default = false, Callback = function(v) flags.RespectLimit = v end })
-Tabs.B:Toggle({ Title = "Pause When Nothing Fits", Default = false, Callback = function(v) flags.StopOnFull = v end })
-Tabs.B:Slider({ Title = "Place Delay", Value = { Min = 0.05, Max = 3, Default = 0.2 }, Callback = function(v) flags.PlaceDelay = v end })
-
-Tabs.B:Toggle({ Title = "Auto Upgrade", Default = false, Callback = function(v) flags.AutoUpgrade = v end })
-Tabs.B:Toggle({ Title = "Upgrade Everything Unlocked", Default = false, Callback = function(v) flags.UpgradeAll = v end })
-Tabs.B:Dropdown({ Title = "Buildings", Values = {}, Default = 1, Multi = true, Callback = function(v) flags.UpgradeBuildings = v end })
-Tabs.B:Slider({ Title = "Max Level", Value = { Min = 2, Max = 64, Default = 64 }, Callback = function(v) flags.UpgradeMaxLevel = v end })
-Tabs.B:Slider({ Title = "Keep Money", Value = { Min = 0, Max = 1000000, Default = 0 }, Callback = function(v) flags.UpgradeKeepMoney = v end })
-Tabs.B:Slider({ Title = "Upgrade Delay", Value = { Min = 0.05, Max = 3, Default = 0.2 }, Callback = function(v) flags.UpgradeDelay = v end })
-local UpgradeStatus = Tabs.B:Label({ Title = "Idle" })
-
-Tabs.Cr:Toggle({ Title = "Auto Craft", Default = false, Callback = function(v) flags.AutoCraft = v end })
-Tabs.Cr:Dropdown({ Title = "Recipes", Values = {}, Default = 1, Multi = true, Callback = function(v) flags.CraftRecipes = v end })
-
-Tabs.Cr:Slider({ Title = "Keep In Inventory", Value = { Min = 0, Max = 50, Default = 0 }, Callback = function(v) flags.CraftKeep = v end })
-Tabs.Cr:Dropdown({ Title = "Never Consume Above", Values = RARITIES, Default = 1, Multi = false, Callback = function(v) flags.CraftMaxRarity = v end })
-Tabs.Cr:Slider({ Title = "Craft Delay", Value = { Min = 0.2, Max = 10, Default = 1 }, Callback = function(v) flags.CraftDelay = v end })
-local CraftStatus = Tabs.Cr:Label({ Title = "Idle" })
-
-Tabs.St:Dropdown({ Title = "Player", Values = {}, Default = 1, Multi = false, Callback = function(v) flags.StealTarget = v end })
-
-Tabs.St:Toggle({ Title = "Clear My Plot First", Default = false, Callback = function(v) flags.StealClearFirst = v end })
-Tabs.St:Toggle({ Title = "Use Normal If Missing Mutated/Shiny", Default = false, Callback = function(v) flags.StealSubstituteNormal = v end })
-Tabs.St:Slider({ Title = "Place Delay", Value = { Min = 0.05, Max = 3, Default = 0.2 }, Callback = function(v) flags.StealDelay = v end })
-local StealStatus = Tabs.St:Label({ Title = "Idle" })
 
 local rollCount = 0
 local cycleIndex = 0
@@ -359,8 +352,8 @@ local function buildingAllowed(identifier)
     end
     local category = config.Category or config.Type or "Any"
     local rarity = config.Rarity or "Basic"
-    return (flags.PlaceCategory.Value == "Any" or category == flags.PlaceCategory.Value)
-        and (rarityIndex[rarity] or 1) >= (rarityIndex[flags.PlaceMinRarity.Value] or 1)
+    return (flags.PlaceCategory == "Any" or category == flags.PlaceCategory)
+        and (rarityIndex[rarity] or 1) >= (rarityIndex[flags.PlaceMinRarity] or 1)
 end
 
 local function findPlacement(plot, sequence)
@@ -383,7 +376,7 @@ local function findPlacement(plot, sequence)
 end
 
 local function placeBuilding(identifier, transform)
-    local rotation = math.rad(tonumber(flags.PlaceRotation.Value) or 0)
+    local rotation = math.rad(tonumber(flags.PlaceRotation) or 0)
     local finalTransform = transform * CFrame.Angles(0, rotation, 0)
     return invoke(Remotes.PlaceBuilding, identifier, finalTransform)
 end
@@ -404,7 +397,7 @@ task.spawn(function()
                 end
             end
         end
-        task.wait(flags.RollDelay.Value)
+        task.wait(flags.RollDelay)
     end
 end)
 
@@ -423,7 +416,7 @@ local function chooseEnemy(enemies, root)
         return nil
     end
 
-    if flags.AuraMode.Value == "Cycle All" then
+    if flags.AuraMode == "Cycle All" then
         cycleIndex = cycleIndex % #valid + 1
         return valid[cycleIndex]
     end
@@ -432,10 +425,10 @@ local function chooseEnemy(enemies, root)
     for _, enemy in ipairs(valid) do
         local targetRoot = enemyRoot(enemy)
         local score
-        if flags.AuraMode.Value == "Densest Cluster" then
+        if flags.AuraMode == "Densest Cluster" then
             score = 0
             for _, other in ipairs(valid) do
-                if (enemyRoot(other).Position - targetRoot.Position).Magnitude <= flags.ClusterRadius.Value then
+                if (enemyRoot(other).Position - targetRoot.Position).Magnitude <= flags.ClusterRadius then
                     score += 1
                 end
             end
@@ -462,7 +455,7 @@ task.spawn(function()
 
             if targetRoot then
                 if flags.ApproachEnemy then
-                    root.CFrame = targetRoot.CFrame * CFrame.new(0, flags.AuraHover.Value, 0)
+                    root.CFrame = targetRoot.CFrame * CFrame.new(0, flags.AuraHover, 0)
                 end
                 local identifier = target:GetAttribute("Identifier") or target.Name
                 fire(Remotes.AttackWeapon, identifier, flags.IgnoreCooldown)
@@ -474,7 +467,7 @@ task.spawn(function()
                 end
             end
         end
-        task.wait(flags.AttackDelay.Value)
+        task.wait(flags.AttackDelay)
     end
 end)
 
@@ -494,12 +487,12 @@ task.spawn(function()
         if flags.AutoStartWave and not active and not requestedStart then
             requestedStart = true
             WaveStatus:SetTitle("Starting wave")
-            task.wait(flags.WaveStartDelay.Value)
+            task.wait(flags.WaveStartDelay)
             fire(Remotes.StartWave)
         elseif active then
             requestedStart = false
             WaveStatus:SetTitle(string.format("Wave %d running", wave))
-            if flags.AutoStopAtWave and wave >= flags.StopWaveNumber.Value then
+            if flags.AutoStopAtWave and wave >= flags.StopWaveNumber then
                 fire(Remotes.StopWave)
                 WaveStatus:SetTitle(string.format("Reached wave %d, stopped", wave))
             end
@@ -519,7 +512,7 @@ task.spawn(function()
                 for _, object in ipairs(temp:GetDescendants()) do
                     if object:IsA("BasePart")
                         and (object.Name == "Gold" or object.Name == "Coin" or object.Name == "CoinBag")
-                        and (object.Position - root.Position).Magnitude <= flags.GoldRange.Value then
+                        and (object.Position - root.Position).Magnitude <= flags.GoldRange then
                         firetouchinterest(root, object, 0)
                         firetouchinterest(root, object, 1)
                     end
@@ -565,7 +558,7 @@ task.spawn(function()
                 invoke(Remotes.BuySkill, affordable[1])
             end
         end
-        task.wait(flags.SkillDelay.Value)
+        task.wait(flags.SkillDelay)
     end
 end)
 
@@ -593,7 +586,7 @@ task.spawn(function()
                 end
             end
         end
-        task.wait(flags.PlaceDelay.Value)
+        task.wait(flags.PlaceDelay)
     end
 end)
 
@@ -611,8 +604,8 @@ task.spawn(function()
                     local level = BuildingsUtility.GetLevel and BuildingsUtility.GetLevel(identifier) or 1
                     local maxLevel = BuildingsUtility.GetMaxLevel and BuildingsUtility.GetMaxLevel(identifier) or 64
                     local price = config and (config.UpgradePrice or config.MoneyPrice or 0) or 0
-                    if level < math.min(maxLevel, flags.UpgradeMaxLevel.Value)
-                        and money - price >= flags.UpgradeKeepMoney.Value then
+                    if level < math.min(maxLevel, flags.UpgradeMaxLevel)
+                        and money - price >= flags.UpgradeKeepMoney then
                         target = identifier
                         break
                     end
@@ -628,7 +621,7 @@ task.spawn(function()
         else
             UpgradeStatus:SetTitle("Idle")
         end
-        task.wait(flags.UpgradeDelay.Value)
+        task.wait(flags.UpgradeDelay)
     end
 end)
 
@@ -636,10 +629,10 @@ task.spawn(function()
     while not shared.IndraHub_Builabase_Unloaded do
         if flags.AutoCraft then
             local crafted = false
-            for recipe, enabled in pairs(flags.CraftRecipes.Value or {}) do
+            for recipe, enabled in pairs(flags.CraftRecipes or {}) do
                 if enabled then
                     CraftStatus:SetTitle("Crafting " .. tostring(recipe))
-                    invoke(Remotes.Craft, recipe, flags.CraftKeep.Value, flags.CraftMaxRarity.Value)
+                    invoke(Remotes.Craft, recipe, flags.CraftKeep, flags.CraftMaxRarity)
                     crafted = true
                     break
                 end
@@ -648,12 +641,12 @@ task.spawn(function()
                 CraftStatus:SetTitle("Idle")
             end
         end
-        task.wait(flags.CraftDelay.Value)
+        task.wait(flags.CraftDelay)
     end
 end)
 
 local function targetPlacementData()
-    local targetName = flags.StealTarget.Value
+    local targetName = flags.StealTarget
     local player = targetName and Players:FindFirstChild(targetName)
     local sourcePlot = player and getPlot(player)
     local destinationPlot = getPlot(LocalPlayer)
@@ -731,7 +724,7 @@ Tabs.St:Button({
                 end
                 StealStatus:SetTitle(string.format("Placing %d/%d", index, #buildings))
                 invoke(Remotes.PlaceBuilding, entry.identifier, entry.transform)
-                task.wait(flags.StealDelay.Value)
+                task.wait(flags.StealDelay)
             end
             StealStatus:SetTitle(string.format("Copied %d buildings", #buildings))
         end)
