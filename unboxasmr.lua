@@ -60,10 +60,10 @@ local Window = WindUI:CreateWindow({
 })
 
 -- Tabs
-local TabMain = Window:Tab({ Title = "Utama", Icon = "gamepad-2" })
-local TabAutomation = Window:Tab({ Title = "Otomatisasi", Icon = "bot" })
-local TabPlayer = Window:Tab({ Title = "Karakter", Icon = "user" })
-local TabSettings = Window:Tab({ Title = "Pengaturan", Icon = "settings" })
+local TabMain = Window:Tab({ Title = "Main", Icon = "gamepad-2" })
+local TabAutomation = Window:Tab({ Title = "Automation", Icon = "bot" })
+local TabPlayer = Window:Tab({ Title = "Player", Icon = "user" })
+local TabSettings = Window:Tab({ Title = "Settings", Icon = "settings" })
 
 -- Configurations
 local Config = {
@@ -214,13 +214,13 @@ local function getASMRCashItems()
 end
 
 -- ==========================================
--- MAIN TAB (TAB UTAMA)
+-- MAIN TAB (ENGLISH)
 -- ==========================================
-TabMain:Section({ Title = "Fitur Utama" })
+TabMain:Section({ Title = "Conveyor & Tapping" })
 
 TabMain:Toggle({
-    Title = "Auto Tekan Tombol Conveyor",
-    Desc = "Menekan tombol conveyor secara otomatis",
+    Title = "Auto Conveyor Button",
+    Desc = "Automatically presses the conveyor button",
     Default = false,
     Callback = function(v)
         Config.AutoConveyor = v
@@ -228,8 +228,8 @@ TabMain:Toggle({
 })
 
 TabMain:Slider({
-    Title = "Kecepatan Tombol Conveyor (Detik)",
-    Desc = "Atur jeda kecepatan penekanan tombol conveyor",
+    Title = "Conveyor Speed (Seconds)",
+    Desc = "Adjust delay between conveyor button presses",
     Value = { Min = 0.1, Max = 3.0, Default = 0.5, Step = 0.1 },
     Callback = function(v)
         local val = typeof(v) == "table" and (v.Value or v[1]) or tonumber(v) or 0.5
@@ -238,8 +238,8 @@ TabMain:Slider({
 })
 
 TabMain:Toggle({
-    Title = "Auto Beli Crate di Conveyor",
-    Desc = "Otomatis membeli peti/crate saat berjalan di conveyor",
+    Title = "Auto Buy Conveyor Crates",
+    Desc = "Automatically buys crates passing on the conveyor",
     Default = false,
     Callback = function(v)
         Config.AutoBuyConveyorCrates = v
@@ -247,8 +247,8 @@ TabMain:Toggle({
 })
 
 TabMain:Toggle({
-    Title = "Auto Tap ASMR (Dapat Cash)",
-    Desc = "Mengetik semua objek ASMR di plot untuk menghasilkan uang",
+    Title = "Auto Tap ASMR (Cash)",
+    Desc = "Taps all ASMR objects in plot to generate cash",
     Default = false,
     Callback = function(v)
         Config.AutoTapASMR = v
@@ -256,16 +256,16 @@ TabMain:Toggle({
             local items, myPlot = getASMRCashItems()
             local plotName = myPlot and myPlot.Name or "Plot"
             WindUI:Notify({ 
-                Title = "Auto Tap Aktif", 
-                Content = "Mengetik " .. tostring(#items) .. " objek ASMR di " .. plotName .. "." 
+                Title = "Auto Tap Enabled", 
+                Content = "Tapping " .. tostring(#items) .. " ASMR items in " .. plotName .. "." 
             })
         end
     end
 })
 
 TabMain:Slider({
-    Title = "Kecepatan Auto Tap (Detik)",
-    Desc = "Atur kecepatan pengetukan ASMR (Makin kecil makin cepat)",
+    Title = "Auto Tap Speed (Seconds)",
+    Desc = "Adjust tapping delay (lower is faster)",
     Value = { Min = 0.01, Max = 0.5, Default = 0.05, Step = 0.01 },
     Callback = function(v)
         local val = typeof(v) == "table" and (v.Value or v[1]) or tonumber(v) or 0.05
@@ -274,8 +274,8 @@ TabMain:Slider({
 })
 
 TabMain:Toggle({
-    Title = "Auto Jual ASMR",
-    Desc = "Menjual objek ASMR ke NPC Showcase secara otomatis",
+    Title = "Auto Sell ASMR",
+    Desc = "Automatically sells ASMR items to NPC Showcase",
     Default = false,
     Callback = function(v)
         Config.AutoSell = v
@@ -283,13 +283,13 @@ TabMain:Toggle({
 })
 
 -- ==========================================
--- AUTOMATION TAB (TAB OTOMATISASI)
+-- AUTOMATION TAB (ENGLISH)
 -- ==========================================
-TabAutomation:Section({ Title = "Rebirth & Perluasan Plot" })
+TabAutomation:Section({ Title = "Rebirth & Plot Expansion" })
 
 TabAutomation:Toggle({
     Title = "Auto Rebirth",
-    Desc = "Rebirth otomatis saat persyaratan uang terpenuhi",
+    Desc = "Automatically rebirths when cash requirement is met",
     Default = false,
     Callback = function(v)
         Config.AutoRebirth = v
@@ -297,21 +297,21 @@ TabAutomation:Toggle({
 })
 
 TabAutomation:Button({
-    Title = "Lakukan Rebirth Sekarang",
-    Desc = "Menjalankan Rebirth secara manual",
+    Title = "Rebirth Now",
+    Desc = "Manually execute rebirth request",
     Callback = function()
         pcall(function()
             if ReplicatedStorage:FindFirstChild("RebirthRemotes") and ReplicatedStorage.RebirthRemotes:FindFirstChild("RequestRebirth") then
                 ReplicatedStorage.RebirthRemotes.RequestRebirth:FireServer()
-                WindUI:Notify({ Title = "Berhasil", Content = "Request Rebirth dikirim!" })
+                WindUI:Notify({ Title = "Success", Content = "Rebirth request sent!" })
             end
         end)
     end
 })
 
 TabAutomation:Toggle({
-    Title = "Auto Perluas Plot",
-    Desc = "Otomatis membeli perluasan area plot Anda",
+    Title = "Auto Expand Plot",
+    Desc = "Automatically purchases plot expansions",
     Default = false,
     Callback = function(v)
         Config.AutoExpandPlot = v
@@ -320,18 +320,18 @@ TabAutomation:Toggle({
 
 TabAutomation:Toggle({
     Title = "Auto Upgrade Conveyor",
-    Desc = "Otomatis menaikkan tingkat keberuntungan conveyor",
+    Desc = "Automatically upgrades conveyor luck level",
     Default = false,
     Callback = function(v)
         Config.AutoUpgradeConveyor = v
     end
 })
 
-TabAutomation:Section({ Title = "Otomatisasi Pekerja & Upgrade" })
+TabAutomation:Section({ Title = "Workers & Upgrades" })
 
 TabAutomation:Toggle({
-    Title = "Auto Beli Pekerja",
-    Desc = "Otomatis merekrut pekerja tambahan",
+    Title = "Auto Buy Worker",
+    Desc = "Automatically hires additional workers",
     Default = false,
     Callback = function(v)
         Config.AutoBuyWorker = v
@@ -340,7 +340,7 @@ TabAutomation:Toggle({
 
 TabAutomation:Toggle({
     Title = "Auto Upgrade ASMR (Optional)",
-    Desc = "Otomatis menaikkan level objek ASMR (menggunakan uang)",
+    Desc = "Automatically upgrades ASMR item levels (uses cash)",
     Default = false,
     Callback = function(v)
         Config.AutoUpgradeASMR = v
@@ -348,8 +348,8 @@ TabAutomation:Toggle({
 })
 
 TabAutomation:Toggle({
-    Title = "Auto Klaim Hadiah Harian",
-    Desc = "Mengklaim bonus harian secara otomatis",
+    Title = "Auto Claim Daily Reward",
+    Desc = "Automatically claims daily rewards",
     Default = false,
     Callback = function(v)
         Config.AutoClaimDaily = v
@@ -357,24 +357,24 @@ TabAutomation:Toggle({
 })
 
 TabAutomation:Button({
-    Title = "Klaim Hadiah Harian Sekarang",
-    Desc = "Klaim bonus harian secara manual",
+    Title = "Claim Daily Reward Now",
+    Desc = "Manually claim daily reward",
     Callback = function()
         pcall(function()
             ReplicatedStorage.DailyRewardRemotes.ClaimDailyReward:FireServer()
         end)
-        WindUI:Notify({ Title = "Berhasil", Content = "Hadiah Harian Diklaim!" })
+        WindUI:Notify({ Title = "Success", Content = "Daily reward claimed!" })
     end
 })
 
 -- ==========================================
--- PLAYER TAB (TAB KARAKTER)
+-- PLAYER TAB (ENGLISH)
 -- ==========================================
-TabPlayer:Section({ Title = "Gerakan & Karakter" })
+TabPlayer:Section({ Title = "Movement & Character" })
 
 TabPlayer:Toggle({
-    Title = "Aktifkan Kecepatan Jalan",
-    Desc = "Mengubah kecepatan berjalan karakter",
+    Title = "Enable Custom WalkSpeed",
+    Desc = "Adjust character walking speed",
     Default = false,
     Callback = function(v)
         Config.EnableWalkSpeed = v
@@ -388,7 +388,7 @@ TabPlayer:Toggle({
 })
 
 TabPlayer:Slider({
-    Title = "Kecepatan Jalan (WalkSpeed)",
+    Title = "WalkSpeed Amount",
     Value = { Min = 16, Max = 250, Default = 16, Step = 1 },
     Callback = function(v)
         local val = typeof(v) == "table" and (v.Value or v[1]) or tonumber(v) or 16
@@ -399,8 +399,8 @@ TabPlayer:Slider({
 })
 
 TabPlayer:Toggle({
-    Title = "Aktifkan Tinggi Lompatan",
-    Desc = "Mengubah tinggi lompatan karakter",
+    Title = "Enable Custom JumpPower",
+    Desc = "Adjust character jump power",
     Default = false,
     Callback = function(v)
         Config.EnableJumpPower = v
@@ -417,7 +417,7 @@ TabPlayer:Toggle({
 })
 
 TabPlayer:Slider({
-    Title = "Tinggi Lompatan (JumpPower)",
+    Title = "JumpPower Amount",
     Value = { Min = 50, Max = 300, Default = 50, Step = 1 },
     Callback = function(v)
         local val = typeof(v) == "table" and (v.Value or v[1]) or tonumber(v) or 50
@@ -428,8 +428,8 @@ TabPlayer:Slider({
 })
 
 TabPlayer:Toggle({
-    Title = "Noclip (Tembus Dinding)",
-    Desc = "Karakter dapat menembus tembok dan rintangan",
+    Title = "Noclip",
+    Desc = "Character can pass through walls and obstacles",
     Default = false,
     Callback = function(v)
         Config.Noclip = v
@@ -437,13 +437,13 @@ TabPlayer:Toggle({
 })
 
 -- ==========================================
--- SETTINGS TAB (TAB PENGATURAN)
+-- SETTINGS TAB (ENGLISH)
 -- ==========================================
-TabSettings:Section({ Title = "Pengaturan Script" })
+TabSettings:Section({ Title = "Script Settings" })
 
 TabSettings:Toggle({
     Title = "Anti-AFK",
-    Desc = "Mencegah terputus dari game saat diam lebih dari 20 menit",
+    Desc = "Prevents Roblox from disconnecting you after 20 minutes",
     Default = true,
     Callback = function(v)
         Config.AntiAFK = v
@@ -451,11 +451,11 @@ TabSettings:Toggle({
 })
 
 TabSettings:Button({
-    Title = "Gabung Discord",
-    Desc = "Salin link undangan Discord",
+    Title = "Join Discord",
+    Desc = "Copy Discord invite link to clipboard",
     Callback = function()
         setclipboard("https://discord.gg/2PPBJsmqr")
-        WindUI:Notify({ Title = "Tersalin", Content = "Link Discord berhasil disalin!" })
+        WindUI:Notify({ Title = "Copied", Content = "Discord invite link copied to clipboard!" })
     end
 })
 
@@ -729,7 +729,7 @@ task.spawn(function()
 end)
 
 WindUI:Notify({
-    Title = "IndraHub Berhasil Dimuat",
-    Content = "Script Unbox ASMR Simulator versi Bahasa Indonesia siap digunakan!",
+    Title = "IndraHub Loaded",
+    Content = "Unbox ASMR Simulator Script successfully loaded!",
     Duration = 4
 })
