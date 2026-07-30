@@ -19,6 +19,15 @@ if getGlobal("IndraHubUnboxASMRRunning") then
     task.wait(0.2)
 end
 setGlobal("IndraHubUnboxASMRRunning", true)
+setGlobal("IndraHubUnboxASMRLastHeartbeat", os.time())
+
+-- Supervisor Watchdog Heartbeat Loop
+task.spawn(function()
+    while task.wait(1) do
+        if not getGlobal("IndraHubUnboxASMRRunning") then break end
+        setGlobal("IndraHubUnboxASMRLastHeartbeat", os.time())
+    end
+end)
 
 if getGlobal("IndraHubUnboxASMRConnections") then
     for _, conn in ipairs(getGlobal("IndraHubUnboxASMRConnections")) do
@@ -51,15 +60,15 @@ local Window = WindUI:CreateWindow({
 })
 
 -- Tabs
-local TabMain = Window:Tab({ Title = "Main", Icon = "gamepad-2" })
-local TabAutomation = Window:Tab({ Title = "Automation", Icon = "bot" })
-local TabPlayer = Window:Tab({ Title = "Player", Icon = "user" })
-local TabSettings = Window:Tab({ Title = "Settings", Icon = "settings" })
+local TabMain = Window:Tab({ Title = "Utama", Icon = "gamepad-2" })
+local TabAutomation = Window:Tab({ Title = "Otomatisasi", Icon = "bot" })
+local TabPlayer = Window:Tab({ Title = "Karakter", Icon = "user" })
+local TabSettings = Window:Tab({ Title = "Pengaturan", Icon = "settings" })
 
 -- Configurations
 local Config = {
     AutoConveyor = false,
-    ConveyorDelay = 2,
+    ConveyorDelay = 0.5,
     AutoBuyConveyorCrates = false,
     AutoTapASMR = false,
     AutoSell = false,
@@ -71,8 +80,8 @@ local Config = {
     AutoUpgradeConveyor = false,
     
     TapDelay = 0.05,
-    TapRange = 1000,
-    MaxKeysPerItem = 10,
+    TapRange = 9999,
+    MaxKeysPerItem = 15,
     
     WalkSpeed = 16,
     EnableWalkSpeed = false,
@@ -205,13 +214,13 @@ local function getASMRCashItems()
 end
 
 -- ==========================================
--- MAIN TAB
+-- MAIN TAB (TAB UTAMA)
 -- ==========================================
-TabMain:Section({ Title = "Core Features" })
+TabMain:Section({ Title = "Fitur Utama" })
 
 TabMain:Toggle({
-    Title = "Auto Conveyor Button",
-    Desc = "Spams the Conveyor Button press remote at configurable speed",
+    Title = "Auto Tekan Tombol Conveyor",
+    Desc = "Menekan tombol conveyor secara otomatis",
     Default = false,
     Callback = function(v)
         Config.AutoConveyor = v
@@ -219,8 +228,8 @@ TabMain:Toggle({
 })
 
 TabMain:Slider({
-    Title = "Conveyor Delay (Seconds)",
-    Desc = "Adjust speed of Auto Conveyor button press (Default: 0.5s)",
+    Title = "Kecepatan Tombol Conveyor (Detik)",
+    Desc = "Atur jeda kecepatan penekanan tombol conveyor",
     Value = { Min = 0.1, Max = 3.0, Default = 0.5, Step = 0.1 },
     Callback = function(v)
         local val = typeof(v) == "table" and (v.Value or v[1]) or tonumber(v) or 0.5
@@ -229,8 +238,8 @@ TabMain:Slider({
 })
 
 TabMain:Toggle({
-    Title = "Auto Buy Conveyor Crates (Auto Press E)",
-    Desc = "Automatically buys crates passing on the conveyor belt",
+    Title = "Auto Beli Crate di Conveyor",
+    Desc = "Otomatis membeli peti/crate saat berjalan di conveyor",
     Default = false,
     Callback = function(v)
         Config.AutoBuyConveyorCrates = v
@@ -238,25 +247,25 @@ TabMain:Toggle({
 })
 
 TabMain:Toggle({
-    Title = "Auto Tap ASMR (Unlimited Cash)",
-    Desc = "Taps all ASMR items across entire plot for maximum cash",
+    Title = "Auto Tap ASMR (Dapat Cash)",
+    Desc = "Mengetik semua objek ASMR di plot untuk menghasilkan uang",
     Default = false,
     Callback = function(v)
         Config.AutoTapASMR = v
         if v then
             local items, myPlot = getASMRCashItems()
-            local plotName = myPlot and myPlot.Name or "Unknown"
+            local plotName = myPlot and myPlot.Name or "Plot"
             WindUI:Notify({ 
-                Title = "Auto Tap Max Power", 
-                Content = "Auto Tap Unlimited Aktif! Mengetik " .. tostring(#items) .. " objek ASMR di " .. plotName .. "." 
+                Title = "Auto Tap Aktif", 
+                Content = "Mengetik " .. tostring(#items) .. " objek ASMR di " .. plotName .. "." 
             })
         end
     end
 })
 
 TabMain:Slider({
-    Title = "Tap Speed / Delay (Seconds)",
-    Desc = "Adjust delay between taps (Lower = Faster)",
+    Title = "Kecepatan Auto Tap (Detik)",
+    Desc = "Atur kecepatan pengetukan ASMR (Makin kecil makin cepat)",
     Value = { Min = 0.01, Max = 0.5, Default = 0.05, Step = 0.01 },
     Callback = function(v)
         local val = typeof(v) == "table" and (v.Value or v[1]) or tonumber(v) or 0.05
@@ -264,29 +273,9 @@ TabMain:Slider({
     end
 })
 
-TabMain:Slider({
-    Title = "Auto Tap Range (Studs)",
-    Desc = "Max distance (Default 1000 studs = Whole Plot)",
-    Value = { Min = 50, Max = 2000, Default = 1000, Step = 50 },
-    Callback = function(v)
-        local val = typeof(v) == "table" and (v.Value or v[1]) or tonumber(v) or 1000
-        Config.TapRange = val
-    end
-})
-
-TabMain:Slider({
-    Title = "Keys Tapped Per Item",
-    Desc = "Number of keys to tap on each ASMR item per tick",
-    Value = { Min = 1, Max = 30, Default = 10, Step = 1 },
-    Callback = function(v)
-        local val = typeof(v) == "table" and (v.Value or v[1]) or tonumber(v) or 10
-        Config.MaxKeysPerItem = val
-    end
-})
-
 TabMain:Toggle({
-    Title = "Auto Sell ASMR",
-    Desc = "Sells ASMR items to the Showcase NPC automatically",
+    Title = "Auto Jual ASMR",
+    Desc = "Menjual objek ASMR ke NPC Showcase secara otomatis",
     Default = false,
     Callback = function(v)
         Config.AutoSell = v
@@ -294,13 +283,13 @@ TabMain:Toggle({
 })
 
 -- ==========================================
--- AUTOMATION TAB
+-- AUTOMATION TAB (TAB OTOMATISASI)
 -- ==========================================
-TabAutomation:Section({ Title = "Rebirth & Plot Expansion" })
+TabAutomation:Section({ Title = "Rebirth & Perluasan Plot" })
 
 TabAutomation:Toggle({
     Title = "Auto Rebirth",
-    Desc = "Automatically rebirths when requirements are met",
+    Desc = "Rebirth otomatis saat persyaratan uang terpenuhi",
     Default = false,
     Callback = function(v)
         Config.AutoRebirth = v
@@ -308,21 +297,21 @@ TabAutomation:Toggle({
 })
 
 TabAutomation:Button({
-    Title = "Request Rebirth Now",
-    Desc = "Manually trigger rebirth request",
+    Title = "Lakukan Rebirth Sekarang",
+    Desc = "Menjalankan Rebirth secara manual",
     Callback = function()
         pcall(function()
             if ReplicatedStorage:FindFirstChild("RebirthRemotes") and ReplicatedStorage.RebirthRemotes:FindFirstChild("RequestRebirth") then
                 ReplicatedStorage.RebirthRemotes.RequestRebirth:FireServer()
-                WindUI:Notify({ Title = "Success", Content = "RequestRebirth Fired!" })
+                WindUI:Notify({ Title = "Berhasil", Content = "Request Rebirth dikirim!" })
             end
         end)
     end
 })
 
 TabAutomation:Toggle({
-    Title = "Auto Expand Plot",
-    Desc = "Automatically purchases plot expansions (EXPANSION_01 - 36)",
+    Title = "Auto Perluas Plot",
+    Desc = "Otomatis membeli perluasan area plot Anda",
     Default = false,
     Callback = function(v)
         Config.AutoExpandPlot = v
@@ -331,18 +320,18 @@ TabAutomation:Toggle({
 
 TabAutomation:Toggle({
     Title = "Auto Upgrade Conveyor",
-    Desc = "Upgrades conveyor luck/rarity level automatically",
+    Desc = "Otomatis menaikkan tingkat keberuntungan conveyor",
     Default = false,
     Callback = function(v)
         Config.AutoUpgradeConveyor = v
     end
 })
 
-TabAutomation:Section({ Title = "Auto Upgrades & Rewards" })
+TabAutomation:Section({ Title = "Otomatisasi Pekerja & Upgrade" })
 
 TabAutomation:Toggle({
-    Title = "Auto Buy Worker",
-    Desc = "Automatically hires / buys workers",
+    Title = "Auto Beli Pekerja",
+    Desc = "Otomatis merekrut pekerja tambahan",
     Default = false,
     Callback = function(v)
         Config.AutoBuyWorker = v
@@ -351,7 +340,7 @@ TabAutomation:Toggle({
 
 TabAutomation:Toggle({
     Title = "Auto Upgrade ASMR (Optional)",
-    Desc = "Triggers ASMR item upgrades via RequestUpgrade remote",
+    Desc = "Otomatis menaikkan level objek ASMR (menggunakan uang)",
     Default = false,
     Callback = function(v)
         Config.AutoUpgradeASMR = v
@@ -359,8 +348,8 @@ TabAutomation:Toggle({
 })
 
 TabAutomation:Toggle({
-    Title = "Auto Claim Daily Reward",
-    Desc = "Claims daily rewards automatically",
+    Title = "Auto Klaim Hadiah Harian",
+    Desc = "Mengklaim bonus harian secara otomatis",
     Default = false,
     Callback = function(v)
         Config.AutoClaimDaily = v
@@ -368,23 +357,24 @@ TabAutomation:Toggle({
 })
 
 TabAutomation:Button({
-    Title = "Claim Daily Reward Now",
-    Desc = "Manually trigger claim daily reward",
+    Title = "Klaim Hadiah Harian Sekarang",
+    Desc = "Klaim bonus harian secara manual",
     Callback = function()
         pcall(function()
             ReplicatedStorage.DailyRewardRemotes.ClaimDailyReward:FireServer()
         end)
-        WindUI:Notify({ Title = "Success", Content = "Triggered Daily Reward Claim!" })
+        WindUI:Notify({ Title = "Berhasil", Content = "Hadiah Harian Diklaim!" })
     end
 })
 
 -- ==========================================
--- PLAYER TAB
+-- PLAYER TAB (TAB KARAKTER)
 -- ==========================================
-TabPlayer:Section({ Title = "Movement & Character" })
+TabPlayer:Section({ Title = "Gerakan & Karakter" })
 
 TabPlayer:Toggle({
-    Title = "Enable Custom WalkSpeed",
+    Title = "Aktifkan Kecepatan Jalan",
+    Desc = "Mengubah kecepatan berjalan karakter",
     Default = false,
     Callback = function(v)
         Config.EnableWalkSpeed = v
@@ -398,7 +388,7 @@ TabPlayer:Toggle({
 })
 
 TabPlayer:Slider({
-    Title = "WalkSpeed Amount",
+    Title = "Kecepatan Jalan (WalkSpeed)",
     Value = { Min = 16, Max = 250, Default = 16, Step = 1 },
     Callback = function(v)
         local val = typeof(v) == "table" and (v.Value or v[1]) or tonumber(v) or 16
@@ -409,7 +399,8 @@ TabPlayer:Slider({
 })
 
 TabPlayer:Toggle({
-    Title = "Enable Custom JumpPower",
+    Title = "Aktifkan Tinggi Lompatan",
+    Desc = "Mengubah tinggi lompatan karakter",
     Default = false,
     Callback = function(v)
         Config.EnableJumpPower = v
@@ -426,7 +417,7 @@ TabPlayer:Toggle({
 })
 
 TabPlayer:Slider({
-    Title = "JumpPower Amount",
+    Title = "Tinggi Lompatan (JumpPower)",
     Value = { Min = 50, Max = 300, Default = 50, Step = 1 },
     Callback = function(v)
         local val = typeof(v) == "table" and (v.Value or v[1]) or tonumber(v) or 50
@@ -437,8 +428,8 @@ TabPlayer:Slider({
 })
 
 TabPlayer:Toggle({
-    Title = "Noclip",
-    Desc = "Pass through walls",
+    Title = "Noclip (Tembus Dinding)",
+    Desc = "Karakter dapat menembus tembok dan rintangan",
     Default = false,
     Callback = function(v)
         Config.Noclip = v
@@ -446,13 +437,13 @@ TabPlayer:Toggle({
 })
 
 -- ==========================================
--- SETTINGS TAB
+-- SETTINGS TAB (TAB PENGATURAN)
 -- ==========================================
-TabSettings:Section({ Title = "Script Settings" })
+TabSettings:Section({ Title = "Pengaturan Script" })
 
 TabSettings:Toggle({
     Title = "Anti-AFK",
-    Desc = "Prevents Roblox from disconnecting you after 20 minutes",
+    Desc = "Mencegah terputus dari game saat diam lebih dari 20 menit",
     Default = true,
     Callback = function(v)
         Config.AntiAFK = v
@@ -460,11 +451,11 @@ TabSettings:Toggle({
 })
 
 TabSettings:Button({
-    Title = "Join Discord",
-    Desc = "Copy Discord link to clipboard",
+    Title = "Gabung Discord",
+    Desc = "Salin link undangan Discord",
     Callback = function()
         setclipboard("https://discord.gg/2PPBJsmqr")
-        WindUI:Notify({ Title = "Copied", Content = "Discord invite link copied to clipboard!" })
+        WindUI:Notify({ Title = "Tersalin", Content = "Link Discord berhasil disalin!" })
     end
 })
 
@@ -537,33 +528,57 @@ task.spawn(function()
         task.wait(delayVal)
         if not getGlobal("IndraHubUnboxASMRRunning") then break end
 
-        -- Auto Buy Conveyor Crates (Auto Press E - Strict Crate Filter)
+        -- Auto Buy Conveyor Crates (Auto Press E - Bulletproof Crate Detector)
         if Config.AutoBuyConveyorCrates then
             pcall(function()
+                local prompts = {}
                 local myPlot = getMyPlot()
                 if myPlot then
                     for _, desc in ipairs(myPlot:GetDescendants()) do
                         if desc:IsA("ProximityPrompt") then
-                            local nameLower = desc.Parent and desc.Parent.Name:lower() or ""
-                            local actionLower = desc.ActionText:lower()
-                            local objectLower = desc.ObjectText:lower()
-                            
-                            -- Blacklist Feedback, Social, and Menu prompts
-                            local isBlacklisted = string.find(nameLower, "feedback") 
-                                or string.find(actionLower, "feedback") 
-                                or string.find(objectLower, "feedback")
-                                or string.find(nameLower, "social")
-                                or string.find(nameLower, "ui")
-                                
-                            if not isBlacklisted then
-                                -- Must strictly match Crate
-                                if string.find(nameLower, "crate") 
-                                    or string.find(objectLower, "crate") 
-                                    or (string.find(actionLower, "buy") and (string.find(nameLower, "conveyor") or string.find(objectLower, "crate"))) then
-                                    if fireproximityprompt then
-                                        fireproximityprompt(desc)
-                                    end
+                            table.insert(prompts, desc)
+                        end
+                    end
+                end
+
+                -- Also check Conveyor / Crates in Workspace
+                for _, obj in ipairs(Workspace:GetChildren()) do
+                    if obj:IsA("Model") or obj:IsA("Folder") then
+                        local nameLower = obj.Name:lower()
+                        if string.find(nameLower, "crate") or string.find(nameLower, "conveyor") or string.find(nameLower, "drop") then
+                            for _, desc in ipairs(obj:GetDescendants()) do
+                                if desc:IsA("ProximityPrompt") then
+                                    table.insert(prompts, desc)
                                 end
+                            end
+                        end
+                    end
+                end
+
+                for _, desc in ipairs(prompts) do
+                    local nameLower = desc.Parent and desc.Parent.Name:lower() or ""
+                    local actionLower = desc.ActionText and desc.ActionText:lower() or ""
+                    local objectLower = desc.ObjectText and desc.ObjectText:lower() or ""
+                    
+                    -- Blacklist Feedback, Social, Mailbox, and UI prompts
+                    local isBlacklisted = string.find(nameLower, "feedback") 
+                        or string.find(actionLower, "feedback") 
+                        or string.find(objectLower, "feedback")
+                        or string.find(nameLower, "mailbox")
+                        or string.find(objectLower, "mailbox")
+                        or string.find(nameLower, "social")
+                        or string.find(nameLower, "ui")
+                        
+                    if not isBlacklisted then
+                        local textCombo = (nameLower .. " " .. actionLower .. " " .. objectLower)
+                        if string.find(textCombo, "crate") 
+                            or string.find(textCombo, "buy") 
+                            or string.find(textCombo, "open") 
+                            or string.find(textCombo, "unbox") 
+                            or string.find(textCombo, "claim")
+                            or string.find(textCombo, "purchase") then
+                            if fireproximityprompt then
+                                fireproximityprompt(desc)
                             end
                         end
                     end
@@ -574,45 +589,27 @@ task.spawn(function()
         -- Auto Tap ASMR (Pure Cash Generation - Max Power)
         if Config.AutoTapASMR then
             pcall(function()
-                local char = LocalPlayer.Character
-                local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                local hrpPos = hrp and hrp.Position
-
                 local items = getASMRCashItems()
                 for _, asmrItem in ipairs(items) do
                     -- Check direct children BaseParts first, fallback to descendants
                     local childrenParts = {}
                     for _, child in ipairs(asmrItem:GetChildren()) do
                         if child:IsA("BasePart") then
-                            if hrpPos then
-                                local dist = (child.Position - hrpPos).Magnitude
-                                if dist <= (Config.TapRange or 1000) then
-                                    table.insert(childrenParts, child)
-                                end
-                            else
-                                table.insert(childrenParts, child)
-                            end
+                            table.insert(childrenParts, child)
                         end
                     end
 
                     if #childrenParts == 0 then
                         for _, desc in ipairs(asmrItem:GetDescendants()) do
                             if desc:IsA("BasePart") then
-                                if hrpPos then
-                                    local dist = (desc.Position - hrpPos).Magnitude
-                                    if dist <= (Config.TapRange or 1000) then
-                                        table.insert(childrenParts, desc)
-                                    end
-                                else
-                                    table.insert(childrenParts, desc)
-                                end
+                                table.insert(childrenParts, desc)
                             end
                         end
                     end
                     
                     if #childrenParts > 0 then
-                        -- Tap multiple keys per item simultaneously
-                        local maxKeys = math.min(#childrenParts, Config.MaxKeysPerItem or 10)
+                        -- Tap all keys per item automatically
+                        local maxKeys = math.min(#childrenParts, 15)
                         for i = 1, maxKeys do
                             local keyPart = childrenParts[i]
                             if keyPart then
@@ -672,7 +669,7 @@ task.spawn(function()
         -- Auto Expand Plot
         if Config.AutoExpandPlot then
             pcall(function()
-                if ReplicatedStorage:FindFirstChild("PlotExpansionRemotes") me
+                if ReplicatedStorage:FindFirstChild("PlotExpansionRemotes") then
                     local remote = ReplicatedStorage.PlotExpansionRemotes:FindFirstChild("RequestExpansion") 
                         or ReplicatedStorage.PlotExpansionRemotes:FindFirstChild("BuyExpansion")
                         or ReplicatedStorage.PlotExpansionRemotes:FindFirstChildWhichIsA("RemoteEvent")
@@ -732,7 +729,7 @@ task.spawn(function()
 end)
 
 WindUI:Notify({
-    Title = "IndraHub Loaded",
-    Content = "Unbox ASMR Simulator Script updated & max power ready!",
+    Title = "IndraHub Berhasil Dimuat",
+    Content = "Script Unbox ASMR Simulator versi Bahasa Indonesia siap digunakan!",
     Duration = 4
 })
