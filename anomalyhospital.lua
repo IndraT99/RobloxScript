@@ -1102,8 +1102,9 @@ track(userInputService.InputBegan:Connect(function(input, processed)
 end))
 
 -- ==========================================
--- UI (WindUI, inlined above — offline proof)
+-- UI (WindUI)
 -- ==========================================
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local indraWindow = WindUI:CreateWindow({
     Title = "IndraHub",
     Author = "IndraHub Premium",
